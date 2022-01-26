@@ -1408,7 +1408,11 @@ HashReference ProposalRef;
    application MUST be validated against the Authentication Service.
    Applications SHOULD require that a client present the same set of
    identifiers throughout its presence in the group, even if its
-   Credential is changed in a Commit or Update.
+   Credential is changed in a Commit or Update.  If an application
+   allows clients to change identifiers over time, then each time the
+   client presents a new credential, the application MUST verify that
+   the set of identifiers in the credential is acceptable to the
+   application for this client.
 
 6.3.1.  Uniquely Identifying Clients
 

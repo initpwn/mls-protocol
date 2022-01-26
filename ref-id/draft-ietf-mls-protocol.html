@@ -2821,7 +2821,9 @@ ciphersuite.<a href="#section-6.3-8" class="pilcrow">¶</a></p>
 In particular, ECDSA signatures are DER-encoded and EdDSA signatures are defined
 as the concatenation of <code>r</code> and <code>s</code> as specified in <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.<a href="#section-6.3-9" class="pilcrow">¶</a></p>
 <p id="section-6.3-10">Each new credential that has not already been validated by the application MUST
-be validated against the Authentication Service.<a href="#section-6.3-10" class="pilcrow">¶</a></p>
+be validated against the Authentication Service.  Applications SHOULD require
+that a client present the same set of identifiers throughout its presence in
+the group, even if its Credential is changed in a Commit or Update.<a href="#section-6.3-10" class="pilcrow">¶</a></p>
 <div id="uniquely-identifying-clients">
 <section id="section-6.3.1">
           <h4 id="name-uniquely-identifying-client">

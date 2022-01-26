@@ -3409,7 +3409,7 @@ proceeds as shown in the following diagram:<a href="#section-8-7" class="pilcrow
     commit_secret -&gt; KDF.Extract
                          |
                          V
-                   ExpandWithLabel(., "joiner", GroupContext_[n], KDF.Nh)
+                 ExpandWithLabel(., "joiner", GroupContext_[n], KDF.Nh)
                          |
                          V
                     joiner_secret
@@ -3421,7 +3421,7 @@ psk_secret (or 0) -&gt; KDF.Extract
                          |    = welcome_secret
                          |
                          V
-                   ExpandWithLabel(., "epoch", GroupContext_[n], KDF.Nh)
+                 ExpandWithLabel(., "epoch", GroupContext_[n], KDF.Nh)
                          |
                          V
                     epoch_secret
@@ -3617,7 +3617,8 @@ struct {
 } PSKLabel;
 
 psk_extracted_[i] = KDF.Extract(0, psk_[i])
-psk_input_[i] = ExpandWithLabel(psk_extracted_[i], "derived psk", PSKLabel, KDF.Nh)
+psk_input_[i] = ExpandWithLabel(psk_extracted_[i], "derived psk",
+                  PSKLabel, KDF.Nh)
 
 psk_secret_[0] = 0
 psk_secret_[i] = KDF.Extract(psk_input[i-1], psk_secret_[i-1])
@@ -3627,23 +3628,24 @@ psk_secret     = psk_secret[n]
 <p id="section-8.2-9">Here <code>0</code> represents the all-zero vector of length <code>KDF.Nh</code>. The <code>index</code> field in
 <code>PSKLabel</code> corresponds to the index of the PSK in the <code>psk</code> array, while the
 <code>count</code> field contains the total number of PSKs.  In other words, the PSKs are
-chained together with KDF.Extract invocations, as follows:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
+chained together with KDF.Extract invocations (labelled "Extract" for brevity 
+in the diagram), as follows:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2-10">
 <pre>
-                0                                   0       = psk_secret_[0]
-                |                                   |
-                V                                   V
-psk_[0] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[1]
-                                                    |
-                0                                   |
-                |                                   |
-                V                                   V
-psk_[1] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[1]
-                                                    |
-                0                                  ...
-                |                                   |
-                V                                   V
-psk_[n] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[n]
+               0                               0    = psk_secret_[0]
+               |                               |
+               V                               V
+psk_[0] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[1]
+                                               |
+               0                               |
+               |                               |
+               V                               V
+psk_[1] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[1]
+                                               |
+               0                              ...
+               |                               |
+               V                               V
+psk_[n] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[n]
 </pre><a href="#section-8.2-10" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2-11">In particular, if there are no PreSharedKey proposals in a given Commit, then
@@ -4165,8 +4167,10 @@ without padding. In pseudocode, the key and nonce are derived as:<a href="#secti
 <pre>
 ciphertext_sample = ciphertext[0..KDF.Nh-1]
 
-sender_data_key = ExpandWithLabel(sender_data_secret, "key", ciphertext_sample, AEAD.Nk)
-sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_sample, AEAD.Nn)
+sender_data_key = ExpandWithLabel(sender_data_secret, "key",
+                      ciphertext_sample, AEAD.Nk)
+sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce",
+                      ciphertext_sample, AEAD.Nn)
 </pre><a href="#section-9.3-6" class="pilcrow">¶</a>
 </div>
 <p id="section-9.3-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is all the

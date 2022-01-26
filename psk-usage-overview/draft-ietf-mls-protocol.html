@@ -2151,11 +2151,13 @@ A              B     ...      Z          Directory       Channel
         <h3 id="name-relationships-between-epoch">
 <a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-relationships-between-epoch" class="section-name selfRef">Relationships Between Epochs</a>
         </h3>
-<p id="section-4.3-1">A group comprises a single linear sequence of epochs. However, it can sometimes
-be useful to express relationships between epochs, either within a group or
-across groups.  MLS derives a resumption pre-shared key (PSK) from each epoch to
-allow entropy extracted from one epoch to be injected into a future epoch,
-effectively creating a causal link between the two epochs.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-1">A group comprises a single linear sequence of epochs and groups are generally
+independent of one-another. However, it can sometimes be useful to link epochs
+cryptographically, either within a group or across groups. MLS derives a
+resumption pre-shared key (PSK) from each epoch to allow entropy extracted from
+one epoch to be injected into a future epoch. This link guarantees that members
+entering the new epoch agree on a key if and only if were members of the group
+during the epoch from which the resumption key was extracted.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3-2">MLS supports two ways to tie a new group to an existing group. Re-initialization
 closes one group and creates a new group comprising the same members with
 different parameters. Branching starts a new group with a subset of the original

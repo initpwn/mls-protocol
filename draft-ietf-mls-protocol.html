@@ -1170,6 +1170,9 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
                 <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-example-protocol-execution" class="xref">Example Protocol Execution</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>.  <a href="#name-relationships-between-epoch" class="xref">Relationships Between Epochs</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
@@ -2138,6 +2141,103 @@ A              B     ...      Z          Directory       Channel
 </div>
 <figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-client-z-removes-client-b-f" class="selfRef">Client Z removes client B from the group</a>
+          </figcaption></figure>
+</section>
+</div>
+<div id="relationships-between-epochs">
+<section id="section-4.3">
+        <h3 id="name-relationships-between-epoch">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-relationships-between-epoch" class="section-name selfRef">Relationships Between Epochs</a>
+        </h3>
+<p id="section-4.3-1">A group comprises a single linear sequence of epochs and groups are generally
+independent of one-another. However, it can sometimes be useful to link epochs
+cryptographically, either within a group or across groups. MLS derives a
+resumption pre-shared key (PSK) from each epoch to allow entropy extracted from
+one epoch to be injected into a future epoch. This link guarantees that members
+entering the new epoch agree on a key if and only if were members of the group
+during the epoch from which the resumption key was extracted.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">MLS supports two ways to tie a new group to an existing group. Re-initialization
+closes one group and creates a new group comprising the same members with
+different parameters. Branching starts a new group with a subset of the original
+group's participants (with no effect on the original group).  In both cases,
+the new group is linked to the old group via a resumption PSK.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<span id="name-reinitializing-a-group"></span><figure id="figure-6">
+          <div class="alignLeft art-text artwork" id="section-4.3-3.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]           epoch_B_[0]
+     .                     |
+     .  PSK(usage=reinit)  |
+     .....................&gt;|
+                           |
+                           V
+                      epoch_B_[1]
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-reinitializing-a-group" class="selfRef">Reinitializing a group</a>
+          </figcaption></figure>
+<span id="name-branching-a-group"></span><figure id="figure-7">
+          <div class="alignLeft art-text artwork" id="section-4.3-4.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]           epoch_B_[0]
+     |                     |
+     |  PSK(usage=branch)  |
+     |....................&gt;|
+     |                     |
+     V                     V
+epoch_A_[n+1]         epoch_B_[1]
+</pre>
+</div>
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
+<a href="#name-branching-a-group" class="selfRef">Branching a group</a>
+          </figcaption></figure>
+<p id="section-4.3-5">Applications may also choose to use resumption PSKs to link epochs in other
+ways.  For example, the following figure shows a case where a resumption PSK
+from epoch <code>n</code> is injected into epoch <code>n+k</code>.  This demonstrates that the members
+of the group at epoch <code>n+k</code> were also members at epoch <code>n</code>, irrespective of any
+changes to these members' keys due to Updates or Commits.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<span id="name-reinjecting-entropy-from-an"></span><figure id="figure-8">
+          <div class="alignLeft art-text artwork" id="section-4.3-6.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]
+     |
+     |  PSK(usage=application)
+     |.....................
+     |                    .
+     |                    .
+    ...                  ...
+     |                    .
+     |                    .
+     V                    .
+epoch_A_[n+k-1]           .
+     |                    .
+     |                    .
+     |&lt;....................
+     |
+     V
+epoch_A_[n+k]
+</pre>
+</div>
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<a href="#name-reinjecting-entropy-from-an" class="selfRef">Reinjecting entropy from an earlier epoch</a>
           </figcaption></figure>
 </section>
 </div>

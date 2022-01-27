@@ -1170,6 +1170,9 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
                 <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-example-protocol-execution" class="xref">Example Protocol Execution</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>.  <a href="#name-relationships-between-epoch" class="xref">Relationships Between Epochs</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
@@ -1408,7 +1411,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                 <p id="section-toc.1-1.15.2.3.1"><a href="#section-15.3" class="xref">15.3</a>.  <a href="#name-forward-secrecy-and-post-co" class="xref">Forward Secrecy and Post-Compromise Security</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.4">
-                <p id="section-toc.1-1.15.2.4.1"><a href="#section-15.4" class="xref">15.4</a>.  <a href="#name-initkey-reuse" class="xref">InitKey Reuse</a></p>
+                <p id="section-toc.1-1.15.2.4.1"><a href="#section-15.4" class="xref">15.4</a>.  <a href="#name-keypackage-reuse" class="xref">KeyPackage Reuse</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.5">
                 <p id="section-toc.1-1.15.2.5.1"><a href="#section-15.5" class="xref">15.5</a>.  <a href="#name-group-fragmentation-by-mali" class="xref">Group Fragmentation by Malicious Insiders</a></p>
@@ -1595,7 +1598,7 @@ shared keys with costs that scale as the log of the group size.<a href="#section
 </li>
           <li class="normal" id="section-1.1-7.12">Clarify X509Credential structure (*)<a href="#section-1.1-7.12" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.13">Remove uneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-7.13" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.13">Remove unneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-7.13" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-7.14">IANA considerations<a href="#section-1.1-7.14" class="pilcrow">¶</a>
 </li>
@@ -1787,7 +1790,9 @@ cryptographic keys it holds.<a href="#section-2-2.2.1" class="pilcrow">¶</a></p
 <dt id="section-2-2.3">
 Group:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.4">
-          <p id="section-2-2.4.1">A linear sequence of epochs in which each epoch depends on its predecessor.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.4.1">A group represents a logical collection of clents that share a common
+secret value at any given time.  Its state is represented as a linear 
+sequence of epochs in which each epoch depends on its predecessor.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.5">
@@ -1809,33 +1814,27 @@ Key Package:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.10">
           <p id="section-2-2.10.1">A signed object describing a client's identity and capabilities, and including
 a hybrid public-key encryption (HPKE <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>) public key that
-can be used to encrypt to that client.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+can be used to encrypt to that client, and which other clients can use to
+introduce the client to a new group.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.11">
-Initialization Key (InitKey):  </dt>
+Signature Key:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.12">
-          <p id="section-2-2.12.1">A key package that is prepublished by a client, which other clients can use to
-introduce the client to a new group.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.12.1">A signing key pair used to authenticate the sender of a message.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.13">
-Signature Key:  </dt>
+Handshake Message:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.14">
-          <p id="section-2-2.14.1">A signing key pair used to authenticate the sender of a message.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.14.1">An MLSPlaintext or MLSCiphertext message carrying an MLS Proposal or Commit
+object, as opposed to application data.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.15">
-Handshake Message:  </dt>
-        <dd style="margin-left: 1.5em" id="section-2-2.16">
-          <p id="section-2-2.16.1">An MLSPlaintext or MLSCiphertext message carrying an MLS Proposal or Commit
-object, as opposed to application data.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-2.17">
 Application Message:  </dt>
-        <dd style="margin-left: 1.5em" id="section-2-2.18">
-          <p id="section-2-2.18.1">An MLSCiphertext message carrying application data.<a href="#section-2-2.18.1" class="pilcrow">¶</a></p>
+        <dd style="margin-left: 1.5em" id="section-2-2.16">
+          <p id="section-2-2.16.1">An MLSCiphertext message carrying application data.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1885,7 +1884,7 @@ group AKE in the sense that there can be more than two participants in the
 protocol, and continuous group AKE in the sense that the set of participants in
 the protocol can change over time.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">The core organizing principles of MLS are <em>groups</em> and <em>epochs</em>.  A group
-represents a logical collection of clents that share a common secret value at
+represents a logical collection of clients that share a common secret value at
 any given time.  The history of a group is divided into a linear sequence of
 epochs.  In each epoch, a set of authenticated <em>members</em> agree on an <em>epoch
 secret</em> that is known only to the members of the group in that epoch.  The set
@@ -1957,7 +1956,7 @@ subsets of the group.  Each epoch has a distinct ratchet tree.<a href="#section-
 </li>
         </ul>
 <p id="section-4.1-3">Each member of the group maintains a view of these two facets of the group's
-state.  MLS messages are used to intialize these views and keep them in sync as
+state.  MLS messages are used to initialize these views and keep them in sync as
 the group transitions between epochs.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1-4">Each new epoch is initiated with a Commit message.  The Commit instructs
 existing members of the group to update their views of ratchet tree by applying
@@ -2011,8 +2010,8 @@ deployment cases an application might gather several proposals before
 committing them all at once.  In the illustrations below, we show the Proposal
 and Commit messages directly, while in reality they would be sent encapsulated in
 MLSPlaintext or MLSCiphertext objects.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.2-4">Before the initialization of a group, clients publish InitKeys (as KeyPackage
-objects) to a directory provided by the Service Provider.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">Before the initialization of a group, clients publish KeyPackages to a directory 
+provided by the Service Provider.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
 <span id="name-clients-a-b-and-c-publish-k"></span><figure id="figure-2">
           <div class="alignLeft art-text artwork" id="section-4.2-5.1">
 <pre>
@@ -2149,6 +2148,103 @@ A              B     ...      Z          Directory       Channel
           </figcaption></figure>
 </section>
 </div>
+<div id="relationships-between-epochs">
+<section id="section-4.3">
+        <h3 id="name-relationships-between-epoch">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-relationships-between-epoch" class="section-name selfRef">Relationships Between Epochs</a>
+        </h3>
+<p id="section-4.3-1">A group comprises a single linear sequence of epochs and groups are generally
+independent of one-another. However, it can sometimes be useful to link epochs
+cryptographically, either within a group or across groups. MLS derives a
+resumption pre-shared key (PSK) from each epoch to allow entropy extracted from
+one epoch to be injected into a future epoch. This link guarantees that members
+entering the new epoch agree on a key if and only if were members of the group
+during the epoch from which the resumption key was extracted.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">MLS supports two ways to tie a new group to an existing group. Re-initialization
+closes one group and creates a new group comprising the same members with
+different parameters. Branching starts a new group with a subset of the original
+group's participants (with no effect on the original group).  In both cases,
+the new group is linked to the old group via a resumption PSK.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<span id="name-reinitializing-a-group"></span><figure id="figure-6">
+          <div class="alignLeft art-text artwork" id="section-4.3-3.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]           epoch_B_[0]
+     .                     |
+     .  PSK(usage=reinit)  |
+     .....................&gt;|
+                           |
+                           V
+                      epoch_B_[1]
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-reinitializing-a-group" class="selfRef">Reinitializing a group</a>
+          </figcaption></figure>
+<span id="name-branching-a-group"></span><figure id="figure-7">
+          <div class="alignLeft art-text artwork" id="section-4.3-4.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]           epoch_B_[0]
+     |                     |
+     |  PSK(usage=branch)  |
+     |....................&gt;|
+     |                     |
+     V                     V
+epoch_A_[n+1]         epoch_B_[1]
+</pre>
+</div>
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
+<a href="#name-branching-a-group" class="selfRef">Branching a group</a>
+          </figcaption></figure>
+<p id="section-4.3-5">Applications may also choose to use resumption PSKs to link epochs in other
+ways.  For example, the following figure shows a case where a resumption PSK
+from epoch <code>n</code> is injected into epoch <code>n+k</code>.  This demonstrates that the members
+of the group at epoch <code>n+k</code> were also members at epoch <code>n</code>, irrespective of any
+changes to these members' keys due to Updates or Commits.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<span id="name-reinjecting-entropy-from-an"></span><figure id="figure-8">
+          <div class="alignLeft art-text artwork" id="section-4.3-6.1">
+<pre>
+epoch_A_[n-1]
+     |
+     |
+     |&lt;-- ReInit
+     |
+     V
+epoch_A_[n]
+     |
+     |  PSK(usage=application)
+     |.....................
+     |                    .
+     |                    .
+    ...                  ...
+     |                    .
+     |                    .
+     V                    .
+epoch_A_[n+k-1]           .
+     |                    .
+     |                    .
+     |&lt;....................
+     |
+     V
+epoch_A_[n+k]
+</pre>
+</div>
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<a href="#name-reinjecting-entropy-from-an" class="selfRef">Reinjecting entropy from an earlier epoch</a>
+          </figcaption></figure>
+</section>
+</div>
 </section>
 </div>
 <div id="ratchet-trees">
@@ -2180,12 +2276,12 @@ replaced with a freshly generated instance.<a href="#section-5-3" class="pilcrow
 parents in our trees have precisely
 two children, a <em>left</em> child and a <em>right</em> child. A node is the <em>root</em>
 of a tree if it has no parents, and <em>intermediate</em> if it has both
-children and parents. The <em>descendants</em> of a node are that node, its
+children and parents. The <em>descendants</em> of a node are that node's
 children, and the descendants of its children, and we say a tree
-<em>contains</em> a node if that node is a descendant of the root of the
-tree. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by the descendants of any
-node, the <em>head</em> of the subtree. The <em>size</em> of a tree or subtree is the
+<em>contains</em> a node if that node is a descendant of the root of the tree,
+or if the node itself is the root of the tree. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by any node (the <em>head</em> of the 
+subtree) and its descendants. The <em>size</em> of a tree or subtree is the
 number of leaf nodes it contains.  For a given parent node, its <em>left
 subtree</em> is the subtree with its left child as head (respectively
 <em>right subtree</em>).<a href="#section-5.1-2" class="pilcrow">¶</a></p>
@@ -2279,6 +2375,7 @@ present are laid out in <a href="#views" class="xref">Section 5.3</a>.<a href="#
 <p id="section-5.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
 that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
 that collectively cover all non-blank descendants of the node.  The resolution
+of a non-blank node with no unmerged leaves is just the node itself. More generally, the resolution
 of a node is effectively a depth-first, left-first enumeration of the nearest
 non-blank nodes below the node:<a href="#section-5.2-6" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2340,8 +2437,7 @@ a way as to maintain the <em>tree invariant</em>:<a href="#section-5.3-3" class=
 <div class="alignLeft art-text artwork" id="section-5.3-4">
 <pre>
 The private key for a node in the tree is known to a member of
-the group only if that member's leaf is a descendant of
-the node.
+the group only if the node's subtree contains that member's leaf.
 </pre><a href="#section-5.3-4" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3-5">In other words, if a node is not blank, then it holds a public key.
@@ -2696,8 +2792,8 @@ opaque HPKEPublicKey&lt;1..2^16-1&gt;;
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
 to be used for signatures in MLSPlaintext and the tree signatures.  It MUST be
 the same as the signature algorithm specified in the credential field of the
-KeyPackage objects in the leaves of the tree (including the InitKeys
-used to add new members).<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+KeyPackage objects in the leaves of the tree (including those used to add new 
+members).<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <p id="section-6.1-7">To disambiguate different signatures used in MLS, each signed value is prefixed
 by a label as shown below:<a href="#section-6.1-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.1-8">
@@ -2733,7 +2829,11 @@ to Proposals they cover.  These identifiers are computed as follows:<a href="#se
 <pre>
 opaque HashReference[16];
 
-MakeHashRef(value) = KDF.expand(KDF.extract("", value), "MLS 1.0 ref", 16)
+MakeKeyPackageRef(value) = KDF.expand(
+  KDF.extract("", value), "MLS 1.0 KeyPackage Reference", 16)
+
+MakeProposalRef(value) = KDF.expand(
+  KDF.extract("", value), "MLS 1.0 Proposal Reference", 16)
 
 HashReference KeyPackageRef;
 HashReference ProposalRef;
@@ -2882,9 +2982,9 @@ provide some public information about a user. A KeyPackage object specifies:<a h
         <li id="section-7-2.4">an <code>endpoint_id</code> that uniquely identifies a client in a group.<a href="#section-7-2.4" class="pilcrow">¶</a>
 </li>
       </ol>
-<p id="section-7-3">When used as InitKeys, KeyPackages are intended to be used only once and SHOULD NOT
-be reused except in case of last resort. (See <a href="#initkey-reuse" class="xref">Section 15.4</a>).
-Clients MAY generate and publish multiple InitKeys to
+<p id="section-7-3">KeyPackages are intended to be used only once and SHOULD NOT
+be reused except in case of last resort. (See <a href="#keypackage-reuse" class="xref">Section 15.4</a>).
+Clients MAY generate and publish multiple KeyPackages to
 support multiple ciphersuites.<a href="#section-7-3" class="pilcrow">¶</a></p>
 <p id="section-7-4">The value for hpke_init_key MUST be a public key for the asymmetric
 encryption scheme defined by cipher_suite, and it MUST be unique among
@@ -3406,7 +3506,7 @@ proceeds as shown in the following diagram:<a href="#section-8-7" class="pilcrow
     commit_secret -&gt; KDF.Extract
                          |
                          V
-                   ExpandWithLabel(., "joiner", GroupContext_[n], KDF.Nh)
+                 ExpandWithLabel(., "joiner", GroupContext_[n], KDF.Nh)
                          |
                          V
                     joiner_secret
@@ -3418,7 +3518,7 @@ psk_secret (or 0) -&gt; KDF.Extract
                          |    = welcome_secret
                          |
                          V
-                   ExpandWithLabel(., "epoch", GroupContext_[n], KDF.Nh)
+                 ExpandWithLabel(., "epoch", GroupContext_[n], KDF.Nh)
                          |
                          V
                     epoch_secret
@@ -3512,9 +3612,9 @@ an MLS group can also initialize a new epoch via an asymmetric interaction using
 the external key pair for the previous epoch.  This is done when an new member
 is joining via an external commit.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">In this process, the joiner sends a new <code>init_secret</code> value to the group using
-the HPKE export method. The joiner then uses that <code>init_secret</code> with information
-provided in the GroupInfo and an external Commit to initialize their copy of the
-key schedule for the new epoch.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+the HPKE export method.  The joiner then uses that <code>init_secret</code> with
+information provided in the PublicGroupState and an external Commit to initialize
+their copy of the key schedule for the new epoch.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.1-3">
 <pre>
 kem_output, context = SetupBaseS(external_pub, "")
@@ -3529,7 +3629,7 @@ context = SetupBaseR(kem_output, external_priv, "")
 init_secret = context.export("MLS 1.0 external init secret", KDF.Nh)
 </pre><a href="#section-8.1-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8.1-6">In both cases, the <code>info</code> input to HPKE is set to the GroupInfo for the
+<p id="section-8.1-6">In both cases, the <code>info</code> input to HPKE is set to the PublicGroupState for the
 previous epoch, encoded using the TLS serialization.<a href="#section-8.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3614,7 +3714,8 @@ struct {
 } PSKLabel;
 
 psk_extracted_[i] = KDF.Extract(0, psk_[i])
-psk_input_[i] = ExpandWithLabel(psk_extracted_[i], "derived psk", PSKLabel, KDF.Nh)
+psk_input_[i] = ExpandWithLabel(psk_extracted_[i], "derived psk",
+                  PSKLabel, KDF.Nh)
 
 psk_secret_[0] = 0
 psk_secret_[i] = KDF.Extract(psk_input[i-1], psk_secret_[i-1])
@@ -3624,23 +3725,24 @@ psk_secret     = psk_secret[n]
 <p id="section-8.2-9">Here <code>0</code> represents the all-zero vector of length <code>KDF.Nh</code>. The <code>index</code> field in
 <code>PSKLabel</code> corresponds to the index of the PSK in the <code>psk</code> array, while the
 <code>count</code> field contains the total number of PSKs.  In other words, the PSKs are
-chained together with KDF.Extract invocations, as follows:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
+chained together with KDF.Extract invocations (labelled "Extract" for brevity 
+in the diagram), as follows:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2-10">
 <pre>
-                0                                   0       = psk_secret_[0]
-                |                                   |
-                V                                   V
-psk_[0] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[1]
-                                                    |
-                0                                   |
-                |                                   |
-                V                                   V
-psk_[1] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[1]
-                                                    |
-                0                                  ...
-                |                                   |
-                V                                   V
-psk_[n] --&gt; KDF.Extract --&gt; ExpandWithLabel --&gt; KDF.Extract = psk_secret_[n]
+               0                               0    = psk_secret_[0]
+               |                               |
+               V                               V
+psk_[0] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[1]
+                                               |
+               0                               |
+               |                               |
+               V                               V
+psk_[1] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[1]
+                                               |
+               0                              ...
+               |                               |
+               V                               V
+psk_[n] --&gt; Extract --&gt; ExpandWithLabel --&gt; Extract = psk_secret_[n]
 </pre><a href="#section-8.2-10" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2-11">In particular, if there are no PreSharedKey proposals in a given Commit, then
@@ -4162,8 +4264,10 @@ without padding. In pseudocode, the key and nonce are derived as:<a href="#secti
 <pre>
 ciphertext_sample = ciphertext[0..KDF.Nh-1]
 
-sender_data_key = ExpandWithLabel(sender_data_secret, "key", ciphertext_sample, AEAD.Nk)
-sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_sample, AEAD.Nn)
+sender_data_key = ExpandWithLabel(sender_data_secret, "key",
+                      ciphertext_sample, AEAD.Nk)
+sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce",
+                      ciphertext_sample, AEAD.Nn)
 </pre><a href="#section-9.3-6" class="pilcrow">¶</a>
 </div>
 <p id="section-9.3-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is all the
@@ -4269,7 +4373,7 @@ all members of the group.  For new members, it is enforced by existing members d
 application of Add commits.  Existing members should of course be in compliance
 already.  In order to ensure this continues to be the case even as the group's
 extensions can be updated, a GroupContextExtensions proposal is invalid if it
-contains a <code>required_capabilities</code> extension that requires capabililities not
+contains a <code>required_capabilities</code> extension that requires capabilities not
 supported by all current members.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -4576,7 +4680,7 @@ in the ReInit proposal MUST be no less than the version for the current group.<a
 <a href="#section-11.1.6" class="section-number selfRef">11.1.6. </a><a href="#name-externalinit" class="section-name selfRef">ExternalInit</a>
           </h4>
 <p id="section-11.1.6-1">An ExternalInit proposal is used by new members that want to join a group by
-using an external commit. This propsal can only be used in that context.<a href="#section-11.1.6-1" class="pilcrow">¶</a></p>
+using an external commit. This proposal can only be used in that context.<a href="#section-11.1.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.1.6-2">
 <pre>
 struct {
@@ -4643,7 +4747,7 @@ that all participants' state would be known.<a href="#section-11.1.7-6.3" class=
 application messages also needs to ensure that AppAck messages and the Commits
 that reference them are not dropped.  One way to do this is to always encrypt
 Proposal and Commit messages, to make it more difficult for the Delivery Service
-to recognize which messages conatain AppAcks.  The application can also have
+to recognize which messages contain AppAcks.  The application can also have
 clients enforce an AppAck schedule, reporting loss if an AppAck is not received
 at the expected time.<a href="#section-11.1.7-7" class="pilcrow">¶</a></p>
 </section>
@@ -4772,13 +4876,16 @@ containing KeyPackages with the same <code>endpoint_id</code>,
 the committer again chooses one to include and considers the rest invalid. Add
 proposals that contain KeyPackages with an <code>endpoint_id</code>
 tuple that matches that of an existing KeyPackage in the group MUST be
-considered invalid. The comitter MUST consider invalid any Add or Update
+considered invalid. The committer MUST consider invalid any Add or Update
 proposal if the Credential in the contained KeyPackage shares the same signature
 key with a Credential in any leaf of the group, or indeed if the KeyPackage
 shares the same <code>hpke_init_key</code> with another KeyPackage in the group.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
-<p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. In the event
-that a valid proposal is omitted from the next Commit, the sender of the
-proposal SHOULD retransmit it in the new epoch.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
+<p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. Due to the
+asynchronous nature of proposals, receivers of a Commit SHOULD NOT enforce that
+all valid proposals sent within the current epoch are referenced by the next
+Commit. In the event that a valid proposal is omitted from the next Commit, and
+that proposal is still valid in the current epoch, the sender of the proposal
+MAY retransmit it.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
 <p id="section-11.2-8">A member of the group MAY send a Commit that references no proposals at all,
 which would thus have an empty <code>proposals</code> vector.  Such
 a Commit resets the sender's leaf and the nodes along its direct path, and
@@ -4873,7 +4980,7 @@ populated.  Otherwise, the sender MAY omit the <code>path</code> field at its di
           <li class="normal" id="section-11.2-16.4">
             <p id="section-11.2-16.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
 ratchet tree and GroupContext. Any new member (from an add proposal) MUST be
-exluded from the resolution during the computation of the UpdatePath.  The
+excluded from the resolution during the computation of the UpdatePath.  The
 <code>leaf_key_package</code> for this UpdatePath must have a <code>parent_hash</code> extension.
 Note that the KeyPackage in the <code>UpdatePath</code> effectively updates an existing
 KeyPackage in the group and thus MUST adhere to the same restrictions as
@@ -5848,22 +5955,25 @@ version of the ratchet tree, as this prevents old group secrets from being
 re-derived. Forward secrecy <em>within</em> an epoch is provided by deleting message
 encryption keys once they've been used to encrypt or decrypt a message.<a href="#section-15.3-2" class="pilcrow">¶</a></p>
 <p id="section-15.3-3">Post-compromise security is also provided for new groups by members regularly
-generating new InitKeys and uploading them to the Delivery Service, such that
+generating new KeyPackages and uploading them to the Delivery Service, such that
 compromised key material won't be used when the member is added to a new group.<a href="#section-15.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="initkey-reuse">
+<div id="keypackage-reuse">
 <section id="section-15.4">
-        <h3 id="name-initkey-reuse">
-<a href="#section-15.4" class="section-number selfRef">15.4. </a><a href="#name-initkey-reuse" class="section-name selfRef">InitKey Reuse</a>
+        <h3 id="name-keypackage-reuse">
+<a href="#section-15.4" class="section-number selfRef">15.4. </a><a href="#name-keypackage-reuse" class="section-name selfRef">KeyPackage Reuse</a>
         </h3>
-<p id="section-15.4-1">InitKeys are intended to be used only once.  That is, once an InitKey has been
-used to introduce the corresponding client to a group, it SHOULD be deleted from
-the InitKey publication system.  Reuse of InitKeys can lead to replay attacks.<a href="#section-15.4-1" class="pilcrow">¶</a></p>
-<p id="section-15.4-2">An application MAY allow for reuse of a "last resort" InitKey in order to
-prevent denial of service attacks.  Since an InitKey is needed to add a client
-to a new group, an attacker could prevent a client being added to new groups by
-exhausting all available InitKeys.<a href="#section-15.4-2" class="pilcrow">¶</a></p>
+<p id="section-15.4-1">KeyPackages are intended to be used only once.  That is, once a KeyPackage 
+has been used to introduce the corresponding client to a group, it SHOULD be 
+deleted from the KeyPackage publication system.  Reuse of KeyPackages can lead 
+to replay attacks.<a href="#section-15.4-1" class="pilcrow">¶</a></p>
+<p id="section-15.4-2">An application MAY allow for reuse of a "last resort" KeyPackage in order to
+prevent denial of service attacks.  Since a KeyPackage is needed to add a 
+client to a new group, an attacker could prevent a client being added to new 
+groups by exhausting all available KeyPackages. To prevent such a denial of 
+service attack, the KeyPackage publication system SHOULD rate limit KeyPackage
+requests, especially if not authenticated.<a href="#section-15.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="group-fragmentation-by-malicious-insiders">

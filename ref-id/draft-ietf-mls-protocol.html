@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 30 July 2022</td>
+<td class="center">Expires 31 July 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-01-26" class="published">26 January 2022</time>
+<time datetime="2022-01-27" class="published">27 January 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-07-30">30 July 2022</time></dd>
+<dd class="expires"><time datetime="2022-07-31">31 July 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 July 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 31 July 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -4430,36 +4430,39 @@ struct {
 <li class="normal" id="section-11.1.2-4.1.2.1">Verify that the signature on the KeyPackage is valid using the public key
 in the KeyPackage's credential<a href="#section-11.1.2-4.1.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.1.2-4.1.2.2">
-                  <p id="section-11.1.2-4.1.2.2.1">Verify that the following fields in the KeyPackage are unique among the
-members of the group (including any other members added in the same
-Commit):<a href="#section-11.1.2-4.1.2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.2-4.1.2.2.2.1">
-                      <code>credential.signature_key</code><a href="#section-11.1.2-4.1.2.2.2.1" class="pilcrow">¶</a>
-</li>
-                    <li class="normal" id="section-11.1.2-4.1.2.2.2.2">
-                      <code>hpke_init_key</code><a href="#section-11.1.2-4.1.2.2.2.2" class="pilcrow">¶</a>
-</li>
-                  </ul>
+                <li class="normal" id="section-11.1.2-4.1.2.2">Verify that the KeyPackage's credential is valid according to the
+Authentication Service<a href="#section-11.1.2-4.1.2.2" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.1.2-4.1.2.3">
-                  <p id="section-11.1.2-4.1.2.3.1">Verify that the following fields in the new KeyPackage are the same as the
-one being replaced:<a href="#section-11.1.2-4.1.2.3.1" class="pilcrow">¶</a></p>
+                  <p id="section-11.1.2-4.1.2.3.1">Verify that the following fields in the KeyPackage are unique among the
+members of the group (including any other members added in the same
+Commit):<a href="#section-11.1.2-4.1.2.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.1.2-4.1.2.3.2.1">
-                      <code>version</code><a href="#section-11.1.2-4.1.2.3.2.1" class="pilcrow">¶</a>
+                      <code>credential.signature_key</code><a href="#section-11.1.2-4.1.2.3.2.1" class="pilcrow">¶</a>
 </li>
                     <li class="normal" id="section-11.1.2-4.1.2.3.2.2">
-                      <code>cipher_suite</code><a href="#section-11.1.2-4.1.2.3.2.2" class="pilcrow">¶</a>
+                      <code>hpke_init_key</code><a href="#section-11.1.2-4.1.2.3.2.2" class="pilcrow">¶</a>
 </li>
                   </ul>
 </li>
-                <li class="normal" id="section-11.1.2-4.1.2.4">Verify that the <code>hpke_init_key</code> value is different from the corresponding
-field in the KeyPackage being replaced.<a href="#section-11.1.2-4.1.2.4" class="pilcrow">¶</a>
+                <li class="normal" id="section-11.1.2-4.1.2.4">
+                  <p id="section-11.1.2-4.1.2.4.1">Verify that the following fields in the new KeyPackage are the same as the
+one being replaced:<a href="#section-11.1.2-4.1.2.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11.1.2-4.1.2.4.2.1">
+                      <code>version</code><a href="#section-11.1.2-4.1.2.4.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.1.2-4.1.2.5">Verify that the set of identities attested by the credential is acceptable
-to the application for the participant being updated.<a href="#section-11.1.2-4.1.2.5" class="pilcrow">¶</a>
+                    <li class="normal" id="section-11.1.2-4.1.2.4.2.2">
+                      <code>cipher_suite</code><a href="#section-11.1.2-4.1.2.4.2.2" class="pilcrow">¶</a>
+</li>
+                  </ul>
+</li>
+                <li class="normal" id="section-11.1.2-4.1.2.5">Verify that the <code>hpke_init_key</code> value is different from the corresponding
+field in the KeyPackage being replaced.<a href="#section-11.1.2-4.1.2.5" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-11.1.2-4.1.2.6">Verify that the set of identities attested by the credential is acceptable
+to the application for the participant being updated.<a href="#section-11.1.2-4.1.2.6" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
@@ -5005,15 +5008,18 @@ MAY be omitted.<a href="#section-11.2-18.5" class="pilcrow">¶</a>
 provisional ratchet tree and GroupContext, to generate the new ratchet tree
 and the <code>commit_secret</code>:<a href="#section-11.2-18.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.6.2.1">Apply the UpdatePath to the tree, as described in
+<li class="normal" id="section-11.2-18.6.2.1">Verify that the KeyPackage is acceptable according to the rules for Update
+(see <a href="#update" class="xref">Section 11.1.2</a>)<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-11.2-18.6.2.2">Apply the UpdatePath to the tree, as described in
 <a href="#synchronizing-views-of-the-tree" class="xref">Section 5.6</a>, and store <code>leaf_key_package</code> at the
-Committer's leaf.<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
+Committer's leaf.<a href="#section-11.2-18.6.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.2">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
-matches the new parent of the sender's leaf node.<a href="#section-11.2-18.6.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-18.6.2.3">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
+matches the new parent of the sender's leaf node.<a href="#section-11.2-18.6.2.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.3">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-18.6.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-18.6.2.4">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-18.6.2.4" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>

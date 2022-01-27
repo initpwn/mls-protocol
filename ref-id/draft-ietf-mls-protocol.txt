@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 30 July 2022                                    Inria & Mozilla
+Expires: 31 July 2022                                    Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 30 July 2022                                    Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                         26 January 2022
+                                                         27 January 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 July 2022.
+   This Internet-Draft will expire on 31 July 2022.
 
 Copyright Notice
 
@@ -2851,6 +2851,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       -  Verify that the signature on the KeyPackage is valid using the
          public key in the KeyPackage's credential
 
+      -  Verify that the KeyPackage's credential is valid according to
+         the Authentication Service
+
       -  Verify that the following fields in the KeyPackage are unique
          among the members of the group (including any other members
          added in the same Commit):
@@ -3380,6 +3383,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    *  If the path value is populated: Process the path value using the
       provisional ratchet tree and GroupContext, to generate the new
       ratchet tree and the commit_secret:
+
+      -  Verify that the KeyPackage is acceptable according to the rules
+         for Update (see Section 11.1.2)
 
       -  Apply the UpdatePath to the tree, as described in Section 5.6,
          and store leaf_key_package at the Committer's leaf.

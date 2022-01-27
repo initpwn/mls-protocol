@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-01-25T01:11:04.184165+00:00",
+  "timestamp": "2022-01-27T01:05:06.392428+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5264,15 +5264,15 @@
       "id": "I_kwDOBoyH6c5Ajrn9",
       "title": "Include `context` in `MLSPlaintextTBS` for sender_type `NewMember`",
       "url": "https://github.com/mlswg/mls-protocol/issues/528",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "From what I can see, there is no reason not to sign the context in the case of an external init. I'm not sure why it got taken out, but while implementing external inits, verification went through even when including the context.",
       "createdAt": "2021-12-17T10:11:11Z",
-      "updatedAt": "2022-01-06T21:43:04Z",
-      "closedAt": null,
+      "updatedAt": "2022-01-26T14:49:24Z",
+      "closedAt": "2022-01-26T14:49:24Z",
       "comments": [
         {
           "author": "bifurcation",
@@ -5280,6 +5280,13 @@
           "body": "As I commented in #526, it's not even clear that we need this context any more for members any more, given `membership_tag` for MLSPlaintext and the AEAD of MLSCiphertext.  So I would propose we just remove the context added to MLSPlaintextTBS altogether.\r\n\r\n@beurdouche IIRC you were the one that proposed adding the context.  WDYT?",
           "createdAt": "2022-01-06T21:43:04Z",
           "updatedAt": "2022-01-06T21:43:04Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This was fixed in #526 ",
+          "createdAt": "2022-01-26T14:49:24Z",
+          "updatedAt": "2022-01-26T14:49:24Z"
         }
       ]
     },
@@ -5319,15 +5326,15 @@
       "id": "I_kwDOBoyH6c5Ak7dL",
       "title": "MLS version is used inconsistently in strings",
       "url": "https://github.com/mlswg/mls-protocol/issues/531",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "raphaelrobert",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "Both \"mls10\" and \"MLS 1.0\" are used. I'd go for \"mls10\" everywhere.",
       "createdAt": "2021-12-17T16:26:39Z",
-      "updatedAt": "2021-12-17T16:26:39Z",
-      "closedAt": null,
+      "updatedAt": "2022-01-26T13:16:32Z",
+      "closedAt": "2022-01-26T13:16:32Z",
       "comments": []
     },
     {
@@ -5456,7 +5463,7 @@
       "labels": [],
       "body": "`KeyPackage`s currently have two usages in the spec:\r\n1. Pre-published key packages that you can download and put in a leaf when adding a new member\r\n2. leaf node content that you update when doing a full `Commit`\r\n\r\nCurrently, things have been designed to use only one structure for both uses, leading to some weirdness such as:\r\n- `version` and `cipher_suite` are useful in the usage 1, but are parameters of the group in usage 2.\r\n- `hpke_init_key` is a good name in usage 1, but would better be named `hpke_key` in usage 2.\r\n- some data is important in usage 2 and have no meaning in usage 1, hence they were designed as \"mandatory-when-updating extensions\" (such as `ParentHash`, and we were also discussing about adding the `group_id` in #527 to help prevent cross-group attacks)\r\n\r\nHow about using different structures for these?\r\n\r\n    // Essentially identical to KeyPackage\r\n    struct {\r\n        ProtocolVersion version;\r\n        CipherSuite cipher_suite;\r\n        HPKEPublicKey hpke_init_key;\r\n        opaque endpoint_id<0..255>;\r\n        Credential credential;\r\n        Extension extensions<8..2^32-1>;\r\n        opaque signature<0..2^16-1>;\r\n    } PrePublishedKeyPackage;\r\n    \r\n    struct {\r\n        HPKEPublicKey hpke_key;\r\n        opaque endpoint_id<0..255>;\r\n        Credential credential;\r\n        opaque parent_hash<0..255>;\r\n        opaque group_id<0..255>;\r\n        Extension extensions<8..2^32-1>;\r\n        opaque signature<0..2^16-1>;\r\n    } LeafNodeContent;\r\n    \r\n    enum {\r\n        reserved(0),\r\n        pre_published_key_package(1),\r\n        leaf_node_content(2),\r\n        (255)\r\n    } LeafNodeType;\r\n    \r\n    struct LeafNode {\r\n        // This is not included in the signature, but with the \"unambiguous signature\" PR that's not a problem\r\n        LeafNodeType type;\r\n        select(LeafNode.type) {\r\n            case pre_published_key_package:\r\n                PrePublishedKeyPackage data;\r\n            case leaf_node_content:\r\n                LeafNodeContent data;\r\n        }\r\n    }\r\n\r\nWhat would you think about refactoring `KeyPackage` like this?",
       "createdAt": "2022-01-12T12:34:44Z",
-      "updatedAt": "2022-01-20T13:42:07Z",
+      "updatedAt": "2022-01-26T15:18:53Z",
       "closedAt": null,
       "comments": [
         {
@@ -5542,6 +5549,13 @@
           "body": "I don't think there's really a good way to get the `group_id` into the leaf.  Because of prepublication, it would have to be optional, but in order to prevent attacks, you need rules to decide whether it's required in a given situation.  It seems like the best you can do is basically TOFU:\r\n\r\n* When you first get the tree, you can't validate whether the group_id should be in a given leaf or not\r\n* Once you're a member, you require that group_id is sent in Update and UpdatePath.leaf_key_package\r\n\r\nI could live with a solution of that character, but given it's a bit complex, might prefer to leave it out unless we get a useful property from it.\r\n\r\n@kkohbrok - Re: Sending KeyPackage in Add - Yep, that makes sense.  So you would send KeyPackage in Add, and LeafNode in Update.",
           "createdAt": "2022-01-20T13:42:07Z",
           "updatedAt": "2022-01-20T13:42:07Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I tried to worked through what would be necessary to implement this.  It looks like it would require some fairly invasive changes to be made to rationalize the document's structure before making this change.  But those changes should probably be made anyway.  Proposal:\r\n\r\nPreparatory PR: Rationalize layout\r\n* Move \"Cryptograhic Objects\" to before \"Ratchet Trees\"\r\n* Update \"Ratchet Tree Nodes\" to define ParentNode and LeafNode structs, with LeafNode initially just equal to KeyPackage\r\n* Move subsections of \"Key Packages\" to under \"Ratchet Trees\"\r\n  * Parent Hash\r\n  * Tree Hashes\r\n  * Update Paths\r\n* Move Group State to its own top-level section\r\n\r\nMain PR:\r\n* Change LeafNode to have the required content:\r\n  * HPKE key for TreeKEM\r\n  * Credential\r\n  * Parent hash\r\n  * Capabilities\r\n  * Extensions\r\n  * Signature\r\n* Change KeyPackage to refer to LeafNode for internals, plus:\r\n  * HPKE key for Welcome\r\n  * Lifetime\r\n  * Extensions\r\n  * Signature\r\n* Add continues to send KeyPackage\r\n* Update and Commit send LeafNode instead of KeyPackage\r\n* Remove and Sender refer to LeafNodeRef instead of KeyPackageRef\r\n\r\nWe should probably do the preparatory PR regardless of this issue.",
+          "createdAt": "2022-01-26T15:18:19Z",
+          "updatedAt": "2022-01-26T15:18:53Z"
         }
       ]
     },
@@ -37854,13 +37868,13 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2022-01-20T13:07:03Z",
+      "updatedAt": "2022-01-26T18:10:45Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "baseRefOid": "0093b047461246b89b2ba72682ef00213df52851",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "ref-id",
-      "headRefOid": "ee54cbd5a57945416dc73248694b1f318977ab6e",
+      "headRefOid": "74a2efcd3b82da5241bd34951d99f2a2b883ed59",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -37977,6 +37991,13 @@
           "body": "You might think the simplest thing we could do here is just require that a Credential be stable for the lifetime of a member's presence in the group.  If you want to change the Credential, you have to be removed and re-added.  But (a) that seems like throwing out a bunch of useful functionality, and (b) it doesn't actually remove the risk, just moves it over to the remove/re-add case, making it harder for the application to track continuity.",
           "createdAt": "2022-01-20T13:07:02Z",
           "updatedAt": "2022-01-20T13:07:02Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "(Force-pushed to address failed merge)\r\n",
+          "createdAt": "2022-01-26T14:40:39Z",
+          "updatedAt": "2022-01-26T14:40:39Z"
         }
       ],
       "reviews": [
@@ -39510,24 +39531,26 @@
       "id": "PR_kwDOBoyH6c4v5flh",
       "title": "Tighten up branch and reinit; define ResumptionPSKUsage",
       "url": "https://github.com/mlswg/mls-protocol/pull/525",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR reflects further discussion on #502 and replaces #518.  The high-level impacts are:\r\n\r\n* Add clearer, more prescriptive definitions of the re-init and branch operations\r\n* Use a single syntax for all resumption PSKs, but also have a `usage` parameter to distinguish cases\r\n* Allow an `application` usage to cover any other cases defined by applications\r\n\r\nOnce #520 lands, we should also add some text to the protocol overview to describe these operations.  Pasting some text here for usage in that future PR...\r\n\r\n```\r\n## Relationships Between Epochs\r\n\r\nA group comprises a single linear sequence of epochs. However, it can sometimes\r\nbe useful to express relationships between epochs, either within a group or\r\nacross groups.  MLS derives a resumption pre-shared key (PSK) from each epoch to\r\nallow a entropy extracted from one epoch to be injected into a future epoch,\r\neffectively creating a causal link between the two epochs.\r\n\r\nMLS supports two ways to tie a new group to an existing group. Re-initialization\r\ncloses one group and creates a new group comprising the same members with\r\ndifferent parameters. Branching starts a new group with a subset of the original\r\ngroup's participants (with no effect on the original group).  In both cases,\r\nthe new group is linked to the old group via a resumption PSK.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     .                     |\r\n     .  PSK(usage=reinit)  |\r\n     .....................>|\r\n                           |\r\n                           V\r\n                      epoch_B_[1]\r\n~~~~~\r\n{: title=\"Reinitializing a group\" }\r\n\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     |                     |\r\n     |  PSK(usage=branch)  |\r\n     |....................>|\r\n     |                     |\r\n     V                     V\r\nepoch_A_[n+1]         epoch_B_[1]\r\n~~~~~\r\n{: title=\"Branching a group\" }\r\n\r\nApplications may also choose to use resumption PSKs to link epochs in other\r\nways.  For example, the following figure shows a case where a resumption PSK\r\nfrom epoch `n` is injected into epoch `n+k`.  This demonstrates that the members\r\nof the group at epoch `n+k` were also members at epoch `n` (irrespective of any\r\nchanges to these members' keys due to Updates or Commits.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]\r\n     |                     \r\n     |  PSK(usage=application)  \r\n     |.....................\r\n     |                    . \r\n     |                    . \r\n    ...                  ...\r\n     |                    . \r\n     |                    . \r\n     V                    .\r\nepoch_A_[n+k-1]           .\r\n     |                    . \r\n     |                    . \r\n     |<.................... \r\n     |                      \r\n     V                     \r\nepoch_A_[n+k]       \r\n~~~~~\r\n{: title=\"Reinjecting entropy from an earlier epoch\" }\r\n```",
       "createdAt": "2021-12-15T15:45:11Z",
-      "updatedAt": "2022-01-19T19:05:21Z",
+      "updatedAt": "2022-01-26T13:56:32Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "baseRefOid": "4e3bf741c54764d266ed7065e1a6e8507eaf332e",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "psk-usages",
-      "headRefOid": "5b9590b55b09085fd2e7affb3a765f8943f02b75",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9e6b0595a83be8f34c25699ce6f3882c5271e525",
+      "closedAt": "2022-01-26T13:56:32Z",
+      "mergedAt": "2022-01-26T13:56:32Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "0093b047461246b89b2ba72682ef00213df52851"
+      },
       "comments": [
         {
           "author": "kkohbrok",
@@ -39626,24 +39649,26 @@
       "id": "PR_kwDOBoyH6c4v8b_5",
       "title": "Unambiguous signatures",
       "url": "https://github.com/mlswg/mls-protocol/pull/526",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "TWal",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Signatures as specified in the MLS protocol document are ambiguous, in the sense that signatures produced for one purpose in the protocol can be (maliciously) used in a different place of the protocol.\r\nIndeed, we found that for example, a `KeyPackage` can have the same serialization as `MLSPlaintextTBS`, which proves that one signature could be accepted for different structures.\r\n\r\nThe collisions we have found so far are quite artificial, so it is not super clear how to exploit this, but at least it makes it impossible to have provable security.\r\n\r\nThe solution is pretty simple, we simply prefix each signed value with a label, in a fashion similar to `ExpandWithLabel`.\r\nThat way, when calling `SignWithLabel` you can give the structure name in the `Label` argument.",
       "createdAt": "2021-12-16T11:56:57Z",
-      "updatedAt": "2022-01-21T16:29:02Z",
+      "updatedAt": "2022-01-26T12:43:52Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_signature",
       "headRefOid": "55ad81138bc6eb43e92b036b4142cb87362b8263",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-01-26T12:43:52Z",
+      "mergedAt": "2022-01-26T12:43:52Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "ced24321bd52a912e45a6e4bf221fd426ed100b0"
+      },
       "comments": [
         {
           "author": "TWal",
@@ -39766,6 +39791,19 @@
               "updatedAt": "2022-01-11T08:52:46Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4zd8e2",
+          "commit": {
+            "abbreviatedOid": "55ad811"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-01-26T12:43:47Z",
+          "updatedAt": "2022-01-26T12:43:47Z",
+          "comments": []
         }
       ]
     },
@@ -39781,7 +39819,7 @@
       "labels": [],
       "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
       "createdAt": "2021-12-16T12:54:02Z",
-      "updatedAt": "2022-01-24T18:04:46Z",
+      "updatedAt": "2022-01-26T17:25:34Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
@@ -39855,6 +39893,27 @@
           "body": "I was going through some examples to verify that the procedure is correct. I think I found two cases where it may be incorrect. @TWal could you check the examples?\r\n1. What happens if some nodes in the subtree of the sibling (Y in your examples) have been truncated since the commit?\r\n2.  See this file [parent_hash.txt](https://github.com/mlswg/mls-protocol/files/7927786/parent_hash.txt) (the trees get large)",
           "createdAt": "2022-01-24T18:04:46Z",
           "updatedAt": "2022-01-24T18:04:46Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Hi Marta, thank you for checking this! Indeed there are correctness problems that I completely overlooked\u2026\r\n\r\n1. I'm not sure to understand the problem? The tree is truncated when there is a Remove, which will blank the nodes so the parent hash won't be checked?\r\n2. This is a good counter-example.\r\n\r\nI see several solutions:\r\n- remove unmerged leaves as suggested by @bifurcation (doing some analysis beforehand would be useful, but my guess is that it's not too bad if we say that new members SHOULD do a full commit as soon as possible)\r\n- next to the parent hash, store how many leaves contained the sibling tree when the tree hash was computed, like this you know which nodes were truncated or not (this option is the least invasive)\r\n- modify the tree hash in a way that would correspond to doing the current tree hash in a complete tree, which would solve the problem since we have the property Complete(Truncate(tree)) == Complete(tree)",
+          "createdAt": "2022-01-25T17:48:58Z",
+          "updatedAt": "2022-01-25T17:48:58Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@kkohbrok I'm not sure I follow the case you present.  In particular: \r\n\r\n> However, Charly can not rule out the possibility that Alice has generated a bunch of credentials, and used them to sign KeyPackages that include the public keys that Bob attested to (although of course she does not own the corresponding private keys).\r\n\r\nTo be clear, you mean that Alice controls the signature keys, but not the HPKE private keys, right?  So she can control the KeyPackage content, including for example the parent hash. Maybe to put this a little more directly: If the parent hash doesn't cover the credential (or at least the signature public key), then Alice can replace anyone in the group with:\r\n\r\n* A sock puppet, for which she controls the signing key\r\n* An appearance of a client in another group that happens to have a parent hash that matches an HPKE public key in the resolution\r\n* A pre-published KeyPackage that happens to have the right HPKE public key for the resolution\r\n\r\nI don't think there's anything we can do about the sock puppet case anyway.  And it seems debatable whether any of these are problematic, in the sense that the parent hash is supposed to validate that the tree invariant holds, and in all of these cases, the client in question actually does hold the required private key, modulo hash collisions.\r\n\r\nSo if I've got the analysis right here, the main benefit of signing more of the tree structure is to guard against collisions among public keys and their hashes.\r\n\r\n\r\n",
+          "createdAt": "2022-01-26T15:59:47Z",
+          "updatedAt": "2022-01-26T15:59:47Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Yes, I think you got it right. Alice can make Charly think that they are in a group with Bob and because Bob only attested to the HPKE public keys, Alice can potentially mess around with the credentials and Charly has only the AS to protect her from that. Depending on the AS that can be more or less helpful. If you have a weak AS, Charly cannot really know if Bob attested to being in a group with these group members. With the tree hash variant, Charly could do that.\r\n\r\nI think @psyoptix got it right by saying that the current parent hash covers the confidentiality guarantees, whereas the tree hash approach gets some authentication guarantees as well.\r\n\r\nI don't have a strong opinion either way, I just wanted to make sure we agree on the gap we're discussing.",
+          "createdAt": "2022-01-26T17:25:34Z",
+          "updatedAt": "2022-01-26T17:25:34Z"
         }
       ],
       "reviews": []
@@ -39987,21 +40046,21 @@
       "id": "PR_kwDOBoyH6c4wThM0",
       "title": "Get rid of explicit protocol version fields",
       "url": "https://github.com/mlswg/mls-protocol/pull/532",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "In all instances that I could find in the spec, the `ProtocolVersion` is redundant, as it appears alongside the `ciphersuite, which implies an MLS version. This PR thus removes explicit handling of MLS versions outside of ciphersuite concerns.",
       "createdAt": "2021-12-27T14:05:44Z",
-      "updatedAt": "2022-01-10T20:59:39Z",
+      "updatedAt": "2022-01-26T12:48:33Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "protocol-versions",
       "headRefOid": "6f5f452cf5eb07ae01d76487f99f44a30b5128bf",
-      "closedAt": null,
+      "closedAt": "2022-01-26T12:48:33Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -40026,6 +40085,13 @@
           "body": "I agree that we should really choose between:\r\n\r\na) Having protocol version-specific ciphersuites and not repeat the protocol version (note that ciphersuites could still be changed for a given protocol version)\r\nb) Not have protocol version-specific ciphersuites and mention the protocol version wherever needed\r\n\r\nIIRC we discussed this at the interim in 2020 in NYC and the reason for deviating from what TLS does were the following:\r\n\r\n - MLS is unlikely to ever have as many ciphersuites as TLS\r\n - The meaning/set of the crypto primitives mentioned in the ciphersuite might considerably change between MLS versions. If the primitives are used differently in a newer version (their meaning changes), it might be a security issue (e.g. a certain security level is now no longer considered sufficient). If the set changes, ciphersuites can't be carried over between versions anyway.\r\n\r\nI'm not very hung up on this, but we did have reasons to do what we did at the time.\r\n",
           "createdAt": "2022-01-10T20:59:39Z",
           "updatedAt": "2022-01-10T20:59:39Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As discussed on working call 2022-01-20, closing in favor of #544 ",
+          "createdAt": "2022-01-26T12:48:33Z",
+          "updatedAt": "2022-01-26T12:48:33Z"
         }
       ],
       "reviews": [
@@ -40208,24 +40274,26 @@
       "id": "PR_kwDOBoyH6c4xDtKt",
       "title": "Make some sections easier to read.",
       "url": "https://github.com/mlswg/mls-protocol/pull/541",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2022-01-14T20:04:17Z",
-      "updatedAt": "2022-01-19T18:56:34Z",
+      "updatedAt": "2022-01-26T13:19:10Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e39695c6e8fe39e04fe644a213eb8a82ac483e3b",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "brendan/editorial",
       "headRefOid": "91c5587b2d86b06cab40a03e2c73f460ffd1c25a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-01-26T13:19:10Z",
+      "mergedAt": "2022-01-26T13:19:10Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "6575f556877bd826ca9e6f74f9e2432cd49d1eb1"
+      },
       "comments": [],
       "reviews": [
         {
@@ -40247,6 +40315,26 @@
               "updatedAt": "2022-01-19T18:56:34Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4zeFlD",
+          "commit": {
+            "abbreviatedOid": "91c5587"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-01-26T13:19:01Z",
+          "updatedAt": "2022-01-26T13:19:02Z",
+          "comments": [
+            {
+              "originalPosition": 247,
+              "body": "Will handle this in a small follow-on.",
+              "createdAt": "2022-01-26T13:19:02Z",
+              "updatedAt": "2022-01-26T13:19:02Z"
+            }
+          ]
         }
       ]
     },
@@ -40255,24 +40343,26 @@
       "id": "PR_kwDOBoyH6c4xRvfM",
       "title": "Be consistent about version labeling",
       "url": "https://github.com/mlswg/mls-protocol/pull/543",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #531 ",
       "createdAt": "2022-01-19T17:21:12Z",
-      "updatedAt": "2022-01-20T15:16:24Z",
+      "updatedAt": "2022-01-26T13:16:32Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "f02d296844fef310d417485100ae0a2e32feb9c7",
+      "baseRefOid": "ced24321bd52a912e45a6e4bf221fd426ed100b0",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "consistent-version",
-      "headRefOid": "2d35e51863aa0bce18f834b6a5d97b4f7650825f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "bb0bd744b274540c5500538cec32f3cfd90d49c5",
+      "closedAt": "2022-01-26T13:16:32Z",
+      "mergedAt": "2022-01-26T13:16:32Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "30079cba38ffe838fb7d2e19d675be3dafbf3039"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -40289,24 +40379,26 @@
       "id": "PR_kwDOBoyH6c4xR9-v",
       "title": "Remove version from ciphersuites",
       "url": "https://github.com/mlswg/mls-protocol/pull/544",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "#532 proposes to remove redundancy between version fields and ciphersuites by removing the version fields.  This PR removes the version from the ciphersuite instead.",
       "createdAt": "2022-01-19T18:38:38Z",
-      "updatedAt": "2022-01-20T15:45:54Z",
+      "updatedAt": "2022-01-26T13:24:37Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "f02d296844fef310d417485100ae0a2e32feb9c7",
+      "baseRefOid": "ced24321bd52a912e45a6e4bf221fd426ed100b0",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "remove-ciphersuite-version",
-      "headRefOid": "501433e48cd3e154f357d4ff760f260e9733a540",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1137ac0f013d2bf5caedc82fbd0733fe5cc93e17",
+      "closedAt": "2022-01-26T13:24:37Z",
+      "mergedAt": "2022-01-26T13:24:37Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a7b13352b5529c41ff4c32004b4c52e6a0bd46fc"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -40323,7 +40415,21 @@
           "updatedAt": "2022-01-20T15:45:54Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zeHjg",
+          "commit": {
+            "abbreviatedOid": "1137ac0"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-01-26T13:23:49Z",
+          "updatedAt": "2022-01-26T13:23:49Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 545,
@@ -40379,7 +40485,7 @@
       "labels": [],
       "body": "Addresses the comments in ( Resolves #542 )\r\n\r\nSince a member performing a commit including all valid proposals within an epoch is best effort, it makes sense to downgrade the requirement from MUST to SHOULD. \r\n\r\nIMO, MUST should be reserved for instances where the receiver would throw an error in the condition the sender did not 100% comply with the rule. Since in this case it is not a hard error under certain conditions, such as the member performing the commit having not received a proposal in transit while generating the commit, SHOULD is a better choice.",
       "createdAt": "2022-01-20T14:32:56Z",
-      "updatedAt": "2022-01-21T21:18:32Z",
+      "updatedAt": "2022-01-26T13:26:05Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "f02d296844fef310d417485100ae0a2e32feb9c7",
@@ -40411,6 +40517,13 @@
           "body": "I believe the existing language in the \"if there are multiple proposals ...\" paragraph covers the non-redundant aspect of the requirements.\r\n\r\nHow about this for retransmit? I can push a new commit if we think this helps\r\n\r\n\"The Commit MUST NOT combine proposals sent within different epochs. In the event that a valid proposal is omitted from the next Commit, and that proposal is still valid in the current epoch, the sender of the proposal MAY retransmit it.\"",
           "createdAt": "2022-01-21T21:18:31Z",
           "updatedAt": "2022-01-21T21:18:31Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I think that works.",
+          "createdAt": "2022-01-26T13:26:04Z",
+          "updatedAt": "2022-01-26T13:26:04Z"
         }
       ],
       "reviews": [
@@ -40434,24 +40547,26 @@
       "id": "PR_kwDOBoyH6c4xX9C7",
       "title": "Domain separation for KeyPackage and Proposal references",
       "url": "https://github.com/mlswg/mls-protocol/pull/547",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "It doesn't seem super critical, but I think right now there could be a collision between references to Update/Add proposals and KeyPackages. Also, it's essentially free and it just feels wrong not to have proper domain separation for these values \ud83d\ude2c.",
       "createdAt": "2022-01-21T10:03:45Z",
-      "updatedAt": "2022-01-24T13:44:01Z",
+      "updatedAt": "2022-01-26T15:15:04Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "separate_reference_spaces",
-      "headRefOid": "cf1e0adaa7408a76117d39f3cec1be506f208015",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "5e1929dca64838616768b984f8b33aadeec22102",
+      "closedAt": "2022-01-26T15:15:03Z",
+      "mergedAt": "2022-01-26T15:15:03Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "da826dffc27c4312e152637dba5022e69a179f26"
+      },
       "comments": [
         {
           "author": "TWal",
@@ -40481,8 +40596,285 @@
           "createdAt": "2022-01-21T18:01:08Z",
           "updatedAt": "2022-01-21T18:01:08Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4zeiER",
+          "commit": {
+            "abbreviatedOid": "cf1e0ad"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-01-26T14:47:13Z",
+          "updatedAt": "2022-01-26T14:47:28Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "```suggestion\r\nMakeKeyPackageRef(value) = KDF.expand(\r\n  KDF.extract(\"\", value), \"MLS 1.0 KeyPackage Reference\", 16)\r\n\r\nMakeProposalRef(value) = KDF.expand(\r\n  KDF.extract(\"\", value), \"MLS 1.0 Proposal Reference\", 16)\r\n```\r\n\r\nWrapping to fit within RFC Editor's preferred line lengths.",
+              "createdAt": "2022-01-26T14:47:13Z",
+              "updatedAt": "2022-01-26T14:47:28Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 548,
+      "id": "PR_kwDOBoyH6c4xnbx5",
+      "title": "Update the description of the evolution of GroupContext",
+      "url": "https://github.com/mlswg/mls-protocol/pull/548",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes a minor bug in #541 \r\n",
+      "createdAt": "2022-01-26T13:23:42Z",
+      "updatedAt": "2022-01-26T13:24:48Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "6575f556877bd826ca9e6f74f9e2432cd49d1eb1",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "pr541-fix",
+      "headRefOid": "0d4372d27e0655efb4ccd99fddcc9c0a040fedd2",
+      "closedAt": "2022-01-26T13:24:48Z",
+      "mergedAt": "2022-01-26T13:24:48Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "4e3bf741c54764d266ed7065e1a6e8507eaf332e"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 549,
+      "id": "PR_kwDOBoyH6c4xniPt",
+      "title": "Add branch/init overview",
+      "url": "https://github.com/mlswg/mls-protocol/pull/549",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adds the overview text proposed in #525.",
+      "createdAt": "2022-01-26T13:56:16Z",
+      "updatedAt": "2022-01-26T17:41:05Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "4e3bf741c54764d266ed7065e1a6e8507eaf332e",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "psk-usage-overview",
+      "headRefOid": "9f8026889c734113f13e8636da34edf335258a8f",
+      "closedAt": "2022-01-26T17:41:05Z",
+      "mergedAt": "2022-01-26T17:41:05Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a9a6d223a5d680503b119f804c1b12606553e22e"
+      },
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @kkohbrok !",
+          "createdAt": "2022-01-26T17:36:50Z",
+          "updatedAt": "2022-01-26T17:36:50Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4ze4-_",
+          "commit": {
+            "abbreviatedOid": "c596fe1"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Thanks for putting together the overview. The figures are great :-)\r\n\r\nLooks good to me with one proposition.",
+          "createdAt": "2022-01-26T15:48:36Z",
+          "updatedAt": "2022-01-26T15:49:43Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "I feel like it doesn't become clear here, what the actual benefits of this are. Although the full details should probably go into the architecture docs. Something as follows maybe?\r\n\r\n```suggestion\r\nA group comprises a single linear sequence of epochs and groups are generally\r\nindependent of one-another. However, it can sometimes be useful to link epochs\r\ncryptographically, either within a group or across groups. MLS derives a\r\nresumption pre-shared key (PSK) from each epoch to allow entropy extracted from\r\none epoch to be injected into a future epoch. This link guarantees that members\r\nentering the new epoch agree on a key if and only if were members of the group\r\nduring the epoch from which the resumption key was extracted.\r\n```",
+              "createdAt": "2022-01-26T15:48:37Z",
+              "updatedAt": "2022-01-26T15:49:43Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 550,
+      "id": "PR_kwDOBoyH6c4xn_xM",
+      "title": "Adjust ASCII art to fit within 72 character limit.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/550",
+      "state": "MERGED",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adjust ASCII art to fit within 72 character limit. Did not fix tables or code in appendices.",
+      "createdAt": "2022-01-26T16:00:47Z",
+      "updatedAt": "2022-01-26T17:41:43Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "da826dffc27c4312e152637dba5022e69a179f26",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/fix-ascii-art",
+      "headRefOid": "0b7aaa7325adec8705278adae9984134d6bfe582",
+      "closedAt": "2022-01-26T17:41:43Z",
+      "mergedAt": "2022-01-26T17:41:42Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zfdbT",
+          "commit": {
+            "abbreviatedOid": "0b7aaa7"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-01-26T17:40:40Z",
+          "updatedAt": "2022-01-26T17:40:40Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 551,
+      "id": "PR_kwDOBoyH6c4xobcN",
+      "title": "Rename InitKeys -> KeyPackages;  and GroupInfo -> PublicGroupState",
+      "url": "https://github.com/mlswg/mls-protocol/pull/551",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Complete the renaming of InitKeys ->  KeyPackages;  and GroupInfo -> PublicGroupState",
+      "createdAt": "2022-01-26T18:10:16Z",
+      "updatedAt": "2022-01-26T18:10:16Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/rename-initkeys",
+      "headRefOid": "37712708b94e9106c92c392cd7b0b2024f4192ab",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 552,
+      "id": "PR_kwDOBoyH6c4xodaH",
+      "title": "fetching KeyPackages SHOULD be rate limited.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/552",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-01-26T18:20:58Z",
+      "updatedAt": "2022-01-26T18:20:58Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/should-rate-limit-keypackages",
+      "headRefOid": "362432d42da5c8665b1da9b1df74a4a0a0357921",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 553,
+      "id": "PR_kwDOBoyH6c4xoe7n",
+      "title": "Make definition of _group_ match the Introduction definition",
+      "url": "https://github.com/mlswg/mls-protocol/pull/553",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The definition of an MLS group in the 2nd paragraph of the Protocol Overview is really good. Let's use it as the definition in the Terminology section as well.",
+      "createdAt": "2022-01-26T18:29:38Z",
+      "updatedAt": "2022-01-26T18:29:38Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/group-definition",
+      "headRefOid": "3b6e4c78efb467c338df84ac5938bff1aac42849",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 554,
+      "id": "PR_kwDOBoyH6c4xogUm",
+      "title": "Use common-sense definition of _descendant_",
+      "url": "https://github.com/mlswg/mls-protocol/pull/554",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Make the definition of _descendant_ match the common-sense definition (you are not your own descendant), adjust the text which uses the definition. Note: this allows for a much clearer definition of the tree invariant as well.",
+      "createdAt": "2022-01-26T18:37:57Z",
+      "updatedAt": "2022-01-26T18:37:57Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/descendant-definition",
+      "headRefOid": "624037f9c73d224044c62142fc23602da5c37614",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 555,
+      "id": "PR_kwDOBoyH6c4xohpv",
+      "title": "Add clarifying note about _resolution_ in the most common case.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/555",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In the most basic case, the resolution of a node is the node, so let's say that.",
+      "createdAt": "2022-01-26T18:45:52Z",
+      "updatedAt": "2022-01-26T18:45:52Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "870dfb60e7feae8c83350ceaa1ff7f5d2bf981a8",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/resolution-basic-case",
+      "headRefOid": "f76c7cc9f2df5ba7a86086ba2767ad67babf4695",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }

@@ -94,15 +94,16 @@ Table of Contents
      6.3.  Credentials
        6.3.1.  Uniquely Identifying Clients
    7.  Key Packages
-     7.1.  Client Capabilities
-     7.2.  Lifetime
-     7.3.  KeyPackage Identifiers
-     7.4.  Parent Hash
-       7.4.1.  Using Parent Hashes
-       7.4.2.  Verifying Parent Hashes
-     7.5.  Tree Hashes
-     7.6.  Group State
-     7.7.  Update Paths
+     7.1.  KeyPackage Validation
+     7.2.  Client Capabilities
+     7.3.  Lifetime
+     7.4.  KeyPackage Identifiers
+     7.5.  Parent Hash
+       7.5.1.  Using Parent Hashes
+       7.5.2.  Verifying Parent Hashes
+     7.6.  Tree Hashes
+     7.7.  Group State
+     7.8.  Update Paths
    8.  Key Schedule
      8.1.  External Initialization
      8.2.  Pre-Shared Keys
@@ -907,7 +908,7 @@ Table of Contents
    *  A credential (only for leaf nodes)
 
    *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 7.4).
+      last time the node was changed (see Section 7.5).
 
    The conditions under which each of these values must or must not be
    present are laid out in Section 5.3.
@@ -951,7 +952,7 @@ Table of Contents
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
    below that node.  The rules for computing these hashes are described
-   in Section 7.5.
+   in Section 7.6.
 
 5.3.  Views of a Ratchet Tree
 
@@ -1021,7 +1022,7 @@ Table of Contents
    fresh key material to be added into the group's shared secret.  To do
    so, one member of the group generates fresh key material, applies it
    to their local tree state, and then sends this key material to other
-   members in the group via an UpdatePath message (see Section 7.7) .
+   members in the group via an UpdatePath message (see Section 7.8) .
    All other group members then apply the key material in the UpdatePath
    to their own local tree state to derive the group's now-updated
    shared secret.
@@ -1518,7 +1519,46 @@ HashReference ProposalRef;
    allows other members to verify the validity of the KeyPackage at any
    time, particularly in the case of a newcomer joining the group.
 
-7.1.  Client Capabilities
+7.1.  KeyPackage Validation
+
+   The validity of a KeyPackage needs to be verified at a few stages:
+
+   *  When a KeyPackage is downloaded by a group member, before it is
+      used to add the client to the group
+
+   *  When a KeyPackage is received by a group member in an Add, Update,
+      or Commit message
+
+   *  When a client joining a group receives KeyPackages for the other
+      members of the group in the group's ratchet tree
+
+   The client verifies the validity of a KeyPackage using the following
+   steps:
+
+   *  Verify that the credential in the KeyPackage is valid according to
+      the authentication service and the client's local policy.
+
+   *  Verify that the signature on the KeyPackage is valid using the
+      public key in the KeyPackage's credential
+
+   *  Verify that the KeyPackage is compatible with the group's
+      parameters.  The ciphersuite and protocol version of the
+      KeyPackage must match those in use in the group.  If the
+      GroupContext has a required_capabilities extension, then the
+      required extensions and proposals MUST be listed in the
+      KeyPackage's capabilities extension.
+
+   *  Verify that the following fields in the KeyPackage are unique
+      among the members of the group (including any other members added
+      in the same Commit):
+
+      -  credential.signature_key
+
+      -  hpke_init_key
+
+      -  endpoint_id
+
+7.2.  Client Capabilities
 
    The capabilities extension indicates what protocol versions,
    ciphersuites, protocol extensions, and non-default proposal types are
@@ -1536,7 +1576,7 @@ HashReference ProposalRef;
    that appear in the extensions field of a KeyPackage MUST be included
    in the extensions field of the capabilities extension.
 
-7.2.  Lifetime
+7.3.  Lifetime
 
    The lifetime extension represents the times between which clients
    will consider a KeyPackage valid.  This time is represented as an
@@ -1554,7 +1594,7 @@ HashReference ProposalRef;
 
    This extension MUST always be present in a KeyPackage.
 
-7.3.  KeyPackage Identifiers
+7.4.  KeyPackage Identifiers
 
    Within MLS, a KeyPackage is identified by its hash (see, e.g.,
    Section 11.2.1.2).  The external_key_id extension allows applications
@@ -1562,7 +1602,7 @@ HashReference ProposalRef;
 
    opaque external_key_id<0..2^16-1>;
 
-7.4.  Parent Hash
+7.5.  Parent Hash
 
    The parent_hash extension carries information to authenticate the
    structure of the tree, as described below.
@@ -1602,7 +1642,7 @@ HashReference ProposalRef;
    Meanwhile, the ParentHashInput of node Z with co-path child D has an
    array with one element in it: the HPKE public key of D.
 
-7.4.1.  Using Parent Hashes
+7.5.1.  Using Parent Hashes
 
    The Parent Hash of P appears in three types of structs.  If V is
    itself a parent node then P's Parent Hash is stored in the
@@ -1623,7 +1663,7 @@ HashReference ProposalRef;
    the insider isn't assigned a leaf in the subtree rooted at V.
    Indeed, such a ratchet tree would violate the tree invariant.)
 
-7.4.2.  Verifying Parent Hashes
+7.5.2.  Verifying Parent Hashes
 
    To this end, when processing a Commit message clients MUST recompute
    the expected value of parent_hash for the committer's new leaf and
@@ -1652,7 +1692,7 @@ HashReference ProposalRef;
    can cause blank nodes to be interposed between a parent node and its
    right child.
 
-7.5.  Tree Hashes
+7.6.  Tree Hashes
 
    To allow group members to verify that they agree on the public
    cryptographic state of the group, this section defines a scheme for
@@ -1700,7 +1740,7 @@ HashReference ProposalRef;
    The left_hash and right_hash fields hold the tree hashes of the
    node's left and right children, respectively.
 
-7.6.  Group State
+7.7.  Group State
 
    Each member of the group maintains a GroupContext object that
    summarizes the state of the group:
@@ -1722,7 +1762,7 @@ HashReference ProposalRef;
 
    *  The tree_hash field contains a commitment to the contents of the
       group's ratchet tree and the credentials for the members of the
-      group, as described in Section 7.5.
+      group, as described in Section 7.6.
 
    *  The confirmed_transcript_hash field contains a running hash over
       the messages that led to this state.
@@ -1793,7 +1833,7 @@ HashReference ProposalRef;
    As shown above, when a new group is created, the
    interim_transcript_hash field is set to the zero-length octet string.
 
-7.7.  Update Paths
+7.8.  Update Paths
 
    As described in Section 11.2, each MLS Commit message may optionally
    transmit a KeyPackage leaf and node values along its direct path.
@@ -2786,8 +2826,8 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 11.1.1.  Add
 
    An Add proposal requests that a client with a specified KeyPackage be
-   added to the group.  The proposer of the Add MUST validate the
-   KeyPackage in the same way as receipients are required to do below.
+   added to the group.  The proposer of the Add MUST verify the validity
+   of the KeyPackage, as specified in Section 7.1.
 
    struct {
        KeyPackage key_package;
@@ -2801,25 +2841,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    right, etc.  If no empty leaf exists, the tree is extended to the
    right.
 
-   *  Validate the KeyPackage:
-
-      -  Verify that the signature on the KeyPackage is valid using the
-         public key in the KeyPackage's credential
-
-      -  Verify that the following fields in the KeyPackage are unique
-         among the members of the group (including any other members
-         added in the same Commit):
-
-         o  credential.signature_key
-
-         o  hpke_init_key
-
-      -  Verify that the KeyPackage is compatible with the group's
-         parameters.  The ciphersuite and protocol version of the
-         KeyPackage must match those in use in the group.  If the
-         GroupContext has a required_capabilities extension, then the
-         required extensions and proposals MUST be listed in the
-         KeyPackage's capabilities extension.
+   *  Validate the KeyPackage as specified in Section 7.1
 
    *  Identify the leaf L for the new member: if there are empty leaves
       in the tree, L is the leftmost empty leaf.  Otherwise, the tree is
@@ -2846,35 +2868,20 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    A member of the group applies an Update message by taking the
    following steps:
 
-   *  Validate the KeyPackage:
+   *  Validate the KeyPackage as specified in Section 7.1
 
-      -  Verify that the signature on the KeyPackage is valid using the
-         public key in the KeyPackage's credential
+   *  Verify that the following fields in the new KeyPackage are the
+      same as the one being replaced:
 
-      -  Verify that the KeyPackage's credential is valid according to
-         the Authentication Service
+      -  version
 
-      -  Verify that the following fields in the KeyPackage are unique
-         among the members of the group (including any other members
-         added in the same Commit):
+      -  cipher_suite
 
-         o  credential.signature_key
+   *  Verify that the hpke_init_key value is different from the
+      corresponding field in the KeyPackage being replaced.
 
-         o  hpke_init_key
-
-      -  Verify that the following fields in the new KeyPackage are the
-         same as the one being replaced:
-
-         o  version
-
-         o  cipher_suite
-
-      -  Verify that the hpke_init_key value is different from the
-         corresponding field in the KeyPackage being replaced.
-
-      -  Verify that the set of identities attested by the credential is
-         acceptable to the application for the participant being
-         updated.
+   *  Verify that the set of identities attested by the credential is
+      acceptable to the application for the participant being updated.
 
    *  Replace the sender's leaf KeyPackage with the one contained in the
       Update proposal

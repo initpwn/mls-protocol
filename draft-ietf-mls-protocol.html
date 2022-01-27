@@ -1590,7 +1590,7 @@ shared keys with costs that scale as the log of the group size.<a href="#section
 </li>
           <li class="normal" id="section-1.1-7.12">Clarify X509Credential structure (*)<a href="#section-1.1-7.12" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.13">Remove uneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-7.13" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.13">Remove unneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-7.13" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-7.14">IANA considerations<a href="#section-1.1-7.14" class="pilcrow">¶</a>
 </li>
@@ -1874,7 +1874,7 @@ group AKE in the sense that there can be more than two participants in the
 protocol, and continuous group AKE in the sense that the set of participants in
 the protocol can change over time.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">The core organizing principles of MLS are <em>groups</em> and <em>epochs</em>.  A group
-represents a logical collection of clents that share a common secret value at
+represents a logical collection of clients that share a common secret value at
 any given time.  The history of a group is divided into a linear sequence of
 epochs.  In each epoch, a set of authenticated <em>members</em> agree on an <em>epoch
 secret</em> that is known only to the members of the group in that epoch.  The set
@@ -1946,7 +1946,7 @@ subsets of the group.  Each epoch has a distinct ratchet tree.<a href="#section-
 </li>
         </ul>
 <p id="section-4.1-3">Each member of the group maintains a view of these two facets of the group's
-state.  MLS messages are used to intialize these views and keep them in sync as
+state.  MLS messages are used to initialize these views and keep them in sync as
 the group transitions between epochs.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1-4">Each new epoch is initiated with a Commit message.  The Commit instructs
 existing members of the group to update their views of ratchet tree by applying
@@ -4270,7 +4270,7 @@ all members of the group.  For new members, it is enforced by existing members d
 application of Add commits.  Existing members should of course be in compliance
 already.  In order to ensure this continues to be the case even as the group's
 extensions can be updated, a GroupContextExtensions proposal is invalid if it
-contains a <code>required_capabilities</code> extension that requires capabililities not
+contains a <code>required_capabilities</code> extension that requires capabilities not
 supported by all current members.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -4405,7 +4405,7 @@ retrieved by hash (as a ProposalOrRef object) in a later Commit message.<a href=
           </h4>
 <p id="section-11.1.1-1">An Add proposal requests that a client with a specified KeyPackage be added
 to the group.  The proposer of the Add MUST validate the KeyPackage in the same
-way as receipients are required to do below.<a href="#section-11.1.1-1" class="pilcrow">¶</a></p>
+way as recipients are required to do below.<a href="#section-11.1.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.1.1-2">
 <pre>
 struct {
@@ -4592,7 +4592,7 @@ in the ReInit proposal MUST be no less than the version for the current group.<a
 <a href="#section-11.1.6" class="section-number selfRef">11.1.6. </a><a href="#name-externalinit" class="section-name selfRef">ExternalInit</a>
           </h4>
 <p id="section-11.1.6-1">An ExternalInit proposal is used by new members that want to join a group by
-using an external commit. This propsal can only be used in that context.<a href="#section-11.1.6-1" class="pilcrow">¶</a></p>
+using an external commit. This proposal can only be used in that context.<a href="#section-11.1.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.1.6-2">
 <pre>
 struct {
@@ -4659,7 +4659,7 @@ that all participants' state would be known.<a href="#section-11.1.7-6.3" class=
 application messages also needs to ensure that AppAck messages and the Commits
 that reference them are not dropped.  One way to do this is to always encrypt
 Proposal and Commit messages, to make it more difficult for the Delivery Service
-to recognize which messages conatain AppAcks.  The application can also have
+to recognize which messages contain AppAcks.  The application can also have
 clients enforce an AppAck schedule, reporting loss if an AppAck is not received
 at the expected time.<a href="#section-11.1.7-7" class="pilcrow">¶</a></p>
 </section>
@@ -4788,7 +4788,7 @@ containing KeyPackages with the same tuple <code>(credential.identity, endpoint_
 the committer again chooses one to include and considers the rest invalid. Add
 proposals that contain KeyPackages with an <code>(credential.identity, endpoint_id)</code>
 tuple that matches that of an existing KeyPackage in the group MUST be
-considered invalid. The comitter MUST consider invalid any Add or Update
+considered invalid. The committer MUST consider invalid any Add or Update
 proposal if the Credential in the contained KeyPackage shares the same signature
 key with a Credential in any leaf of the group, or indeed if the KeyPackage
 shares the same <code>hpke_init_key</code> with another KeyPackage in the group.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
@@ -4892,7 +4892,7 @@ populated.  Otherwise, the sender MAY omit the <code>path</code> field at its di
           <li class="normal" id="section-11.2-16.4">
             <p id="section-11.2-16.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
 ratchet tree and GroupContext. Any new member (from an add proposal) MUST be
-exluded from the resolution during the computation of the UpdatePath.  The
+excluded from the resolution during the computation of the UpdatePath.  The
 <code>leaf_key_package</code> for this UpdatePath must have a <code>parent_hash</code> extension.
 Note that the KeyPackage in the <code>UpdatePath</code> effectively updates an existing
 KeyPackage in the group and thus MUST adhere to the same restrictions as

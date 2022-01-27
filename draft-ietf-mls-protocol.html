@@ -1783,7 +1783,7 @@ cryptographic keys it holds.<a href="#section-2-2.2.1" class="pilcrow">¶</a></p
 Group:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.4">
           <p id="section-2-2.4.1">A group represents a logical collection of clents that share a common
-secret value at any given time.  Its state is represented as a linear 
+secret value at any given time.  Its state is represented as a linear
 sequence of epochs in which each epoch depends on its predecessor.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
@@ -2002,7 +2002,7 @@ deployment cases an application might gather several proposals before
 committing them all at once.  In the illustrations below, we show the Proposal
 and Commit messages directly, while in reality they would be sent encapsulated in
 MLSPlaintext or MLSCiphertext objects.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.2-4">Before the initialization of a group, clients publish KeyPackages to a directory 
+<p id="section-4.2-4">Before the initialization of a group, clients publish KeyPackages to a directory
 provided by the Service Provider.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
 <span id="name-clients-a-b-and-c-publish-k"></span><figure id="figure-2">
           <div class="alignLeft art-text artwork" id="section-4.2-5.1">
@@ -2272,7 +2272,7 @@ children and parents. The <em>descendants</em> of a node are that node's
 children, and the descendants of its children, and we say a tree
 <em>contains</em> a node if that node is a descendant of the root of the tree,
 or if the node itself is the root of the tree. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by any node (the <em>head</em> of the 
+<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by any node (the <em>head</em> of the
 subtree) and its descendants. The <em>size</em> of a tree or subtree is the
 number of leaf nodes it contains.  For a given parent node, its <em>left
 subtree</em> is the subtree with its left child as head (respectively
@@ -2784,7 +2784,7 @@ opaque HPKEPublicKey&lt;1..2^16-1&gt;;
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
 to be used for signatures in MLSPlaintext and the tree signatures.  It MUST be
 the same as the signature algorithm specified in the credential field of the
-KeyPackage objects in the leaves of the tree (including those used to add new 
+KeyPackage objects in the leaves of the tree (including those used to add new
 members).<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <p id="section-6.1-7">To disambiguate different signatures used in MLS, each signed value is prefixed
 by a label as shown below:<a href="#section-6.1-7" class="pilcrow">¶</a></p>
@@ -3624,7 +3624,7 @@ psk_secret     = psk_secret[n]
 <p id="section-8.2-9">Here <code>0</code> represents the all-zero vector of length <code>KDF.Nh</code>. The <code>index</code> field in
 <code>PSKLabel</code> corresponds to the index of the PSK in the <code>psk</code> array, while the
 <code>count</code> field contains the total number of PSKs.  In other words, the PSKs are
-chained together with KDF.Extract invocations (labelled "Extract" for brevity 
+chained together with KDF.Extract invocations (labelled "Extract" for brevity
 in the diagram), as follows:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2-10">
 <pre>
@@ -5874,14 +5874,14 @@ compromised key material won't be used when the member is added to a new group.<
         <h3 id="name-keypackage-reuse">
 <a href="#section-15.4" class="section-number selfRef">15.4. </a><a href="#name-keypackage-reuse" class="section-name selfRef">KeyPackage Reuse</a>
         </h3>
-<p id="section-15.4-1">KeyPackages are intended to be used only once.  That is, once a KeyPackage 
-has been used to introduce the corresponding client to a group, it SHOULD be 
-deleted from the KeyPackage publication system.  Reuse of KeyPackages can lead 
+<p id="section-15.4-1">KeyPackages are intended to be used only once.  That is, once a KeyPackage
+has been used to introduce the corresponding client to a group, it SHOULD be
+deleted from the KeyPackage publication system.  Reuse of KeyPackages can lead
 to replay attacks.<a href="#section-15.4-1" class="pilcrow">¶</a></p>
 <p id="section-15.4-2">An application MAY allow for reuse of a "last resort" KeyPackage in order to
-prevent denial of service attacks.  Since a KeyPackage is needed to add a 
-client to a new group, an attacker could prevent a client being added to new 
-groups by exhausting all available KeyPackages. To prevent such a denial of 
+prevent denial of service attacks.  Since a KeyPackage is needed to add a
+client to a new group, an attacker could prevent a client being added to new
+groups by exhausting all available KeyPackages. To prevent such a denial of
 service attack, the KeyPackage publication system SHOULD rate limit KeyPackage
 requests, especially if not authenticated.<a href="#section-15.4-2" class="pilcrow">¶</a></p>
 </section>

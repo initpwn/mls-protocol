@@ -2268,12 +2268,12 @@ replaced with a freshly generated instance.<a href="#section-5-3" class="pilcrow
 parents in our trees have precisely
 two children, a <em>left</em> child and a <em>right</em> child. A node is the <em>root</em>
 of a tree if it has no parents, and <em>intermediate</em> if it has both
-children and parents. The <em>descendants</em> of a node are that node, its
+children and parents. The <em>descendants</em> of a node are that node's
 children, and the descendants of its children, and we say a tree
-<em>contains</em> a node if that node is a descendant of the root of the
-tree. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by the descendants of any
-node, the <em>head</em> of the subtree. The <em>size</em> of a tree or subtree is the
+<em>contains</em> a node if that node is a descendant of the root of the tree,
+or if the node itself is the root of the tree. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">A <em>subtree</em> of a tree is the tree given by any node (the <em>head</em> of the 
+subtree) and its descendants. The <em>size</em> of a tree or subtree is the
 number of leaf nodes it contains.  For a given parent node, its <em>left
 subtree</em> is the subtree with its left child as head (respectively
 <em>right subtree</em>).<a href="#section-5.1-2" class="pilcrow">¶</a></p>
@@ -2429,8 +2429,7 @@ a way as to maintain the <em>tree invariant</em>:<a href="#section-5.3-3" class=
 <div class="alignLeft art-text artwork" id="section-5.3-4">
 <pre>
 The private key for a node in the tree is known to a member of
-the group only if that member's leaf is a descendant of
-the node.
+the group only if the node's subtree contains that member's leaf.
 </pre><a href="#section-5.3-4" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3-5">In other words, if a node is not blank, then it holds a public key.

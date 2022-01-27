@@ -1946,8 +1946,12 @@ evolution from one epoch to the next.<a href="#section-4.1-2.1" class="pilcrow">
 members a way to authenticate each other and efficiently encrypt messages to
 subsets of the group.  Each epoch has a distinct ratchet tree.<a href="#section-4.1-2.2" class="pilcrow">¶</a>
 </li>
+          <li class="normal" id="section-4.1-2.3">A <em>secret tree</em> derived from the key schedule that represents shared secrets
+used by the members of the group to provide confidentiality and forward
+secrecy for MLS messages.  Each epoch has a distinct secret tree.<a href="#section-4.1-2.3" class="pilcrow">¶</a>
+</li>
         </ul>
-<p id="section-4.1-3">Each member of the group maintains a view of these two facets of the group's
+<p id="section-4.1-3">Each member of the group maintains a view of these facets of the group's
 state.  MLS messages are used to initialize these views and keep them in sync as
 the group transitions between epochs.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1-4">Each new epoch is initiated with a Commit message.  The Commit instructs
@@ -1966,9 +1970,8 @@ in this epoch.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 also defines a collection of secrets that are derived from the epoch secret.
 For example:<a href="#section-4.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.1-7.1">An <em>encryption secret</em> that is used to initialize a <em>secret tree</em>, which
-provides keys for encrypting handshake and application messages and providing
-forward secrecy for these messages within an epoch.<a href="#section-4.1-7.1" class="pilcrow">¶</a>
+<li class="normal" id="section-4.1-7.1">An <em>encryption secret</em> that is used to initialize the secret tree for the
+epoch.<a href="#section-4.1-7.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-4.1-7.2">A <em>confirmation key</em> that is used to confirm that all members agree on the
 shared state of the group.<a href="#section-4.1-7.2" class="pilcrow">¶</a>

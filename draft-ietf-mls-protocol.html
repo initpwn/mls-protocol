@@ -4268,12 +4268,15 @@ struct {
 </pre><a href="#section-10.1-2" class="pilcrow">¶</a>
 </div>
 <p id="section-10.1-3">This extension lists the extensions and proposal types that must be supported by
-all members of the group.  For new members, it is enforced by existing members during the
-application of Add commits.  Existing members should of course be in compliance
-already.  In order to ensure this continues to be the case even as the group's
-extensions can be updated, a GroupContextExtensions proposal is invalid if it
-contains a <code>required_capabilities</code> extension that requires capabilities not
-supported by all current members.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+all members of the group. The "default" proposal and extension types defined in this
+document are assumed to be implemented by all clients, and need not be listed in
+RequiredCapabilities in order to be safely used.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+<p id="section-10.1-4">For new members, support for required capabilities is enforced by existing
+members during the application of Add commits.  Existing members should of
+course be in compliance already.  In order to ensure this continues to be the
+case even as the group's extensions can be updated, a GroupContextExtensions
+proposal is invalid if it contains a <code>required_capabilities</code> extension that
+requires non-default capabilities not supported by all current members.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="reinitialization">

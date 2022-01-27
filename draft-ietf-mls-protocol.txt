@@ -4222,7 +4222,9 @@ Table of Contents
    order to prevent denial of service attacks.  Since a KeyPackage is
    needed to add a client to a new group, an attacker could prevent a
    client being added to new groups by exhausting all available
-   KeyPackages.
+   KeyPackages.  To prevent such a denial of service attack, the
+   KeyPackage publication system SHOULD rate limit KeyPackage requests,
+   especially if not authenticated.
 
 15.5.  Group Fragmentation by Malicious Insiders
 

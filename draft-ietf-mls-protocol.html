@@ -5881,7 +5881,9 @@ to replay attacks.<a href="#section-15.4-1" class="pilcrow">¶</a></p>
 <p id="section-15.4-2">An application MAY allow for reuse of a "last resort" KeyPackage in order to
 prevent denial of service attacks.  Since a KeyPackage is needed to add a 
 client to a new group, an attacker could prevent a client being added to new 
-groups by exhausting all available KeyPackages.<a href="#section-15.4-2" class="pilcrow">¶</a></p>
+groups by exhausting all available KeyPackages. To prevent such a denial of 
+service attack, the KeyPackage publication system SHOULD rate limit KeyPackage
+requests, especially if not authenticated.<a href="#section-15.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="group-fragmentation-by-malicious-insiders">

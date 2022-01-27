@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 30 July 2022</td>
+<td class="center">Expires 31 July 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-01-26" class="published">26 January 2022</time>
+<time datetime="2022-01-27" class="published">27 January 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-07-30">30 July 2022</time></dd>
+<dd class="expires"><time datetime="2022-07-31">31 July 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 July 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 31 July 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -4798,9 +4798,12 @@ considered invalid. The comitter MUST consider invalid any Add or Update
 proposal if the Credential in the contained KeyPackage shares the same signature
 key with a Credential in any leaf of the group, or indeed if the KeyPackage
 shares the same <code>hpke_init_key</code> with another KeyPackage in the group.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
-<p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. In the event
-that a valid proposal is omitted from the next Commit, the sender of the
-proposal SHOULD retransmit it in the new epoch.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
+<p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. Due to the
+asynchronous nature of proposals, receivers of a Commit SHOULD NOT enforce that
+all valid proposals sent within the current epoch are referenced by the next
+Commit. In the event that a valid proposal is omitted from the next Commit, and
+that proposal is still valid in the current epoch, the sender of the proposal
+MAY retransmit it.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
 <p id="section-11.2-8">A member of the group MAY send a Commit that references no proposals at all,
 which would thus have an empty <code>proposals</code> vector.  Such
 a Commit resets the sender's leaf and the nodes along its direct path, and

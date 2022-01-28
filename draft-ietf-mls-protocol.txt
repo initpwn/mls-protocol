@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 31 July 2022                                    Inria & Mozilla
+Expires: 1 August 2022                                   Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 31 July 2022                                    Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                         27 January 2022
+                                                         28 January 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 July 2022.
+   This Internet-Draft will expire on 1 August 2022.
 
 Copyright Notice
 
@@ -543,22 +543,6 @@ Table of Contents
    epoch secret.  From the epoch secret, members derive further shared
    secrets for message encryption, group membership authentication, etc.
 
-                             epoch_secret
-                                  |
-  |\ Ratchet                      |                            Secret /|
-  | \ Tree                        |                             Tree / |
-  |  \                            |                                 /  |
-  |   \                           V                                /   |
-  |    --> commit_secret --> epoch_secret --> encryption_secret -->    |
-  |   /                           |                                \   |
-  |  /                            |                                 \  |
-  | /                             |                                  \ |
-  |/                              |                                   \|
-                                  V
-                             epoch_secret
-
-                Figure 1: Overview of MLS group evolution
-
    The creator of an MLS group creates the group's first epoch
    unilaterally, with no protocol interactions.  Thereafter, the members
    of the group advance their shared cryptographic state from one epoch
@@ -590,15 +574,35 @@ Table of Contents
 
 4.1.  Cryptographic State and Evolution
 
-   There are two types of cryptographic state at the core of MLS:
+   The cryptographic state at the core of MLS is divided into three
+   areas of responsibility:
 
-   *  A _key schedule_ that represents the shared secret state of the
-      group and its evolution from one epoch to the next.
+                             epoch_secret
+                           _      |      _
+  |\ Ratchet              /      ...      \                    Secret /|
+  | \ Tree                :       |       :                     Tree / |
+  |  \                    :       |       :                         /  |
+  |   \                   :       V       :                        /   |
+  |    --> commit_secret --> epoch_secret --> encryption_secret -->    |
+  |   /                   :       |       :                        \   |
+  |  /                    :      ...      > Key Schedule            \  |
+  | /                     :       |       :                          \ |
+  |/                      \_      |      _/                           \|
+                                  V
+                             epoch_secret
+
+                Figure 1: Overview of MLS group evolution
 
    *  A _ratchet tree_ that represents the membership of the group,
       providing group members a way to authenticate each other and
       efficiently encrypt messages to subsets of the group.  Each epoch
-      has a distinct ratchet tree.
+      has a distinct ratchet tree.  It seeds the _key schedule_.
+
+   *  A _key schedule_ that describes the chain of key derivations used
+      to progress from epoch to epoch (mainly using the _init_secret_
+      and _epoch_secret_); and to derive a variety of other secrets (see
+      Table 2) used during the current epoch.  One of these (the
+      _encryption_secret_) is the root of _secret_tree_.
 
    *  A _secret tree_ derived from the key schedule that represents
       shared secrets used by the members of the group to provide
@@ -1978,7 +1982,7 @@ Table of Contents
                | resumption_secret     | "resumption"     |
                +-----------------------+------------------+
 
-                                 Table 2
+                      Table 2: Epoch-derived secrets
 
    The "external secret" is used to derive an HPKE key pair whose
    private key is held by the entire group:

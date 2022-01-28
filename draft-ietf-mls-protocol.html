@@ -5291,43 +5291,46 @@ can choose to make it available to new members in order to allow External
 Commits.<a href="#section-11.2.1.1-10" class="pilcrow">¶</a></p>
 <p id="section-11.2.1.1-11">External Commits work like regular Commits, with a few differences:<a href="#section-11.2.1.1-11" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2.1.1-12.1">
-                <p id="section-11.2.1.1-12.1.1">The proposals included by value in an External Commit MUST meet the following
-conditions:<a href="#section-11.2.1.1-12.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.2.1.1-12.1.2.1">There MUST be a single ExternalInit proposal<a href="#section-11.2.1.1-12.1.2.1" class="pilcrow">¶</a>
-</li>
-                  <li class="normal" id="section-11.2.1.1-12.1.2.2">There MUST NOT be any Update proposals<a href="#section-11.2.1.1-12.1.2.2" class="pilcrow">¶</a>
-</li>
-                  <li class="normal" id="section-11.2.1.1-12.1.2.3">If a Remove proposal is present, then the <code>endpoint_id</code> of the Add
-KeyPackage MUST be the same as the one in the removed node, and the <code>credential</code>
-MUST present a set of identifiers that is acceptable to the application for
-the removed participant (as if this were an Update for that participant).<a href="#section-11.2.1.1-12.1.2.3" class="pilcrow">¶</a>
-</li>
-                </ul>
+<li class="normal" id="section-11.2.1.1-12.1">The Commit MUST NOT include any proposals by reference, since an external
+joiner cannot determine the validity of proposals sent within the group<a href="#section-11.2.1.1-12.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-11.2.1.1-12.2">
-                <p id="section-11.2.1.1-12.2.1">The proposals included by reference in an External Commit MUST meet the following
+                <p id="section-11.2.1.1-12.2.1">The proposals included by value in an External Commit MUST meet the following
 conditions:<a href="#section-11.2.1.1-12.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2.1.1-12.2.2.1">There MUST NOT be any ExternalInit proposals<a href="#section-11.2.1.1-12.2.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2.1.1-12.2.2.1">There MUST be a single ExternalInit proposal<a href="#section-11.2.1.1-12.2.2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-11.2.1.1-12.2.2.2">There MUST NOT be any Update proposals<a href="#section-11.2.1.1-12.2.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-11.2.1.1-12.2.2.3">If a Remove proposal is present, then the <code>endpoint_id</code> of the Add
+KeyPackage MUST be the same as the one in the removed node, and the <code>credential</code>
+MUST present a set of identifiers that is acceptable to the application for
+the removed participant (as if this were an Update for that participant).<a href="#section-11.2.1.1-12.2.2.3" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
-              <li class="normal" id="section-11.2.1.1-12.3">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
+              <li class="normal" id="section-11.2.1.1-12.3">
+                <p id="section-11.2.1.1-12.3.1">The proposals included by reference in an External Commit MUST meet the following
+conditions:<a href="#section-11.2.1.1-12.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11.2.1.1-12.3.2.1">There MUST NOT be any ExternalInit proposals<a href="#section-11.2.1.1-12.3.2.1" class="pilcrow">¶</a>
+</li>
+                </ul>
+</li>
+              <li class="normal" id="section-11.2.1.1-12.4">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
 Commit).  The joiner is added at the leftmost free leaf node (just as if they
 were added with an Add proposal), and the path is calculated relative to that
-leaf node.<a href="#section-11.2.1.1-12.3" class="pilcrow">¶</a>
+leaf node.<a href="#section-11.2.1.1-12.4" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2.1.1-12.4">External Commits MUST be signed by the new member.  In particular, the
+              <li class="normal" id="section-11.2.1.1-12.5">External Commits MUST be signed by the new member.  In particular, the
 signature on the enclosing MLSPlaintext MUST verify using the public key for
-the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-11.2.1.1-12.4" class="pilcrow">¶</a>
+the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-11.2.1.1-12.5" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2.1.1-12.5">When processing a Commit, both existing and new members MUST use the external
-init secret as described in <a href="#external-initialization" class="xref">Section 8.1</a>.<a href="#section-11.2.1.1-12.5" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2.1.1-12.6">When processing a Commit, both existing and new members MUST use the external
+init secret as described in <a href="#external-initialization" class="xref">Section 8.1</a>.<a href="#section-11.2.1.1-12.6" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2.1.1-12.6">The sender type for the MLSPlaintext encapsulating the External Commit MUST be
-<code>new_member</code><a href="#section-11.2.1.1-12.6" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2.1.1-12.7">The sender type for the MLSPlaintext encapsulating the External Commit MUST be
+<code>new_member</code><a href="#section-11.2.1.1-12.7" class="pilcrow">¶</a>
 </li>
             </ul>
 <p id="section-11.2.1.1-13">In other words, External Commits come in two "flavors" -- a "join" commit that

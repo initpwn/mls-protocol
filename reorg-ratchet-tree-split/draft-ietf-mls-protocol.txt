@@ -84,8 +84,8 @@ Table of Contents
      4.3.  Relationships Between Epochs
      4.4.  Ratchet Tree Concepts
        4.4.1.  Ratchet Tree Terminology
-       4.4.2.  Ratchet Tree Nodes
-       4.4.3.  Views of a Ratchet Tree
+       4.4.2.  Views of a Ratchet Tree
+       4.4.3.  Ratchet Tree Nodes
    5.  Ratchet Tree Operations
      5.1.  Ratchet Tree Evolution
      5.2.  Adding and Removing Leaves
@@ -977,81 +977,7 @@ Table of Contents
    associated algorithms, as long as they produce correct protocol
    messages.
 
-4.4.2.  Ratchet Tree Nodes
-
-   A particular instance of a ratchet tree is defined by the same
-   parameters that define an instance of HPKE, namely:
-
-   *  A Key Encapsulation Mechanism (KEM), including a DeriveKeyPair
-      function that creates a key pair for the KEM from a symmetric
-      secret
-
-   *  A Key Derivation Function (KDF), including Extract and Expand
-      functions
-
-   *  An AEAD encryption scheme
-
-   Each node in a ratchet tree contains up to five values:
-
-   *  A private key (only within the member's direct path, see below)
-
-   *  A public key
-
-   *  An ordered list of leaf indices for "unmerged" leaves (see
-      Section 4.4.3)
-
-   *  A credential (only for leaf nodes)
-
-   *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 7.5).
-
-   The conditions under which each of these values must or must not be
-   present are laid out in Section 4.4.3.
-
-   A node in the tree may also be _blank_, indicating that no value is
-   present at that node.  The _resolution_ of a node is an ordered list
-   of non-blank nodes that collectively cover all non-blank descendants
-   of the node.  The resolution of a non-blank node with no unmerged
-   leaves is just the node itself.  More generally, the resolution of a
-   node is effectively a depth-first, left-first enumeration of the
-   nearest non-blank nodes below the node:
-
-   *  The resolution of a non-blank node comprises the node itself,
-      followed by its list of unmerged leaves, if any
-
-   *  The resolution of a blank leaf node is the empty list
-
-   *  The resolution of a blank intermediate node is the result of
-      concatenating the resolution of its left child with the resolution
-      of its right child, in that order
-
-   For example, consider the following tree, where the "_" character
-   represents a blank node and unmerged leaves are indicated in square
-   brackets:
-
-         _
-       __|__
-      /     \
-     _       Z[C]
-    / \     / \
-   A   _   C   D
-
-   0   1   2   3
-
-   In this tree, we can see all of the above rules in play:
-
-   *  The resolution of node Z is the list [Z, C]
-
-   *  The resolution of leaf 1 is the empty list []
-
-   *  The resolution of root node is the list [A, Z, C]
-
-   Every node, regardless of whether the node is blank or populated, has
-   a corresponding _hash_ that summarizes the contents of the subtree
-   below that node.  The rules for computing these hashes are described
-   in Section 7.6.
-
-4.4.3.  Views of a Ratchet Tree
+4.4.2.  Views of a Ratchet Tree
 
    We generally assume that each participant maintains a complete and
    up-to-date view of the public state of the group's ratchet tree,
@@ -1110,6 +1036,80 @@ Table of Contents
 
    Note how the tree invariant applies: Each member knows only their own
    leaf, and the private key AB is known only to A and B.
+
+4.4.3.  Ratchet Tree Nodes
+
+   A particular instance of a ratchet tree is defined by the same
+   parameters that define an instance of HPKE, namely:
+
+   *  A Key Encapsulation Mechanism (KEM), including a DeriveKeyPair
+      function that creates a key pair for the KEM from a symmetric
+      secret
+
+   *  A Key Derivation Function (KDF), including Extract and Expand
+      functions
+
+   *  An AEAD encryption scheme
+
+   Each node in a ratchet tree contains up to five values:
+
+   *  A private key (only within the member's direct path, see below)
+
+   *  A public key
+
+   *  An ordered list of leaf indices for "unmerged" leaves (see
+      Section 4.4.2)
+
+   *  A credential (only for leaf nodes)
+
+   *  A hash of certain information about the node's parent, as of the
+      last time the node was changed (see Section 7.5).
+
+   The conditions under which each of these values must or must not be
+   present are laid out in Section 4.4.2.
+
+   A node in the tree may also be _blank_, indicating that no value is
+   present at that node.  The _resolution_ of a node is an ordered list
+   of non-blank nodes that collectively cover all non-blank descendants
+   of the node.  The resolution of a non-blank node with no unmerged
+   leaves is just the node itself.  More generally, the resolution of a
+   node is effectively a depth-first, left-first enumeration of the
+   nearest non-blank nodes below the node:
+
+   *  The resolution of a non-blank node comprises the node itself,
+      followed by its list of unmerged leaves, if any
+
+   *  The resolution of a blank leaf node is the empty list
+
+   *  The resolution of a blank intermediate node is the result of
+      concatenating the resolution of its left child with the resolution
+      of its right child, in that order
+
+   For example, consider the following tree, where the "_" character
+   represents a blank node and unmerged leaves are indicated in square
+   brackets:
+
+         _
+       __|__
+      /     \
+     _       Z[C]
+    / \     / \
+   A   _   C   D
+
+   0   1   2   3
+
+   In this tree, we can see all of the above rules in play:
+
+   *  The resolution of node Z is the list [Z, C]
+
+   *  The resolution of leaf 1 is the empty list []
+
+   *  The resolution of root node is the list [A, Z, C]
+
+   Every node, regardless of whether the node is blank or populated, has
+   a corresponding _hash_ that summarizes the contents of the subtree
+   below that node.  The rules for computing these hashes are described
+   in Section 7.6.
 
 5.  Ratchet Tree Operations
 
@@ -1748,7 +1748,7 @@ Table of Contents
    Finally, original_child_resolution is the array of HPKEPublicKey
    values of the nodes in the resolution of S but with the
    unmerged_leaves of P omitted.  For example, in the ratchet tree
-   depicted in Section 4.4.2 the ParentHashInput of node Z with co-path
+   depicted in Section 4.4.3 the ParentHashInput of node Z with co-path
    child C would contain an empty original_child_resolution since C's
    resolution includes only itself but C is also an unmerged leaf of Z.
    Meanwhile, the ParentHashInput of node Z with co-path child D has an

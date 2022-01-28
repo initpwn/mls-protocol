@@ -1180,10 +1180,10 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                     <p id="section-toc.1-1.4.2.4.2.1.1"><a href="#section-4.4.1" class="xref">4.4.1</a>.  <a href="#name-ratchet-tree-terminology" class="xref">Ratchet Tree Terminology</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.2">
-                    <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="xref">4.4.2</a>.  <a href="#name-ratchet-tree-nodes" class="xref">Ratchet Tree Nodes</a></p>
+                    <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="xref">4.4.2</a>.  <a href="#name-views-of-a-ratchet-tree" class="xref">Views of a Ratchet Tree</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.3">
-                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="xref">4.4.3</a>.  <a href="#name-views-of-a-ratchet-tree" class="xref">Views of a Ratchet Tree</a></p>
+                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="xref">4.4.3</a>.  <a href="#name-ratchet-tree-nodes" class="xref">Ratchet Tree Nodes</a></p>
 </li>
                 </ul>
 </li>
@@ -2354,125 +2354,45 @@ of ratchet trees.  An implementation MAY use any tree representation and
 associated algorithms, as long as they produce correct protocol messages.<a href="#section-4.4.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="resolution-example">
-<section id="section-4.4.2">
-          <h4 id="name-ratchet-tree-nodes">
-<a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-ratchet-tree-nodes" class="section-name selfRef">Ratchet Tree Nodes</a>
-          </h4>
-<p id="section-4.4.2-1">A particular instance of a ratchet tree is defined by the same parameters that
-define an instance of HPKE, namely:<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4.4.2-2.1">A Key Encapsulation Mechanism (KEM), including a <code>DeriveKeyPair</code> function that
-creates a key pair for the KEM from a symmetric secret<a href="#section-4.4.2-2.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-2.2">A Key Derivation Function (KDF), including <code>Extract</code> and <code>Expand</code> functions<a href="#section-4.4.2-2.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-2.3">An AEAD encryption scheme<a href="#section-4.4.2-2.3" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-4.4.2-3">Each node in a ratchet tree contains up to five values:<a href="#section-4.4.2-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4.4.2-4.1">A private key (only within the member's direct path, see below)<a href="#section-4.4.2-4.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-4.2">A public key<a href="#section-4.4.2-4.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-4.3">An ordered list of leaf indices for "unmerged" leaves (see
-<a href="#views" class="xref">Section 4.4.3</a>)<a href="#section-4.4.2-4.3" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-4.4">A credential (only for leaf nodes)<a href="#section-4.4.2-4.4" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-4.5">A hash of certain information about the node's parent, as of the last time the
-node was changed (see <a href="#parent-hash" class="xref">Section 7.5</a>).<a href="#section-4.4.2-4.5" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-4.4.2-5">The conditions under which each of these values must or must not be
-present are laid out in <a href="#views" class="xref">Section 4.4.3</a>.<a href="#section-4.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-4.4.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
-that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
-that collectively cover all non-blank descendants of the node.  The resolution
-of a non-blank node with no unmerged leaves is just the node itself. More generally, the resolution
-of a node is effectively a depth-first, left-first enumeration of the nearest
-non-blank nodes below the node:<a href="#section-4.4.2-6" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4.4.2-7.1">The resolution of a non-blank node comprises the node itself,
-followed by its list of unmerged leaves, if any<a href="#section-4.4.2-7.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-7.2">The resolution of a blank leaf node is the empty list<a href="#section-4.4.2-7.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-7.3">The resolution of a blank intermediate node is the result of
-concatenating the resolution of its left child with the resolution
-of its right child, in that order<a href="#section-4.4.2-7.3" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-4.4.2-8">For example, consider the following tree, where the "_" character
-represents a blank node and unmerged leaves are indicated in square
-brackets:<a href="#section-4.4.2-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.4.2-9">
-<pre>
-      _
-    __|__
-   /     \
-  _       Z[C]
- / \     / \
-A   _   C   D
-
-0   1   2   3
-</pre><a href="#section-4.4.2-9" class="pilcrow">¶</a>
-</div>
-<p id="section-4.4.2-10">In this tree, we can see all of the above rules in play:<a href="#section-4.4.2-10" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4.4.2-11.1">The resolution of node Z is the list [Z, C]<a href="#section-4.4.2-11.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-11.2">The resolution of leaf 1 is the empty list []<a href="#section-4.4.2-11.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-4.4.2-11.3">The resolution of root node is the list [A, Z, C]<a href="#section-4.4.2-11.3" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-4.4.2-12">Every node, regardless of whether the node is blank or populated, has
-a corresponding <em>hash</em> that summarizes the contents of the subtree
-below that node.  The rules for computing these hashes are described
-in <a href="#tree-hashes" class="xref">Section 7.6</a>.<a href="#section-4.4.2-12" class="pilcrow">¶</a></p>
-</section>
-</div>
 <div id="views">
-<section id="section-4.4.3">
+<section id="section-4.4.2">
           <h4 id="name-views-of-a-ratchet-tree">
-<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-views-of-a-ratchet-tree" class="section-name selfRef">Views of a Ratchet Tree</a>
+<a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-views-of-a-ratchet-tree" class="section-name selfRef">Views of a Ratchet Tree</a>
           </h4>
-<p id="section-4.4.3-1">We generally assume that each participant maintains a complete and
+<p id="section-4.4.2-1">We generally assume that each participant maintains a complete and
 up-to-date view of the public state of the group's ratchet tree,
 including the public keys for all nodes and the credentials
-associated with the leaf nodes.<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-2">No participant in an MLS group knows the private key associated with
+associated with the leaf nodes.<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-2">No participant in an MLS group knows the private key associated with
 every node in the tree. Instead, each member is assigned to a leaf of the tree,
 which determines the subset of private keys it knows. The
-credential stored at that leaf is one provided by the member.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-3">In particular, MLS maintains the members' views of the tree in such
-a way as to maintain the <em>tree invariant</em>:<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.4.3-4">
+credential stored at that leaf is one provided by the member.<a href="#section-4.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-3">In particular, MLS maintains the members' views of the tree in such
+a way as to maintain the <em>tree invariant</em>:<a href="#section-4.4.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.2-4">
 <pre>
 The private key for a node in the tree is known to a member of
 the group only if the node's subtree contains that member's leaf.
-</pre><a href="#section-4.4.3-4" class="pilcrow">¶</a>
+</pre><a href="#section-4.4.2-4" class="pilcrow">¶</a>
 </div>
-<p id="section-4.4.3-5">In other words, if a node is not blank, then it holds a public key.
+<p id="section-4.4.2-5">In other words, if a node is not blank, then it holds a public key.
 The corresponding private key is known only to members occupying
-leaves below that node.<a href="#section-4.4.3-5" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-6">The reverse implication is not true: A member may not know the private keys of
+leaves below that node.<a href="#section-4.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-6">The reverse implication is not true: A member may not know the private keys of
 all the intermediate nodes they're below.  Such a member has an <em>unmerged</em> leaf.
 Encrypting to an intermediate node requires encrypting to the node's public key,
 as well as the public keys of all the unmerged leaves below it.  A leaf is
 unmerged when it is first added, because the process of adding the leaf does not
 give it access to all of the nodes above it in the tree.  Leaves are "merged" as
 they receive the private keys for nodes, as described in
-<a href="#ratchet-tree-evolution" class="xref">Section 5.1</a>.<a href="#section-4.4.3-6" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-7">For example, consider a four-member group (A, B, C, D) where the node above the
+<a href="#ratchet-tree-evolution" class="xref">Section 5.1</a>.<a href="#section-4.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-7">For example, consider a four-member group (A, B, C, D) where the node above the
 right two members is blank.  (This is what it would look like if A created a
 group with B, C, and D.)  Then the public state of the tree and the views of the
 private keys of the tree held by each participant would be as follows, where <code>_</code>
 represents a blank node, <code>?</code> represents an unknown private key, and <code>pk(X)</code>
-represents the public key corresponding to the private key <code>X</code>:<a href="#section-4.4.3-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.4.3-8">
+represents the public key corresponding to the private key <code>X</code>:<a href="#section-4.4.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.2-8">
 <pre>
          Public Tree
 ============================
@@ -2490,10 +2410,90 @@ pk(A)   pk(B)   pk(C)   pk(D)
   AB      _         AB      _         ?       _         ?       _
  / \     / \       / \     / \       / \     / \       / \     / \
 A   ?   ?   ?     ?   B   ?   ?     ?   ?   C   ?     ?   ?   ?   D
-</pre><a href="#section-4.4.3-8" class="pilcrow">¶</a>
+</pre><a href="#section-4.4.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-4.4.3-9">Note how the tree invariant applies: Each member knows only their own leaf, and
-the private key AB is known only to A and B.<a href="#section-4.4.3-9" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-9">Note how the tree invariant applies: Each member knows only their own leaf, and
+the private key AB is known only to A and B.<a href="#section-4.4.2-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="resolution-example">
+<section id="section-4.4.3">
+          <h4 id="name-ratchet-tree-nodes">
+<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-ratchet-tree-nodes" class="section-name selfRef">Ratchet Tree Nodes</a>
+          </h4>
+<p id="section-4.4.3-1">A particular instance of a ratchet tree is defined by the same parameters that
+define an instance of HPKE, namely:<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4.3-2.1">A Key Encapsulation Mechanism (KEM), including a <code>DeriveKeyPair</code> function that
+creates a key pair for the KEM from a symmetric secret<a href="#section-4.4.3-2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-2.2">A Key Derivation Function (KDF), including <code>Extract</code> and <code>Expand</code> functions<a href="#section-4.4.3-2.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-2.3">An AEAD encryption scheme<a href="#section-4.4.3-2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.4.3-3">Each node in a ratchet tree contains up to five values:<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4.3-4.1">A private key (only within the member's direct path, see below)<a href="#section-4.4.3-4.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-4.2">A public key<a href="#section-4.4.3-4.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-4.3">An ordered list of leaf indices for "unmerged" leaves (see
+<a href="#views" class="xref">Section 4.4.2</a>)<a href="#section-4.4.3-4.3" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-4.4">A credential (only for leaf nodes)<a href="#section-4.4.3-4.4" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-4.5">A hash of certain information about the node's parent, as of the last time the
+node was changed (see <a href="#parent-hash" class="xref">Section 7.5</a>).<a href="#section-4.4.3-4.5" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.4.3-5">The conditions under which each of these values must or must not be
+present are laid out in <a href="#views" class="xref">Section 4.4.2</a>.<a href="#section-4.4.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
+that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
+that collectively cover all non-blank descendants of the node.  The resolution
+of a non-blank node with no unmerged leaves is just the node itself. More generally, the resolution
+of a node is effectively a depth-first, left-first enumeration of the nearest
+non-blank nodes below the node:<a href="#section-4.4.3-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4.3-7.1">The resolution of a non-blank node comprises the node itself,
+followed by its list of unmerged leaves, if any<a href="#section-4.4.3-7.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-7.2">The resolution of a blank leaf node is the empty list<a href="#section-4.4.3-7.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-7.3">The resolution of a blank intermediate node is the result of
+concatenating the resolution of its left child with the resolution
+of its right child, in that order<a href="#section-4.4.3-7.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.4.3-8">For example, consider the following tree, where the "_" character
+represents a blank node and unmerged leaves are indicated in square
+brackets:<a href="#section-4.4.3-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.3-9">
+<pre>
+      _
+    __|__
+   /     \
+  _       Z[C]
+ / \     / \
+A   _   C   D
+
+0   1   2   3
+</pre><a href="#section-4.4.3-9" class="pilcrow">¶</a>
+</div>
+<p id="section-4.4.3-10">In this tree, we can see all of the above rules in play:<a href="#section-4.4.3-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4.3-11.1">The resolution of node Z is the list [Z, C]<a href="#section-4.4.3-11.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-11.2">The resolution of leaf 1 is the empty list []<a href="#section-4.4.3-11.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-4.4.3-11.3">The resolution of root node is the list [A, Z, C]<a href="#section-4.4.3-11.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.4.3-12">Every node, regardless of whether the node is blank or populated, has
+a corresponding <em>hash</em> that summarizes the contents of the subtree
+below that node.  The rules for computing these hashes are described
+in <a href="#tree-hashes" class="xref">Section 7.6</a>.<a href="#section-4.4.3-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3221,7 +3221,7 @@ Otherwise <code>parent_hash</code> is the Parent Hash of P's parent with P's sib
 co-path child.<a href="#section-7.5-5" class="pilcrow">¶</a></p>
 <p id="section-7.5-6">Finally, <code>original_child_resolution</code> is the array of <code>HPKEPublicKey</code> values of the
 nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
-example, in the ratchet tree depicted in <a href="#resolution-example" class="xref">Section 4.4.2</a> the
+example, in the ratchet tree depicted in <a href="#resolution-example" class="xref">Section 4.4.3</a> the
 <code>ParentHashInput</code> of node Z with co-path child C would contain an empty
 <code>original_child_resolution</code> since C's resolution includes only itself but C is also
 an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child

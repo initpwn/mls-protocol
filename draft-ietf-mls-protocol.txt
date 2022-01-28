@@ -93,16 +93,18 @@ Table of Contents
      6.1.  Ciphersuites
      6.2.  Hash-Based Identifiers
      6.3.  Credentials
+       6.3.1.  Uniquely Identifying Clients
    7.  Key Packages
-     7.1.  Client Capabilities
-     7.2.  Lifetime
-     7.3.  KeyPackage Identifiers
-     7.4.  Parent Hash
-       7.4.1.  Using Parent Hashes
-       7.4.2.  Verifying Parent Hashes
-     7.5.  Tree Hashes
-     7.6.  Group State
-     7.7.  Update Paths
+     7.1.  KeyPackage Validation
+     7.2.  Client Capabilities
+     7.3.  Lifetime
+     7.4.  KeyPackage Identifiers
+     7.5.  Parent Hash
+       7.5.1.  Using Parent Hashes
+       7.5.2.  Verifying Parent Hashes
+     7.6.  Tree Hashes
+     7.7.  Group State
+     7.8.  Update Paths
    8.  Key Schedule
      8.1.  External Initialization
      8.2.  Pre-Shared Keys
@@ -997,7 +999,7 @@ Table of Contents
    *  A credential (only for leaf nodes)
 
    *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 7.4).
+      last time the node was changed (see Section 7.5).
 
    The conditions under which each of these values must or must not be
    present are laid out in Section 5.3.
@@ -1043,7 +1045,7 @@ Table of Contents
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
    below that node.  The rules for computing these hashes are described
-   in Section 7.5.
+   in Section 7.6.
 
 5.3.  Views of a Ratchet Tree
 
@@ -1112,7 +1114,7 @@ Table of Contents
    fresh key material to be added into the group's shared secret.  To do
    so, one member of the group generates fresh key material, applies it
    to their local tree state, and then sends this key material to other
-   members in the group via an UpdatePath message (see Section 7.7) .
+   members in the group via an UpdatePath message (see Section 7.8) .
    All other group members then apply the key material in the UpdatePath
    to their own local tree state to derive the group's now-updated
    shared secret.
@@ -1428,7 +1430,21 @@ Table of Contents
    *  The public key of a signature key pair matching the
       SignatureScheme specified by the CipherSuite of the group
 
-   *  The identity of the holder of the private key
+   *  One or more identifiers of the holder of the private key
+
+   Note that a Credential can provide multiple identifiers for the
+   client.  If an application wishes to decided whether a credential
+   represents the correct identifier for a participant in a given
+   context, it is up to the application to decide what the correct value
+   is and compare it to the credential.  For example, a certificate in
+   an X509Credential may attest to several domain names or email
+   addresses in its subjectAltName extension.  An application may decide
+   to present all of these to a user, or if it knows a "desired" domain
+   name or email address, it can check that the desired identifier is
+   among those attested.  Using the terminology from [RFC6125], a
+   Credential provides "presented identifiers", and it is up to the
+   application to supply a "reference identifier" for the authenticated
+   client, if any.
 
    Credentials MAY also include information that allows a relying party
    to verify the identity / signing key binding.
@@ -1467,7 +1483,11 @@ Table of Contents
    key binding.  The format of the key in the public_key field is
    defined by the relevant ciphersuite: the group ciphersuite for a
    credential in a ratchet tree, the KeyPackage ciphersuite for a
-   credential in a KeyPackage object.
+   credential in a KeyPackage object.  For ciphersuites using Ed25519 or
+   Ed448 signature schemes, the public key is in the format specified
+   [RFC8032].  For ciphersuites using ECDSA with the NIST curves P-256
+   or P-521, the public key is the output of the uncompressed Elliptic-
+   Curve-Point-to-Octet-String conversion according to [SECG].
 
    For an X.509 credential, each entry in the chain represents a single
    DER-encoded X.509 certificate.  The chain is ordered such that the
@@ -1476,19 +1496,49 @@ Table of Contents
    previous certificate.  The algorithm for the public_key in the end-
    entity certificate MUST match the relevant ciphersuite.
 
-   For ciphersuites using Ed25519 or Ed448 signature schemes, the public
-   key is in the format specified [RFC8032].  For ciphersuites using
-   ECDSA with the NIST curves P-256 or P-521, the public key is the
-   output of the uncompressed Elliptic-Curve-Point-to-Octet-String
-   conversion according to [SECG].
+   The signatures used in this document are encoded as specified in
+   [RFC8446].  In particular, ECDSA signatures are DER-encoded and EdDSA
+   signatures are defined as the concatenation of r and s as specified
+   in [RFC8032].
 
-   The signatures used throughout this document are encoded as specified
-   in [RFC8446].  In particular, ECDSA signatures are DER-encoded and
-   EdDSA signatures are defined as the concatenation of r and s as
-   specified in [RFC8032].
+   Each new credential that has not already been validated by the
+   application MUST be validated against the Authentication Service.
+   Applications SHOULD require that a client present the same set of
+   identifiers throughout its presence in the group, even if its
+   Credential is changed in a Commit or Update.  If an application
+   allows clients to change identifiers over time, then each time the
+   client presents a new credential, the application MUST verify that
+   the set of identifiers in the credential is acceptable to the
+   application for this client.
 
-   Note that each new credential that has not already been validated by
-   the application MUST be validated against the Authentication Service.
+6.3.1.  Uniquely Identifying Clients
+
+   MLS implementations will presumably provide applications with a way
+   to request protocol operations with regard to other clients (e.g.,
+   removing clients).  Such functions will need to refer to the other
+   clients using some identifier.  MLS clients have a few types of
+   identifiers, with different operational properties.
+
+   The Credentials presented by the clients in a group authenticate
+   application-level identifiers for the clients.  These identifiers may
+   not uniquely identify clients.  For example, if a user has multiple
+   devices that are all present in an MLS group, then those devices'
+   clients will all present the user's application-layer identifiers.
+
+   Internally to the the protocol, group members are uniquely identified
+   by their leaves, expressed as KeyPackageRef objects.  These
+   identifiers are unstable: They change whenever the member sends a
+   Commit, or whenever an Update proposal from the member is committed.
+
+   MLS provides two unique client identifiers that are stable across
+   epochs:
+
+   *  The index of a client among the leaves of the tree
+
+   *  The epoch_id field in the key package
+
+   The application may also provide application-specific unique
+   identifiers in the extensions field of KeyPackage object.
 
 7.  Key Packages
 
@@ -1500,10 +1550,10 @@ Table of Contents
 
    2.  a public key that others can use for key agreement,
 
-   3.  a credential containing the client's identity,
+   3.  a credential authenticating the client's application-layer
+       identity, and
 
-   4.  along with an endpoint_id that, combined with the client's
-       identity, serve to uniquely identify a client in a group.
+   4.  an endpoint_id that uniquely identifies a client in a group.
 
    KeyPackages are intended to be used only once and SHOULD NOT be
    reused except in case of last resort.  (See Section 15.4).  Clients
@@ -1538,7 +1588,6 @@ Table of Contents
        ProtocolVersion version;
        CipherSuite cipher_suite;
        HPKEPublicKey hpke_init_key;
-       opaque endpoint_id<0..255>;
        Credential credential;
        Extension extensions<8..2^32-1>;
        // SignWithLabel(., "KeyPackageTBS", KeyPackageTBS)
@@ -1566,7 +1615,48 @@ Table of Contents
    allows other members to verify the validity of the KeyPackage at any
    time, particularly in the case of a newcomer joining the group.
 
-7.1.  Client Capabilities
+7.1.  KeyPackage Validation
+
+   The validity of a KeyPackage needs to be verified at a few stages:
+
+   *  When a KeyPackage is downloaded by a group member, before it is
+      used to add the client to the group
+
+   *  When a KeyPackage is received by a group member in an Add, Update,
+      or Commit message
+
+   *  When a client joining a group receives KeyPackages for the other
+      members of the group in the group's ratchet tree
+
+   The client verifies the validity of a KeyPackage using the following
+   steps:
+
+   *  Verify that the credential in the KeyPackage is valid according to
+      the authentication service and the client's local policy.  These
+      actions MUST be the same regardless of at what point in the
+      protocol the KeyPackage is being verified.
+
+   *  Verify that the signature on the KeyPackage is valid using the
+      public key in the KeyPackage's credential
+
+   *  Verify that the KeyPackage is compatible with the group's
+      parameters.  The ciphersuite and protocol version of the
+      KeyPackage must match those in use in the group.  If the
+      GroupContext has a required_capabilities extension, then the
+      required extensions and proposals MUST be listed in the
+      KeyPackage's capabilities extension.
+
+   *  Verify that the following fields in the KeyPackage are unique
+      among the members of the group (including any other members added
+      in the same Commit):
+
+      -  credential.signature_key
+
+      -  hpke_init_key
+
+      -  endpoint_id
+
+7.2.  Client Capabilities
 
    The capabilities extension indicates what protocol versions,
    ciphersuites, protocol extensions, and non-default proposal types are
@@ -1584,7 +1674,7 @@ Table of Contents
    that appear in the extensions field of a KeyPackage MUST be included
    in the extensions field of the capabilities extension.
 
-7.2.  Lifetime
+7.3.  Lifetime
 
    The lifetime extension represents the times between which clients
    will consider a KeyPackage valid.  This time is represented as an
@@ -1602,7 +1692,7 @@ Table of Contents
 
    This extension MUST always be present in a KeyPackage.
 
-7.3.  KeyPackage Identifiers
+7.4.  KeyPackage Identifiers
 
    Within MLS, a KeyPackage is identified by its hash (see, e.g.,
    Section 11.2.1.2).  The external_key_id extension allows applications
@@ -1610,7 +1700,7 @@ Table of Contents
 
    opaque external_key_id<0..2^16-1>;
 
-7.4.  Parent Hash
+7.5.  Parent Hash
 
    The parent_hash extension carries information to authenticate the
    structure of the tree, as described below.
@@ -1650,7 +1740,7 @@ Table of Contents
    Meanwhile, the ParentHashInput of node Z with co-path child D has an
    array with one element in it: the HPKE public key of D.
 
-7.4.1.  Using Parent Hashes
+7.5.1.  Using Parent Hashes
 
    The Parent Hash of P appears in three types of structs.  If V is
    itself a parent node then P's Parent Hash is stored in the
@@ -1671,7 +1761,7 @@ Table of Contents
    the insider isn't assigned a leaf in the subtree rooted at V.
    Indeed, such a ratchet tree would violate the tree invariant.)
 
-7.4.2.  Verifying Parent Hashes
+7.5.2.  Verifying Parent Hashes
 
    To this end, when processing a Commit message clients MUST recompute
    the expected value of parent_hash for the committer's new leaf and
@@ -1700,7 +1790,7 @@ Table of Contents
    can cause blank nodes to be interposed between a parent node and its
    right child.
 
-7.5.  Tree Hashes
+7.6.  Tree Hashes
 
    To allow group members to verify that they agree on the public
    cryptographic state of the group, this section defines a scheme for
@@ -1748,7 +1838,7 @@ Table of Contents
    The left_hash and right_hash fields hold the tree hashes of the
    node's left and right children, respectively.
 
-7.6.  Group State
+7.7.  Group State
 
    Each member of the group maintains a GroupContext object that
    summarizes the state of the group:
@@ -1770,7 +1860,7 @@ Table of Contents
 
    *  The tree_hash field contains a commitment to the contents of the
       group's ratchet tree and the credentials for the members of the
-      group, as described in Section 7.5.
+      group, as described in Section 7.6.
 
    *  The confirmed_transcript_hash field contains a running hash over
       the messages that led to this state.
@@ -1841,7 +1931,7 @@ Table of Contents
    As shown above, when a new group is created, the
    interim_transcript_hash field is set to the zero-length octet string.
 
-7.7.  Update Paths
+7.8.  Update Paths
 
    As described in Section 11.2, each MLS Commit message may optionally
    transmit a KeyPackage leaf and node values along its direct path.
@@ -2843,8 +2933,8 @@ Table of Contents
 11.1.1.  Add
 
    An Add proposal requests that a client with a specified KeyPackage be
-   added to the group.  The proposer of the Add MUST validate the
-   KeyPackage in the same way as recipients are required to do below.
+   added to the group.  The proposer of the Add MUST verify the validity
+   of the KeyPackage, as specified in Section 7.1.
 
    struct {
        KeyPackage key_package;
@@ -2858,27 +2948,7 @@ Table of Contents
    right, etc.  If no empty leaf exists, the tree is extended to the
    right.
 
-   *  Validate the KeyPackage:
-
-      -  Verify that the signature on the KeyPackage is valid using the
-         public key in the KeyPackage's credential
-
-      -  Verify that the following fields in the KeyPackage are unique
-         among the members of the group (including any other members
-         added in the same Commit):
-
-         o  (credential.identity, endpoint_id) tuple
-
-         o  credential.signature_key
-
-         o  hpke_init_key
-
-      -  Verify that the KeyPackage is compatible with the group's
-         parameters.  The ciphersuite and protocol version of the
-         KeyPackage must match those in use in the group.  If the
-         GroupContext has a required_capabilities extension, then the
-         required extensions and proposals MUST be listed in the
-         KeyPackage's capabilities extension.
+   *  Validate the KeyPackage as specified in Section 7.1
 
    *  Identify the leaf L for the new member: if there are empty leaves
       in the tree, L is the leftmost empty leaf.  Otherwise, the tree is
@@ -2902,17 +2972,23 @@ Table of Contents
        KeyPackage key_package;
    } Update;
 
-   The values in the following fields of the KeyPackage contained in an
-   Update proposal MUST be the same as those of the KeyPackage it
-   replaces in the tree. version, cipher_suite, credential.identity,
-   endpoint_id.  However, the value of the credential.signature_key
-   field of the new KeyPackage MUST be different from that of all other
-   KeyPackages in the tree.  Furthermore, the value of the hpke_init_key
-   field of the new KeyPackage MUST be different from that of the
-   KeyPackage it replaces.
-
    A member of the group applies an Update message by taking the
    following steps:
+
+   *  Validate the KeyPackage as specified in Section 7.1
+
+   *  Verify that the following fields in the new KeyPackage are the
+      same as the one being replaced:
+
+      -  version
+
+      -  cipher_suite
+
+   *  Verify that the hpke_init_key value is different from the
+      corresponding field in the KeyPackage being replaced.
+
+   *  Verify that the set of identities attested by the credential is
+      acceptable to the application for the participant being updated.
 
    *  Replace the sender's leaf KeyPackage with the one contained in the
       Update proposal
@@ -3189,10 +3265,9 @@ Table of Contents
    duplicative with the path field in the Commit.  The committer MUST
    prefer any Remove received, or the most recent Update for the leaf if
    there are no Removes.  If there are multiple Add proposals containing
-   KeyPackages with the same tuple (credential.identity, endpoint_id)
-   the committer again chooses one to include and considers the rest
-   invalid.  Add proposals that contain KeyPackages with an
-   (credential.identity, endpoint_id) tuple that matches that of an
+   KeyPackages with the same endpoint_id, the committer again chooses
+   one to include and considers the rest invalid.  Add proposals that
+   contain KeyPackages with an endpoint_id tuple that matches that of an
    existing KeyPackage in the group MUST be considered invalid.  The
    committer MUST consider invalid any Add or Update proposal if the
    Credential in the contained KeyPackage shares the same signature key
@@ -3427,6 +3502,9 @@ Table of Contents
       provisional ratchet tree and GroupContext, to generate the new
       ratchet tree and the commit_secret:
 
+      -  Verify that the KeyPackage is acceptable according to the rules
+         for Update (see Section 11.1.2)
+
       -  Apply the UpdatePath to the tree, as described in Section 5.6,
          and store leaf_key_package at the Committer's leaf.
 
@@ -3577,11 +3655,13 @@ Table of Contents
 
       -  There MUST be a single ExternalInit proposal
 
-      -  There MUST NOT be any Add or Update proposals
+      -  There MUST NOT be any Update proposals
 
-      -  If a Remove proposal is present, then the credential and
-         endpoint_id of the removed leaf MUST be the same as the
-         corresponding values in the Add KeyPackage.
+      -  If a Remove proposal is present, then the endpoint_id of the
+         Add KeyPackage MUST be the same as the one in the removed node,
+         and the credential MUST present a set of identifiers that is
+         acceptable to the application for the removed participant (as
+         if this were an Update for that participant).
 
    *  The proposals included by reference in an External Commit MUST
       meet the following conditions:
@@ -4750,6 +4830,13 @@ Table of Contents
    [RFC5116]  McGrew, D., "An Interface and Algorithms for Authenticated
               Encryption", RFC 5116, DOI 10.17487/RFC5116, January 2008,
               <https://www.rfc-editor.org/rfc/rfc5116>.
+
+   [RFC6125]  Saint-Andre, P. and J. Hodges, "Representation and
+              Verification of Domain-Based Application Service Identity
+              within Internet Public Key Infrastructure Using X.509
+              (PKIX) Certificates in the Context of Transport Layer
+              Security (TLS)", RFC 6125, DOI 10.17487/RFC6125, March
+              2011, <https://www.rfc-editor.org/rfc/rfc6125>.
 
    [RFC7540]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
               Transfer Protocol Version 2 (HTTP/2)", RFC 7540,

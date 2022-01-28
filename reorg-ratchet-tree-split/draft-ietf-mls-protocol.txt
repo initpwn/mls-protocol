@@ -82,90 +82,90 @@ Table of Contents
      4.1.  Cryptographic State and Evolution
      4.2.  Example Protocol Execution
      4.3.  Relationships Between Epochs
-     4.4.  Ratchet Tree Concepts
-       4.4.1.  Ratchet Tree Terminology
-       4.4.2.  Views of a Ratchet Tree
-       4.4.3.  Ratchet Tree Nodes
-   5.  Ratchet Tree Operations
-     5.1.  Ratchet Tree Evolution
-     5.2.  Adding and Removing Leaves
-     5.3.  Synchronizing Views of the Tree
-   6.  Cryptographic Objects
-     6.1.  Ciphersuites
-     6.2.  Hash-Based Identifiers
-     6.3.  Credentials
-       6.3.1.  Uniquely Identifying Clients
-   7.  Key Packages
-     7.1.  KeyPackage Validation
-     7.2.  Client Capabilities
-     7.3.  Lifetime
-     7.4.  KeyPackage Identifiers
-     7.5.  Parent Hash
-       7.5.1.  Using Parent Hashes
-       7.5.2.  Verifying Parent Hashes
-     7.6.  Tree Hashes
-     7.7.  Group State
-     7.8.  Update Paths
-   8.  Key Schedule
-     8.1.  External Initialization
-     8.2.  Pre-Shared Keys
-     8.3.  Secret Tree
-     8.4.  Encryption Keys
-     8.5.  Deletion Schedule
-     8.6.  Exporters
-     8.7.  Resumption Secret
-     8.8.  State Authentication Keys
-   9.  Message Framing
-     9.1.  Content Authentication
-     9.2.  Content Encryption
-     9.3.  Sender Data Encryption
-   10. Group Creation
-     10.1.  Required Capabilities
-     10.2.  Reinitialization
-     10.3.  Sub-group Branching
-   11. Group Evolution
-     11.1.  Proposals
-       11.1.1.  Add
-       11.1.2.  Update
-       11.1.3.  Remove
-       11.1.4.  PreSharedKey
-       11.1.5.  ReInit
-       11.1.6.  ExternalInit
-       11.1.7.  AppAck
-       11.1.8.  GroupContextExtensions
-       11.1.9.  External Proposals
-     11.2.  Commit
-       11.2.1.  Creating a Commit
-       11.2.2.  Processing a Commit
-       11.2.3.  Adding Members to the Group
-     11.3.  Ratchet Tree Extension
-   12. Extensibility
-     12.1.  Ciphersuites
-     12.2.  Proposals
-     12.3.  Extensions
-   13. Sequencing of State Changes
-     13.1.  Server-Enforced Ordering
-     13.2.  Client-Enforced Ordering
-   14. Application Messages
-     14.1.  Message Encryption and Decryption
-     14.2.  Restrictions
-     14.3.  Delayed and Reordered Application messages
-   15. Security Considerations
-     15.1.  Confidentiality of the Group Secrets
-     15.2.  Authentication
-     15.3.  Forward Secrecy and Post-Compromise Security
-     15.4.  KeyPackage Reuse
-     15.5.  Group Fragmentation by Malicious Insiders
-   16. IANA Considerations
-     16.1.  MLS Ciphersuites
-     16.2.  MLS Extension Types
-     16.3.  MLS Proposal Types
-     16.4.  MLS Credential Types
-     16.5.  MLS Designated Expert Pool
-   17. Contributors
-   18. References
-     18.1.  Normative References
-     18.2.  Informative References
+   5.  Ratchet Tree Concepts
+     5.1.  Ratchet Tree Terminology
+     5.2.  Views of a Ratchet Tree
+     5.3.  Ratchet Tree Nodes
+   6.  Ratchet Tree Operations
+     6.1.  Ratchet Tree Evolution
+     6.2.  Adding and Removing Leaves
+     6.3.  Synchronizing Views of the Tree
+   7.  Cryptographic Objects
+     7.1.  Ciphersuites
+     7.2.  Hash-Based Identifiers
+     7.3.  Credentials
+       7.3.1.  Uniquely Identifying Clients
+   8.  Key Packages
+     8.1.  KeyPackage Validation
+     8.2.  Client Capabilities
+     8.3.  Lifetime
+     8.4.  KeyPackage Identifiers
+     8.5.  Parent Hash
+       8.5.1.  Using Parent Hashes
+       8.5.2.  Verifying Parent Hashes
+     8.6.  Tree Hashes
+     8.7.  Group State
+     8.8.  Update Paths
+   9.  Key Schedule
+     9.1.  External Initialization
+     9.2.  Pre-Shared Keys
+     9.3.  Secret Tree
+     9.4.  Encryption Keys
+     9.5.  Deletion Schedule
+     9.6.  Exporters
+     9.7.  Resumption Secret
+     9.8.  State Authentication Keys
+   10. Message Framing
+     10.1.  Content Authentication
+     10.2.  Content Encryption
+     10.3.  Sender Data Encryption
+   11. Group Creation
+     11.1.  Required Capabilities
+     11.2.  Reinitialization
+     11.3.  Sub-group Branching
+   12. Group Evolution
+     12.1.  Proposals
+       12.1.1.  Add
+       12.1.2.  Update
+       12.1.3.  Remove
+       12.1.4.  PreSharedKey
+       12.1.5.  ReInit
+       12.1.6.  ExternalInit
+       12.1.7.  AppAck
+       12.1.8.  GroupContextExtensions
+       12.1.9.  External Proposals
+     12.2.  Commit
+       12.2.1.  Creating a Commit
+       12.2.2.  Processing a Commit
+       12.2.3.  Adding Members to the Group
+     12.3.  Ratchet Tree Extension
+   13. Extensibility
+     13.1.  Ciphersuites
+     13.2.  Proposals
+     13.3.  Extensions
+   14. Sequencing of State Changes
+     14.1.  Server-Enforced Ordering
+     14.2.  Client-Enforced Ordering
+   15. Application Messages
+     15.1.  Message Encryption and Decryption
+     15.2.  Restrictions
+     15.3.  Delayed and Reordered Application messages
+   16. Security Considerations
+     16.1.  Confidentiality of the Group Secrets
+     16.2.  Authentication
+     16.3.  Forward Secrecy and Post-Compromise Security
+     16.4.  KeyPackage Reuse
+     16.5.  Group Fragmentation by Malicious Insiders
+   17. IANA Considerations
+     17.1.  MLS Ciphersuites
+     17.2.  MLS Extension Types
+     17.3.  MLS Proposal Types
+     17.4.  MLS Credential Types
+     17.5.  MLS Designated Expert Pool
+   18. Contributors
+   19. References
+     19.1.  Normative References
+     19.2.  Informative References
    Appendix A.  Array-Based Trees
    Appendix B.  Link-Based Trees
    Authors' Addresses
@@ -502,7 +502,7 @@ Table of Contents
       data.
 
    Terminology specific to tree computations is described in
-   Section 4.4.1.
+   Section 5.1.
 
    We use the TLS presentation language [RFC8446] to describe the
    structure of protocol messages.
@@ -881,7 +881,7 @@ Table of Contents
 
             Figure 8: Reinjecting entropy from an earlier epoch
 
-4.4.  Ratchet Tree Concepts
+5.  Ratchet Tree Concepts
 
    The protocol uses "ratchet trees" for deriving shared secrets among a
    group of clients.  A ratchet tree is an arrangement of secrets and
@@ -902,7 +902,7 @@ Table of Contents
    efficiently removed from the group and replaced with a freshly
    generated instance.
 
-4.4.1.  Ratchet Tree Terminology
+5.1.  Ratchet Tree Terminology
 
    Trees consist of _nodes_. A node is a _leaf_ if it has no children,
    and a _parent_ otherwise; note that all parents in our trees have
@@ -977,7 +977,7 @@ Table of Contents
    associated algorithms, as long as they produce correct protocol
    messages.
 
-4.4.2.  Views of a Ratchet Tree
+5.2.  Views of a Ratchet Tree
 
    We generally assume that each participant maintains a complete and
    up-to-date view of the public state of the group's ratchet tree,
@@ -1007,7 +1007,7 @@ Table of Contents
    is first added, because the process of adding the leaf does not give
    it access to all of the nodes above it in the tree.  Leaves are
    "merged" as they receive the private keys for nodes, as described in
-   Section 5.1.
+   Section 6.1.
 
    For example, consider a four-member group (A, B, C, D) where the node
    above the right two members is blank.  (This is what it would look
@@ -1037,7 +1037,7 @@ Table of Contents
    Note how the tree invariant applies: Each member knows only their own
    leaf, and the private key AB is known only to A and B.
 
-4.4.3.  Ratchet Tree Nodes
+5.3.  Ratchet Tree Nodes
 
    A particular instance of a ratchet tree is defined by the same
    parameters that define an instance of HPKE, namely:
@@ -1058,15 +1058,15 @@ Table of Contents
    *  A public key
 
    *  An ordered list of leaf indices for "unmerged" leaves (see
-      Section 4.4.2)
+      Section 5.2)
 
    *  A credential (only for leaf nodes)
 
    *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 7.5).
+      last time the node was changed (see Section 8.5).
 
    The conditions under which each of these values must or must not be
-   present are laid out in Section 4.4.2.
+   present are laid out in Section 5.2.
 
    A node in the tree may also be _blank_, indicating that no value is
    present at that node.  The _resolution_ of a node is an ordered list
@@ -1109,9 +1109,9 @@ Table of Contents
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
    below that node.  The rules for computing these hashes are described
-   in Section 7.6.
+   in Section 8.6.
 
-5.  Ratchet Tree Operations
+6.  Ratchet Tree Operations
 
    The ratchet tree for an epoch describes the membership of a group in
    that epoch, providing public-key encryption keys that can be used to
@@ -1121,14 +1121,14 @@ Table of Contents
    changes are made to the ratchet tree.  In this section, we describe
    the content of the tree and the required operations.
 
-5.1.  Ratchet Tree Evolution
+6.1.  Ratchet Tree Evolution
 
    A member of an MLS group advances the key schedule to provide forward
    secrecy and post-compromise security by providing the group with
    fresh key material to be added into the group's shared secret.  To do
    so, one member of the group generates fresh key material, applies it
    to their local tree state, and then sends this key material to other
-   members in the group via an UpdatePath message (see Section 7.8) .
+   members in the group via an UpdatePath message (see Section 8.8) .
    All other group members then apply the key material in the UpdatePath
    to their own local tree state to derive the group's now-updated
    shared secret.
@@ -1140,7 +1140,7 @@ Table of Contents
 
    The generator of the UpdatePath starts by sampling a fresh random
    value called "leaf_secret", and uses the leaf_secret to generate
-   their leaf HPKE key pair (see Section 7) and to seed a sequence of
+   their leaf HPKE key pair (see Section 8) and to seed a sequence of
    "path secrets", one for each ancestor of its leaf.  In this setting,
    path_secret[0] refers to the leaf's parent, path_secret[1] to the
    parent's parent, and so on.  At each step, the path secret is used to
@@ -1205,12 +1205,12 @@ Table of Contents
    After performing these operations, the generator of the UpdatePath
    MUST delete the leaf_secret.
 
-5.2.  Adding and Removing Leaves
+6.2.  Adding and Removing Leaves
 
    In addition to the path-based updates to the tree described above, it
    is also necessary to add and remove leaves of the tree in order to
-   reflect changes to the membership of the group (see Section 11.1.1
-   and Section 11.1.3).  Leaves are always added and removed at the
+   reflect changes to the membership of the group (see Section 12.1.1
+   and Section 12.1.3).  Leaves are always added and removed at the
    right edge of the tree: Either a new rightmost leaf is added, or the
    rightmost leaf is removed.  Nodes' parent/child node relationships
    are then updated to maintain the tree's left-balanced structure.
@@ -1260,7 +1260,7 @@ Table of Contents
    algorithm that produces the correct tree in its internal
    representation.
 
-5.3.  Synchronizing Views of the Tree
+6.3.  Synchronizing Views of the Tree
 
    After generating fresh key material and applying it to ratchet
    forward their local tree state as described in the prior section, the
@@ -1349,9 +1349,9 @@ Table of Contents
 
    *  Each outdated node key pair that was replaced by the update.
 
-6.  Cryptographic Objects
+7.  Cryptographic Objects
 
-6.1.  Ciphersuites
+7.1.  Ciphersuites
 
    Each MLS session uses a single ciphersuite that specifies the
    following primitives to be used in group key computations:
@@ -1409,9 +1409,9 @@ Table of Contents
    Here, the functions Signature.Sign and Signature.Verify are defined
    by the signature algorithm.
 
-   The ciphersuites are defined in section Section 16.1.
+   The ciphersuites are defined in section Section 17.1.
 
-6.2.  Hash-Based Identifiers
+7.2.  Hash-Based Identifiers
 
    Some MLS messages refer to other MLS objects by hash.  For example,
    Welcome messages refer to KeyPackages for the members being welcomed,
@@ -1434,7 +1434,7 @@ Table of Contents
    For a ProposalRef, the value input is the MLSPlaintext carrying the
    proposal, and the KDF is determined by the group's ciphersuite.
 
-6.3.  Credentials
+7.3.  Credentials
 
    A member of a group authenticates the identities of other
    participants by means of credentials issued by some authentication
@@ -1525,7 +1525,7 @@ Table of Contents
    the set of identifiers in the credential is acceptable to the
    application for this client.
 
-6.3.1.  Uniquely Identifying Clients
+7.3.1.  Uniquely Identifying Clients
 
    MLS implementations will presumably provide applications with a way
    to request protocol operations with regard to other clients (e.g.,
@@ -1554,7 +1554,7 @@ Table of Contents
    The application may also provide application-specific unique
    identifiers in the extensions field of KeyPackage object.
 
-7.  Key Packages
+8.  Key Packages
 
    In order to facilitate the asynchronous addition of clients to a
    group, key packages are pre-published that provide some public
@@ -1570,7 +1570,7 @@ Table of Contents
    4.  an endpoint_id that uniquely identifies a client in a group.
 
    KeyPackages are intended to be used only once and SHOULD NOT be
-   reused except in case of last resort.  (See Section 15.4).  Clients
+   reused except in case of last resort.  (See Section 16.4).  Clients
    MAY generate and publish multiple KeyPackages to support multiple
    ciphersuites.
 
@@ -1620,7 +1620,7 @@ Table of Contents
    KeyPackage objects MUST contain at least two extensions, one of type
    capabilities, and one of type lifetime.  The capabilities extension
    allows MLS session establishment to be safe from downgrade attacks on
-   the parameters described (as discussed in Section 10), while still
+   the parameters described (as discussed in Section 11), while still
    only advertising one version / ciphersuite per KeyPackage.
 
    As the KeyPackage is a structure which is stored in the Ratchet Tree
@@ -1629,7 +1629,7 @@ Table of Contents
    allows other members to verify the validity of the KeyPackage at any
    time, particularly in the case of a newcomer joining the group.
 
-7.1.  KeyPackage Validation
+8.1.  KeyPackage Validation
 
    The validity of a KeyPackage needs to be verified at a few stages:
 
@@ -1670,7 +1670,7 @@ Table of Contents
 
       -  endpoint_id
 
-7.2.  Client Capabilities
+8.2.  Client Capabilities
 
    The capabilities extension indicates what protocol versions,
    ciphersuites, protocol extensions, and non-default proposal types are
@@ -1688,7 +1688,7 @@ Table of Contents
    that appear in the extensions field of a KeyPackage MUST be included
    in the extensions field of the capabilities extension.
 
-7.3.  Lifetime
+8.3.  Lifetime
 
    The lifetime extension represents the times between which clients
    will consider a KeyPackage valid.  This time is represented as an
@@ -1706,15 +1706,15 @@ Table of Contents
 
    This extension MUST always be present in a KeyPackage.
 
-7.4.  KeyPackage Identifiers
+8.4.  KeyPackage Identifiers
 
    Within MLS, a KeyPackage is identified by its hash (see, e.g.,
-   Section 11.2.3.2).  The external_key_id extension allows applications
+   Section 12.2.3.2).  The external_key_id extension allows applications
    to add an explicit, application-defined identifier to a KeyPackage.
 
    opaque external_key_id<0..2^16-1>;
 
-7.5.  Parent Hash
+8.5.  Parent Hash
 
    The parent_hash extension carries information to authenticate the
    structure of the tree, as described below.
@@ -1748,13 +1748,13 @@ Table of Contents
    Finally, original_child_resolution is the array of HPKEPublicKey
    values of the nodes in the resolution of S but with the
    unmerged_leaves of P omitted.  For example, in the ratchet tree
-   depicted in Section 4.4.3 the ParentHashInput of node Z with co-path
+   depicted in Section 5.3 the ParentHashInput of node Z with co-path
    child C would contain an empty original_child_resolution since C's
    resolution includes only itself but C is also an unmerged leaf of Z.
    Meanwhile, the ParentHashInput of node Z with co-path child D has an
    array with one element in it: the HPKE public key of D.
 
-7.5.1.  Using Parent Hashes
+8.5.1.  Using Parent Hashes
 
    The Parent Hash of P appears in three types of structs.  If V is
    itself a parent node then P's Parent Hash is stored in the
@@ -1775,7 +1775,7 @@ Table of Contents
    the insider isn't assigned a leaf in the subtree rooted at V.
    Indeed, such a ratchet tree would violate the tree invariant.)
 
-7.5.2.  Verifying Parent Hashes
+8.5.2.  Verifying Parent Hashes
 
    To this end, when processing a Commit message clients MUST recompute
    the expected value of parent_hash for the committer's new leaf and
@@ -1804,7 +1804,7 @@ Table of Contents
    can cause blank nodes to be interposed between a parent node and its
    right child.
 
-7.6.  Tree Hashes
+8.6.  Tree Hashes
 
    To allow group members to verify that they agree on the public
    cryptographic state of the group, this section defines a scheme for
@@ -1852,7 +1852,7 @@ Table of Contents
    The left_hash and right_hash fields hold the tree hashes of the
    node's left and right children, respectively.
 
-7.7.  Group State
+8.7.  Group State
 
    Each member of the group maintains a GroupContext object that
    summarizes the state of the group:
@@ -1874,7 +1874,7 @@ Table of Contents
 
    *  The tree_hash field contains a commitment to the contents of the
       group's ratchet tree and the credentials for the members of the
-      group, as described in Section 7.6.
+      group, as described in Section 8.6.
 
    *  The confirmed_transcript_hash field contains a running hash over
       the messages that led to this state.
@@ -1889,7 +1889,7 @@ Table of Contents
 
    Different changes to the group will have different effects on the
    group state.  These effects are described in their respective
-   subsections of Section 11.1.  The following general rules apply:
+   subsections of Section 12.1.  The following general rules apply:
 
    *  The group_id field is constant.
 
@@ -1945,9 +1945,9 @@ Table of Contents
    As shown above, when a new group is created, the
    interim_transcript_hash field is set to the zero-length octet string.
 
-7.8.  Update Paths
+8.8.  Update Paths
 
-   As described in Section 11.2, each MLS Commit message may optionally
+   As described in Section 12.2, each MLS Commit message may optionally
    transmit a KeyPackage leaf and node values along its direct path.
    The path contains a public key and encrypted secret value for all
    intermediate nodes in the path above the leaf.  The path is ordered
@@ -1989,7 +1989,7 @@ Table of Contents
    Decryption is performed in the corresponding way, using the private
    key of the resolution node.
 
-8.  Key Schedule
+9.  Key Schedule
 
    Group keys are derived using the Extract and Expand functions from
    the KDF for the group's ciphersuite, as well as the functions defined
@@ -2097,7 +2097,7 @@ Table of Contents
    struct in order to allow non-members to join the group using an
    external commit.
 
-8.1.  External Initialization
+9.1.  External Initialization
 
    In addition to initializing a new epoch via KDF invocations as
    described above, an MLS group can also initialize a new epoch via an
@@ -2124,7 +2124,7 @@ Table of Contents
    In both cases, the info input to HPKE is set to the PublicGroupState
    for the previous epoch, encoded using the TLS serialization.
 
-8.2.  Pre-Shared Keys
+9.2.  Pre-Shared Keys
 
    Groups which already have an out-of-band mechanism to generate shared
    group secrets can inject those into the MLS key schedule to seed the
@@ -2240,7 +2240,7 @@ Table of Contents
    Commit, then the resulting psk_secret is psk_secret_[0], the all-zero
    vector.
 
-8.3.  Secret Tree
+9.3.  Secret Tree
 
    For the generation of encryption keys and nonces, the key schedule
    begins with the encryption_secret at the root and derives a tree of
@@ -2263,7 +2263,7 @@ Table of Contents
 
    The secret in the leaf of the Secret Tree is used to initiate two
    symmetric hash ratchets, from which a sequence of single-use keys and
-   nonces are derived, as described in Section 8.4.  The root of each
+   nonces are derived, as described in Section 9.4.  The root of each
    ratchet is computed as:
 
    tree_node_[N]_secret
@@ -2275,9 +2275,9 @@ Table of Contents
            +--> ExpandWithLabel(., "application", "", KDF.Nh)
                 = application_ratchet_secret_[N]_[0]
 
-8.4.  Encryption Keys
+9.4.  Encryption Keys
 
-   As described in Section 9, MLS encrypts three different types of
+   As described in Section 10, MLS encrypts three different types of
    information:
 
    *  Metadata (sender information)
@@ -2296,7 +2296,7 @@ Table of Contents
    and each step along the ratchet is called a "generation".
 
    A sender ratchet starts from a per-sender base secret derived from a
-   Secret Tree, as described in Section 8.3.  The base secret initiates
+   Secret Tree, as described in Section 9.3.  The base secret initiates
    a symmetric hash ratchet which generates a sequence of keys and
    nonces.  The sender uses the j-th key/nonce pair in the sequence to
    encrypt (using the AEAD) the j-th message they send during that
@@ -2327,7 +2327,7 @@ Table of Contents
    Here, AEAD.Nn and AEAD.Nk denote the lengths in bytes of the nonce
    and key for the AEAD scheme defined by the ciphersuite.
 
-8.5.  Deletion Schedule
+9.5.  Deletion Schedule
 
    It is important to delete all security-sensitive values as soon as
    they are _consumed_. A sensitive value S is said to be _consumed_ if
@@ -2393,7 +2393,7 @@ Table of Contents
    values K0 and N0 to allow for out-of-order delivery, and SHOULD
    retain AR2 for processing future messages.
 
-8.6.  Exporters
+9.6.  Exporters
 
    The main MLS key schedule provides an exporter_secret which can be
    used by an application as the basis to derive new secrets called
@@ -2415,12 +2415,12 @@ Table of Contents
    It is RECOMMENDED for the application generating exported values to
    refresh those values after a Commit is processed.
 
-8.7.  Resumption Secret
+9.7.  Resumption Secret
 
    The main MLS key schedule provides a resumption_secret that is used
    as a PSK to inject entropy from one epoch into another.  This
    functionality is used in the reinitialization and branching processes
-   described in Section 10.2 and Section 10.3, but may be used by
+   described in Section 11.2 and Section 11.3, but may be used by
    applications for other purposes.
 
    Some uses of resumption PSKs might call for the use of PSKs from
@@ -2428,7 +2428,7 @@ Table of Contents
    the number of past epochs for which the resumption_secret may be
    stored.
 
-8.8.  State Authentication Keys
+9.8.  State Authentication Keys
 
    The main MLS key schedule provides a per-epoch authentication_secret.
    If one of the parties is being actively impersonated by an attacker,
@@ -2437,7 +2437,7 @@ Table of Contents
    authentication_secrets within an out-of-band authentication protocol
    to ensure that they share the same view of the group.
 
-9.  Message Framing
+10.  Message Framing
 
    Handshake and application messages use a common framing structure.
    This framing provides encryption to ensure confidentiality within the
@@ -2530,7 +2530,7 @@ Table of Contents
    The field confirmation_tag MUST be present if content_type equals
    commit.  Otherwise, it MUST NOT be present.
 
-   External sender types are sent as MLSPlaintext, see Section 11.1.9
+   External sender types are sent as MLSPlaintext, see Section 12.1.9
    for their use.
 
    The remainder of this section describes how to compute the signature
@@ -2555,7 +2555,7 @@ Table of Contents
    The following sections describe the encryption and signing processes
    in detail.
 
-9.1.  Content Authentication
+10.1.  Content Authentication
 
    The signature field in an MLSPlaintext object is computed using the
    signing private key corresponding to the public key, which was
@@ -2616,7 +2616,7 @@ Table of Contents
    and transmitted as MLSCiphertext messages (wire_format ==
    mls_ciphertext).
 
-9.2.  Content Encryption
+10.2.  Content Encryption
 
    The ciphertext field of the MLSCiphertext object is produced by
    supplying the inputs described below to the AEAD function specified
@@ -2689,7 +2689,7 @@ Table of Contents
        opaque authenticated_data<0..2^32-1>;
    } MLSCiphertextContentAAD;
 
-9.3.  Sender Data Encryption
+10.3.  Sender Data Encryption
 
    The "sender data" used to look up the key for the content encryption
    is encrypted with the ciphersuite's AEAD with a key and nonce derived
@@ -2710,7 +2710,7 @@ Table of Contents
 
    The reuse_guard field contains a fresh random value used to avoid
    nonce reuse in the case of state loss or corruption, as described in
-   Section 9.2.
+   Section 10.2.
 
    The key and nonce provided to the AEAD are computed as the KDF of the
    first KDF.Nh bytes of the ciphertext generated in the previous
@@ -2738,13 +2738,13 @@ Table of Contents
    recipient MUST verify that the KeyPackageRef indicated in the sender
    field identifies a member of the group.
 
-10.  Group Creation
+11.  Group Creation
 
    A group is always created with a single member, the "creator".  The
    other members are added when the creator effectively sends itself an
    Add proposal and commits it, then sends the corresponding Welcome
    message to the new participants.  These processes are described in
-   detail in Section 11.1.1, Section 11.2, and Section 11.2.3.2.
+   detail in Section 12.1.1, Section 12.2, and Section 12.2.3.2.
 
    The creator of a group MUST take the following steps to initialize
    the group:
@@ -2776,10 +2776,10 @@ Table of Contents
       -  Extensions: Any values of the creator's choosing
 
    *  For each member, construct an Add proposal from the KeyPackage for
-      that member (see Section 11.1.1)
+      that member (see Section 12.1.1)
 
    *  Construct a Commit message that commits all of the Add proposals,
-      in any order chosen by the creator (see Section 11.2)
+      in any order chosen by the creator (see Section 12.2)
 
    *  Process the Commit message to obtain a new group state (for the
       epoch in which the new members are added) and a Welcome message
@@ -2787,7 +2787,7 @@ Table of Contents
    *  Transmit the Welcome message to the other new members
 
    The recipient of a Welcome message processes it as described in
-   Section 11.2.3.2.  If application context informs the recipient that
+   Section 12.2.3.2.  If application context informs the recipient that
    the Welcome should reflect the creation of a new group (for example,
    due to a branch or reinitialization), then the recipient MUST verify
    that the epoch value in the GroupInfo is equal to 1.
@@ -2799,7 +2799,7 @@ Table of Contents
    introduced.  The only choices the creator makes here are its own
    KeyPackage and the leaf secret from which the Commit is built.
 
-10.1.  Required Capabilities
+11.1.  Required Capabilities
 
    The configuration of a group imposes certain requirements on clients
    in the group.  At a minimum, all members of the group need to support
@@ -2826,7 +2826,7 @@ Table of Contents
    contains a required_capabilities extension that requires non-default
    capabilities not supported by all current members.
 
-10.2.  Reinitialization
+11.2.  Reinitialization
 
    A group may be reinitialized by creating a new group with the same
    membership and different parameters, and linking it to the old group
@@ -2834,7 +2834,7 @@ Table of Contents
    the following steps:
 
    1.  A member of the old group sends a ReInit proposal (see
-       Section 11.1.5)
+       Section 12.1.5)
 
    2.  A member of the old group sends a Commit covering the ReInit
        proposal
@@ -2868,7 +2868,7 @@ Table of Contents
    A PreSharedKey proposal with type resumption and usage reinit MUST be
    considered invalid.
 
-10.3.  Sub-group Branching
+11.3.  Sub-group Branching
 
    A new group can be formed from a subset of an existing group's
    members, using the same parameters as the old group.  The creator of
@@ -2895,7 +2895,7 @@ Table of Contents
    A PreSharedKey proposal with type resumption and usage branch MUST be
    considered invalid.
 
-11.  Group Evolution
+12.  Group Evolution
 
    Over the lifetime of a group, its membership can change, and existing
    members might want to change their keys in order to achieve post-
@@ -2916,7 +2916,7 @@ Table of Contents
    time a state transition occurs, the epoch number is incremented by
    one.
 
-11.1.  Proposals
+12.1.  Proposals
 
    Proposals are included in an MLSPlaintext by way of a Proposal
    structure that indicates their type:
@@ -2944,11 +2944,11 @@ Table of Contents
    way that it can be retrieved by hash (as a ProposalOrRef object) in a
    later Commit message.
 
-11.1.1.  Add
+12.1.1.  Add
 
    An Add proposal requests that a client with a specified KeyPackage be
    added to the group.  The proposer of the Add MUST verify the validity
-   of the KeyPackage, as specified in Section 7.1.
+   of the KeyPackage, as specified in Section 8.1.
 
    struct {
        KeyPackage key_package;
@@ -2962,7 +2962,7 @@ Table of Contents
    right, etc.  If no empty leaf exists, the tree is extended to the
    right.
 
-   *  Validate the KeyPackage as specified in Section 7.1
+   *  Validate the KeyPackage as specified in Section 8.1
 
    *  Identify the leaf L for the new member: if there are empty leaves
       in the tree, L is the leftmost empty leaf.  Otherwise, the tree is
@@ -2976,7 +2976,7 @@ Table of Contents
       the KeyPackage in the Add, as well as the credential under which
       the KeyPackage was signed.
 
-11.1.2.  Update
+12.1.2.  Update
 
    An Update proposal is a similar mechanism to Add with the distinction
    that it is the sender's leaf KeyPackage in the tree which would be
@@ -2989,7 +2989,7 @@ Table of Contents
    A member of the group applies an Update message by taking the
    following steps:
 
-   *  Validate the KeyPackage as specified in Section 7.1
+   *  Validate the KeyPackage as specified in Section 8.1
 
    *  Verify that the following fields in the new KeyPackage are the
       same as the one being replaced:
@@ -3010,7 +3010,7 @@ Table of Contents
    *  Blank the intermediate nodes along the path from the sender's leaf
       to the root
 
-11.1.3.  Remove
+12.1.3.  Remove
 
    A Remove proposal requests that the member with KeyPackageRef removed
    be removed from the group.
@@ -3025,7 +3025,7 @@ Table of Contents
    *  Identify a leaf node containing a key package matching removed.
       This lookup MUST be done on the tree before any non-Remove
       proposals have been applied (the "old" tree in the terminology of
-      Section 11.2), since proposals such as Update can change the
+      Section 12.2), since proposals such as Update can change the
       KeyPackage stored at a leaf.  Let L be this leaf node.
 
    *  Replace the leaf node L with a blank node
@@ -3042,7 +3042,7 @@ Table of Contents
       -  The parent of the rightmost leaf is either blank or the root of
          the tree
 
-11.1.4.  PreSharedKey
+12.1.4.  PreSharedKey
 
    A PreSharedKey proposal can be used to request that a pre-shared key
    be injected into the key schedule in the process of advancing the
@@ -3055,11 +3055,11 @@ Table of Contents
    The psktype of the pre-shared key MUST be external and the psk_nonce
    MUST be a randomly sampled nonce of length KDF.Nh.  When processing a
    Commit message that includes one or more PreSharedKey proposals,
-   group members derive psk_secret as described in Section 8.2, where
+   group members derive psk_secret as described in Section 9.2, where
    the order of the PSKs corresponds to the order of the PreSharedKey
    proposals in the Commit.
 
-11.1.5.  ReInit
+12.1.5.  ReInit
 
    A ReInit proposal represents a request to reinitialize the group with
    different parameters, for example, to increase the version number or
@@ -3075,7 +3075,7 @@ Table of Contents
 
    A member of the group applies a ReInit proposal by waiting for the
    committer to send the Welcome message that matches the ReInit,
-   according to the criteria in Section 10.2.
+   according to the criteria in Section 11.2.
 
    If a ReInit proposal is included in a Commit, it MUST be the only
    proposal referenced by the Commit.  If other non-ReInit proposals
@@ -3084,7 +3084,7 @@ Table of Contents
    applied in a subsequent epoch.  The version field in the ReInit
    proposal MUST be no less than the version for the current group.
 
-11.1.6.  ExternalInit
+12.1.6.  ExternalInit
 
    An ExternalInit proposal is used by new members that want to join a
    group by using an external commit.  This proposal can only be used in
@@ -3096,9 +3096,9 @@ Table of Contents
 
    A member of the group applies an ExternalInit message by initializing
    the next epoch using an init secret computed as described in
-   Section 8.1.  The kem_output field contains the required KEM output.
+   Section 9.1.  The kem_output field contains the required KEM output.
 
-11.1.7.  AppAck
+12.1.7.  AppAck
 
    An AppAck proposal is used to acknowledge receipt of application
    messages.  Though this information implies no change to the group, it
@@ -3158,7 +3158,7 @@ Table of Contents
    enforce an AppAck schedule, reporting loss if an AppAck is not
    received at the expected time.
 
-11.1.8.  GroupContextExtensions
+12.1.8.  GroupContextExtensions
 
    A GroupContextExtensions proposal is used to update the list of
    extensions in the GroupContext for the group.
@@ -3183,7 +3183,7 @@ Table of Contents
    confirmation_tag by way of the key schedule will confirm that all
    members of the group agree on the extensions in use.
 
-11.1.9.  External Proposals
+12.1.9.  External Proposals
 
    Add and Remove proposals can be constructed and sent to the group by
    a party that is outside the group.  For example, a Delivery Service
@@ -3219,7 +3219,7 @@ Table of Contents
    the sender will not have the keys necessary to construct an
    MLSCiphertext object.
 
-11.2.  Commit
+12.2.  Commit
 
    A Commit message initiates a new epoch for the group, based on a
    collection of Proposals.  It instructs group members to update their
@@ -3231,7 +3231,7 @@ Table of Contents
    reference.  Proposals supplied by value are included directly in the
    Commit object.  Proposals supplied by reference are specified by
    including the hash of the MLSPlaintext in which the Proposal was sent
-   (see Section 6.2).  For proposals supplied by value, the sender of
+   (see Section 7.2).  For proposals supplied by value, the sender of
    the proposal is the same as the sender of the Commit.  Conversely,
    proposals sent by people other than the committer MUST be included by
    reference.
@@ -3340,7 +3340,7 @@ Table of Contents
        provides FS with regard to any removed members and PCS for the
        committer and any updated members.
 
-11.2.1.  Creating a Commit
+12.2.1.  Creating a Commit
 
    When creating or processing a Commit, three different ratchet trees
    and their associated GroupContexts are used:
@@ -3373,7 +3373,7 @@ Table of Contents
 
    *  Generate the provisional ratchet tree and GroupContext by applying
       the proposals referenced in the initial Commit object, as
-      described in Section 11.1.  Update proposals are applied first,
+      described in Section 12.1.  Update proposals are applied first,
       followed by Remove proposals, and then finally Add proposals.  Add
       proposals are applied in the order listed in the proposals vector,
       and always to the leftmost unoccupied leaf in the tree, or the
@@ -3402,7 +3402,7 @@ Table of Contents
 
       -  Assign this UpdatePath to the path field in the Commit.
 
-      -  Apply the UpdatePath to the tree, as described in Section 5.3,
+      -  Apply the UpdatePath to the tree, as described in Section 6.3,
          creating the new ratchet tree.  Define commit_secret as the
          value path_secret[n+1] derived from the path_secret[n] value
          assigned to the root node.
@@ -3413,7 +3413,7 @@ Table of Contents
       be).  In this case, the new ratchet tree is the same as the
       provisional ratchet tree.
 
-   *  Derive the psk_secret as specified in Section 8.2, where the order
+   *  Derive the psk_secret as specified in Section 9.2, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3446,13 +3446,13 @@ Table of Contents
 
       -  Other extensions as defined by the application
 
-      -  Optionally derive an external keypair as described in Section 8
-         (required for External Commits, see Section 11.2.3.1)
+      -  Optionally derive an external keypair as described in Section 9
+         (required for External Commits, see Section 12.2.3.1)
 
       -  Sign the GroupInfo using the member's private signing key
 
       -  Encrypt the GroupInfo using the key and nonce derived from the
-         joiner_secret for the new epoch (see Section 11.2.3.2)
+         joiner_secret for the new epoch (see Section 12.2.3.2)
 
    *  For each new member in the group:
 
@@ -3485,7 +3485,7 @@ Table of Contents
 
       -  epoch: The epoch that the group will be in after this Commit
 
-11.2.2.  Processing a Commit
+12.2.2.  Processing a Commit
 
    A member of the group applies a Commit message by taking the
    following steps:
@@ -3502,7 +3502,7 @@ Table of Contents
 
    *  Generate the provisional ratchet tree and GroupContext by applying
       the proposals referenced in the initial Commit object, as
-      described in Section 11.1.  Update proposals are applied first,
+      described in Section 12.1.  Update proposals are applied first,
       followed by Remove proposals, and then finally Add proposals.  Add
       proposals are applied in the order listed in the proposals vector,
       and always to the leftmost unoccupied leaf in the tree, or the
@@ -3521,9 +3521,9 @@ Table of Contents
       ratchet tree and the commit_secret:
 
       -  Verify that the KeyPackage is acceptable according to the rules
-         for Update (see Section 11.1.2)
+         for Update (see Section 12.1.2)
 
-      -  Apply the UpdatePath to the tree, as described in Section 5.3,
+      -  Apply the UpdatePath to the tree, as described in Section 6.3,
          and store leaf_key_package at the Committer's leaf.
 
       -  Verify that the KeyPackage has a parent_hash extension and that
@@ -3539,7 +3539,7 @@ Table of Contents
    *  Update the confirmed and interim transcript hashes using the new
       Commit, and generate the new GroupContext.
 
-   *  Derive the psk_secret as specified in Section 8.2, where the order
+   *  Derive the psk_secret as specified in Section 9.2, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3559,7 +3559,7 @@ Table of Contents
    *  If the Commit included a ReInit proposal, the client MUST NOT use
       the group to send messages anymore.  Instead, it MUST wait for a
       Welcome message from the committer meeting the requirements of
-      Section 10.2.
+      Section 11.2.
 
    The confirmation tag value confirms that the members of the group
    have arrived at the same state of the group:
@@ -3567,7 +3567,7 @@ Table of Contents
    MLSPlaintext.confirmation_tag =
        MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
 
-11.2.3.  Adding Members to the Group
+12.2.3.  Adding Members to the Group
 
    New members can join the group in two ways.  Either by being added by
    a group member, or by adding themselves through an external Commit.
@@ -3606,7 +3606,7 @@ Table of Contents
        KeyPackageRef signer;
    } GroupInfoTBS;
 
-11.2.3.1.  Joining via External Commits
+12.2.3.1.  Joining via External Commits
 
    External Commits are a mechanism for new members (external parties
    that want to become members of the group) to add themselves to a
@@ -3653,7 +3653,7 @@ Table of Contents
 
    Note that the tree_hash field is used the same way as in the Welcome
    message.  The full tree can be included via the ratchet_tree
-   extension Section 11.3.
+   extension Section 12.3.
 
    The signature on the GroupInfo struct authenticates the HPKE public
    key, so that the joiner knows that the public key was provided by a
@@ -3701,7 +3701,7 @@ Table of Contents
       field.
 
    *  When processing a Commit, both existing and new members MUST use
-      the external init secret as described in Section 8.1.
+      the external init secret as described in Section 9.1.
 
    *  The sender type for the MLSPlaintext encapsulating the External
       Commit MUST be new_member
@@ -3724,7 +3724,7 @@ Table of Contents
    application will need to ensure that continuing, non-resync'ing
    members have the required PSK.
 
-11.2.3.2.  Joining via Welcome Message
+12.2.3.2.  Joining via Welcome Message
 
    The sender of a Commit message is responsible for sending a Welcome
    message to any new members added via Add proposals.  The Welcome
@@ -3866,7 +3866,7 @@ Table of Contents
    *  Use the confirmed transcript hash and confirmation tag to compute
       the interim transcript hash in the new state.
 
-11.3.  Ratchet Tree Extension
+12.3.  Ratchet Tree Extension
 
    By default, a GroupInfo message only provides the joiner with a
    commitment to the group's ratchet tree.  In order to process or
@@ -3941,7 +3941,7 @@ Table of Contents
    section may be used to simplify decoding this extension into other
    representations.)
 
-   The example tree in Section 4.4.1 would be represented as an array of
+   The example tree in Section 5.1 would be represented as an array of
    nodes in the following form, where R represents the "subtree root"
    for a given subarray of the node array:
 
@@ -3979,7 +3979,7 @@ Table of Contents
    that the root hash of the ratchet tree matches the tree_hash of the
    GroupContext before using the tree for MLS operations.
 
-12.  Extensibility
+13.  Extensibility
 
    The base MLS protocol can be extended in a few ways.  New
    ciphersuites can be added to enable the use of new cryptographic
@@ -3989,16 +3989,16 @@ Table of Contents
    some constraints on these extensibility mechanisms that are necessary
    to ensure broad interoperability.
 
-12.1.  Ciphersuites
+13.1.  Ciphersuites
 
-   As discussed in Section 6.1, MLS allows the participants in a group
+   As discussed in Section 7.1, MLS allows the participants in a group
    to negotiate the cryptographic algorithms used within the group.
    This extensibility is important for maintaining the security of the
    protocol over time [RFC7696].  It also creates a risk of
    interoperability failure due to clients not supporting a common
    ciphersuite.
 
-   The ciphersuite registry defined in Section 16.1 attempts to strike a
+   The ciphersuite registry defined in Section 17.1 attempts to strike a
    balance on this point.  On the one hand, the base policy for the
    registry is Specification Required, a fairly low bar designed to
    avoid the need for standards work in cases where different ciphers
@@ -4016,15 +4016,15 @@ Table of Contents
    HTTP/2, which restricted the set of allowed TLS ciphers (see
    Section 9.2.2 of [RFC7540].
 
-12.2.  Proposals
+13.2.  Proposals
 
    Commit messages do not have an extension field because the set of
-   protocols is extensible.  As discussed in Section 11.2, Proposals
+   protocols is extensible.  As discussed in Section 12.2, Proposals
    with a non-default proposal type MUST NOT be included in a commit
    unless the proposal type is supported by all the members of the group
    that will process the Commit.
 
-12.3.  Extensions
+13.3.  Extensions
 
    This protocol includes a mechanism for negotiating extension
    parameters similar to the one in TLS [RFC8446].  In TLS, extension
@@ -4091,7 +4091,7 @@ Table of Contents
    to change once it has been created; such a behavior could be
    implemented as an extension.
 
-13.  Sequencing of State Changes
+14.  Sequencing of State Changes
 
    Each Commit message is premised on a given starting state, indicated
    by the epoch field of the enclosing MLSPlaintext message.  If the
@@ -4134,7 +4134,7 @@ Table of Contents
    state, since the endpoint doesn't know at that time whether the
    changes implied by the Commit message will succeed or not.
 
-13.1.  Server-Enforced Ordering
+14.1.  Server-Enforced Ordering
 
    With this approach, the Delivery Service ensures that incoming
    messages are added to an ordered queue and outgoing messages are
@@ -4155,7 +4155,7 @@ Table of Contents
 
    This applies to all messages, not only state changing messages.
 
-13.2.  Client-Enforced Ordering
+14.2.  Client-Enforced Ordering
 
    Order enforcement can be implemented on the client as well, one way
    to achieve it is to use a two step update protocol: the first client
@@ -4168,7 +4168,7 @@ Table of Contents
    complex and harder to implement.  It also could cause starvation for
    some clients if they keep failing to get their proposal accepted.
 
-14.  Application Messages
+15.  Application Messages
 
    The primary purpose of the Handshake protocol is to provide an
    authenticated group key exchange to clients.  In order to protect
@@ -4194,7 +4194,7 @@ Table of Contents
    signatures are required.  Handshake messages MUST use asymmetric
    signatures to strongly authenticate the sender of a message.
 
-14.1.  Message Encryption and Decryption
+15.1.  Message Encryption and Decryption
 
    The group members MUST use the AEAD algorithm associated with the
    negotiated MLS ciphersuite to AEAD encrypt and decrypt their
@@ -4224,7 +4224,7 @@ Table of Contents
    recommended that padding data is comprised of zero-valued bytes and
    follows an established deterministic padding scheme.
 
-14.2.  Restrictions
+15.2.  Restrictions
 
    During each epoch senders MUST NOT encrypt more data than permitted
    by the security bounds of the AEAD scheme used.
@@ -4236,7 +4236,7 @@ Table of Contents
    messages and to (potentially) recover confidentiality and
    authenticity for future messages despite a past state compromise.
 
-14.3.  Delayed and Reordered Application messages
+15.3.  Delayed and Reordered Application messages
 
    Since each Application message contains the group identifier, the
    epoch and a message counter, a client can receive messages out of
@@ -4249,14 +4249,14 @@ Table of Contents
    delayed or out of order messages, possibly still in transit while a
    decryption is being done.
 
-15.  Security Considerations
+16.  Security Considerations
 
    The security goals of MLS are described in
    [I-D.ietf-mls-architecture].  We describe here how the protocol
    achieves its goals at a high level, though a complete security
    analysis is outside of the scope of this document.
 
-15.1.  Confidentiality of the Group Secrets
+16.1.  Confidentiality of the Group Secrets
 
    Group secrets are partly derived from the output of a ratchet tree.
    Ratchet trees work by assigning each member of the group to a leaf in
@@ -4272,7 +4272,7 @@ Table of Contents
    to rotate their keypair such that the old private key can no longer
    be used to decrypt new messages.
 
-15.2.  Authentication
+16.2.  Authentication
 
    The first form of authentication we provide is that group members can
    verify a message originated from one of the members of the group.
@@ -4307,7 +4307,7 @@ Table of Contents
    that ensures that the legitimate members of the group to have the
    required PSKs.
 
-15.3.  Forward Secrecy and Post-Compromise Security
+16.3.  Forward Secrecy and Post-Compromise Security
 
    Post-compromise security is provided between epochs by members
    regularly updating their leaf key in the ratchet tree.  Updating
@@ -4325,7 +4325,7 @@ Table of Contents
    Delivery Service, such that compromised key material won't be used
    when the member is added to a new group.
 
-15.4.  KeyPackage Reuse
+16.4.  KeyPackage Reuse
 
    KeyPackages are intended to be used only once.  That is, once a
    KeyPackage has been used to introduce the corresponding client to a
@@ -4340,13 +4340,13 @@ Table of Contents
    KeyPackage publication system SHOULD rate limit KeyPackage requests,
    especially if not authenticated.
 
-15.5.  Group Fragmentation by Malicious Insiders
+16.5.  Group Fragmentation by Malicious Insiders
 
    It is possible for a malicious member of a group to "fragment" the
    group by crafting an invalid UpdatePath.  Recall that an UpdatePath
    encrypts a sequence of path secrets to different subtrees of the
    group's ratchet trees.  These path secrets should be derived in a
-   sequence as described in Section 5.1, but the UpdatePath syntax
+   sequence as described in Section 6.1, but the UpdatePath syntax
    allows the sender to encrypt arbitrary, unrelated secrets.  The
    syntax also does not guarantee that the encrypted path secret
    encrypted for a given node corresponds to the public key provided for
@@ -4383,28 +4383,28 @@ Table of Contents
    UpdatePath, that is, one member from each subtree rooted in the
    copath node corresponding to the node in the UpdatePath.
 
-16.  IANA Considerations
+17.  IANA Considerations
 
    This document requests the creation of the following new IANA
    registries:
 
-   *  MLS Ciphersuites (Section 16.1)
+   *  MLS Ciphersuites (Section 17.1)
 
-   *  MLS Extension Types (Section 16.2)
+   *  MLS Extension Types (Section 17.2)
 
-   *  MLS Proposal Types (Section 16.3)
+   *  MLS Proposal Types (Section 17.3)
 
-   *  MLS Credential Types (Section 16.4)
+   *  MLS Credential Types (Section 17.4)
 
    All of these registries should be under a heading of "Messaging Layer
    Security", and assignments are made via the Specification Required
-   policy [RFC8126].  See Section 16.5 for additional information about
+   policy [RFC8126].  See Section 17.5 for additional information about
    the MLS Designated Experts (DEs).
 
    RFC EDITOR: Please replace XXXX throughout with the RFC number
    assigned to this document
 
-16.1.  MLS Ciphersuites
+17.1.  MLS Ciphersuites
 
    A ciphersuite is a combination of a protocol version and the set of
    cryptographic algorithms that should be used.
@@ -4533,9 +4533,9 @@ Table of Contents
    Use.
 
    New ciphersuite values are assigned by IANA as described in
-   Section 16.
+   Section 17.
 
-16.2.  MLS Extension Types
+17.2.  MLS Extension Types
 
    This registry lists identifiers for extensions to the MLS protocol.
    The extension type field is two bytes wide, so valid extension type
@@ -4594,7 +4594,7 @@ Table of Contents
 
                                   Table 6
 
-16.3.  MLS Proposal Types
+17.3.  MLS Proposal Types
 
    This registry lists identifiers for types of proposals that can be
    made for changes to an MLS group.  The extension type field is two
@@ -4645,7 +4645,7 @@ Table of Contents
 
                                   Table 7
 
-16.4.  MLS Credential Types
+17.4.  MLS Credential Types
 
    This registry lists identifiers for types of credentials that can be
    used for authentication in the MLS protocol.  The credential type
@@ -4684,7 +4684,7 @@ Table of Contents
 
                                  Table 8
 
-16.5.  MLS Designated Expert Pool
+17.5.  MLS Designated Expert Pool
 
    Specification Required [RFC8126] registry requests are registered
    after a three-week review period on the MLS DEs' mailing list: mls-
@@ -4710,7 +4710,7 @@ Table of Contents
    whether it is likely to be of general applicability or useful only
    for a single application, and whether the registration description is
    clear.  For example, the MLS DEs will apply the ciphersuite-related
-   advisory found in Section 6.1.
+   advisory found in Section 7.1.
 
    IANA MUST only accept registry updates from the MLS DEs and SHOULD
    direct all requests for registration to the MLS DEs' mailing list.
@@ -4722,7 +4722,7 @@ Table of Contents
    be perceived as creating a conflict of interest for a particular MLS
    DE, that MLS DE SHOULD defer to the judgment of the other MLS DEs.
 
-17.  Contributors
+18.  Contributors
 
    *  Joel Alwen
       Wickr
@@ -4772,9 +4772,9 @@ Table of Contents
       Royal Holloway, University of London
       thyla.van.der@merwe.tech
 
-18.  References
+19.  References
 
-18.1.  Normative References
+19.1.  Normative References
 
    [I-D.irtf-cfrg-hpke]
               Barnes, R. L., Bhargavan, K., Lipp, B., and C. A. Wood,
@@ -4806,7 +4806,7 @@ Table of Contents
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://www.rfc-editor.org/rfc/rfc8446>.
 
-18.2.  Informative References
+19.2.  Informative References
 
    [art]      Cohn-Gordon, K., Cremers, C., Garratt, L., Millican, J.,
               and K. Milner, "On Ends-to-Ends Encryption: Asynchronous

@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-01-30T01:05:42.514324+00:00",
+  "timestamp": "2022-02-01T01:07:47.179435+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5736,9 +5736,17 @@
       "labels": [],
       "body": "Right now, the UpdatePath generation and processing algorithms populate \"redundant\" parent nodes in the tree, in the sense that they have only one child node.  These redundant nodes are harmless except that they make tree truncation less effective.  We should update the UpdatePath algorithms so that they do not add redundant nodes to the tree.",
       "createdAt": "2022-01-27T19:24:35Z",
-      "updatedAt": "2022-01-27T19:24:35Z",
+      "updatedAt": "2022-01-31T12:25:23Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I think the definition of redundant is slightly different than what you propose. Redundant nodes are nodes with a resolution of only one leaf node, where all parent nodes are filtered out of the resolution. I think in the very early days we called that a \"shadow\".\r\n\r\nWith the definition you propose, I think it would become impossible to do the first-ever full commit in an otherwise empty tree.",
+          "createdAt": "2022-01-31T12:25:22Z",
+          "updatedAt": "2022-01-31T12:25:22Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -40087,7 +40095,7 @@
       ],
       "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
       "createdAt": "2021-12-16T12:54:02Z",
-      "updatedAt": "2022-01-28T18:39:08Z",
+      "updatedAt": "2022-01-31T08:13:27Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
@@ -40217,6 +40225,13 @@
           "body": "If we had some language to talk about the guarantees encoded in a ratchet-tree T that is:\r\n - clean, succinct & simple\r\n - communicates significant and meaningful amount of information about the guarantees\r\n - clearly conveys an intuition that accurately reflects (parts of) the formal guarantee in T\r\n\r\nthen I'd probably change my mind about the security benefits of the new parent hash (assuming we also give MLS an interface for applications to extract statements in this language about the current epoch; especially for welcome msgs).",
           "createdAt": "2022-01-28T13:44:46Z",
           "updatedAt": "2022-01-28T13:46:59Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@psyoptix good points. If there is indeed an easier-to-create ratchet tree that would be equally plausible (as is the case here), then I agree that the guarantees are not worth much. In principle, however, I still think that guarantees might be worth having even if the user isn't aware of it. One example could be that the application could consider the effective guarantees that we get from a ratchet tree and then, for example, hide the group from the user until enough members have updated, such that group membership was sufficiently attested to (for some degree of \"sufficiently\"). Although for usability purposes that might not be an option, so in this particular point, it probably means that it's not worth having if we can't communicate it to the user.\r\n\r\nRegarding the interface: I don't believe MLS as specified right now has any sort of interface. It's really only specified how clients communicate with one-another. They way I understand it, an MLS implementation can then decide what information about their state they make available to the application or what actions the application can take.\r\n\r\nRegarding language: I'm not sure I understand what you have in mind, but let's give it a try. (Of course this is all going to be a bit vague, but maybe it's a starting point for further discussions.)\r\n\r\n# Security Model\r\n\r\nLet T be a ratchet tree freshly received by user U. Then let M_T be an array in the state of user U indexed by the members of the tree T, where for each member m, M_T[m] contains the set of identities attested to by m. We can now create an oracle that allows the adversary to query this store. \r\n\r\nIn the real world, the store is filled by checking which leaves are covered by the individual parent hashes present in the member's key packages. In the ideal world, each sender maintains a log (per tree) containing the members to which they attest and the receiver just copies the information from there upon receiving a ratchet tree. (Similar to log-decryption in real-vs.-ideal AE models.)\r\n\r\n# Resolution Based Parent Hash\r\n\r\nI would now claim that with resolution based parent hashes, there is an attack that goes as follows:\r\n\r\nThe adversary takes a valid tree, where a user A has already made a commit. The adversary generates a credential and replaces the credential of one of the users attested to by A (let's call the user B), before re-signing the corresponding key package. The adversary then sends it to their victim V as part of a Welcome message. V validates the parent hashes, which should be fine, since we didn't touch any hpke keys. The adversary then queries the oracle defined above using the gid of the new group, as well as the cids of V and A. If the user B shows up in M_T[A] then the adversary knows it's the ideal world, otherwise it's the real world.\r\n\r\n# Tree-Hash Based Parent Hash \r\n\r\nIf we have tree-hash based parent hash, the attack described above will not work. This is because upon receiving the Welcome message, V will fail to verify the parent hashes since the tree hash covers the credential as well.\r\n\r\n# Caveat: AS\r\n\r\nThe above attack will _not_ work in the first scenario if the AS (which V will consult upon receiving the Welcome) rejects the tampered-with key package (or the credential within) created by the adversary. I still think there is some relevance to the attack, since for many messengers in use today, the AS essentially requires users to verify identities OOB (\"safety numbers\", etc.), which I would claim is not done in most cases.",
+          "createdAt": "2022-01-31T08:12:33Z",
+          "updatedAt": "2022-01-31T08:13:27Z"
         }
       ],
       "reviews": []
@@ -41833,26 +41848,50 @@
       "id": "PR_kwDOBoyH6c4xwQrc",
       "title": "Reorg move crypto forward",
       "url": "https://github.com/mlswg/mls-protocol/pull/567",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Depends on #566 \r\n\r\nMoves the `Cryptographic Objects` and `Message Framing` sections ahead of `Ratchet Tree Operations`, to reduce forward references and have ratchet tree / key schedule / secret tree sections together.\r\n\r\n<img width=\"495\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151605925-af25de8b-9361-4409-bd40-c9dafccc8038.png\">\r\n",
       "createdAt": "2022-01-28T19:01:45Z",
-      "updatedAt": "2022-01-29T00:14:43Z",
+      "updatedAt": "2022-01-31T22:04:42Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "4fa832bf5219e06a01ff673bfb9d5e28e9ef1e05",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-move-crypto-forward",
       "headRefOid": "355717e6787dcc5e0bec0a0c9b92bca4d75f5f25",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "closedAt": "2022-01-31T22:03:50Z",
+      "mergedAt": "2022-01-31T22:03:50Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "8efbc7f8af47028978829b29132755b7e144484c"
+      },
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "If you look at this with `git diff main --diff-algorithm=minimal`, it shows the session move more clearly.",
+          "createdAt": "2022-01-31T21:23:43Z",
+          "updatedAt": "2022-01-31T21:23:43Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zw9GY",
+          "commit": {
+            "abbreviatedOid": "355717e"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-01-31T22:04:42Z",
+          "updatedAt": "2022-01-31T22:04:42Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 568,
@@ -41866,18 +41905,120 @@
       "labels": [],
       "body": "Depends on #567 \r\n\r\nSome subsections of `Key Packages` are more natural within the ratchet tree operations section.  This PR pulls them up into the `Ratchet Tree Operations` section.\r\n\r\n<img width=\"495\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151607463-8ffdd738-1034-4c80-b137-c64492e6e001.png\">\r\n",
       "createdAt": "2022-01-28T19:27:56Z",
-      "updatedAt": "2022-01-28T19:27:56Z",
+      "updatedAt": "2022-01-31T22:08:47Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "83108dbfe7f0aa3daeea5e869413e02e2f662404",
+      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-ratchet-tree-together",
-      "headRefOid": "1ac1770b3dbf26e52bf490cc7c24e8dafe8fdced",
+      "headRefOid": "b07503101c5bafd51652adb1b79d7d197ab2fd10",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Again, this diff looks better with `git diff main --diff-algorithm=minimal`\r\n",
+          "createdAt": "2022-01-31T22:08:47Z",
+          "updatedAt": "2022-01-31T22:08:47Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 569,
+      "id": "PR_kwDOBoyH6c4x3eB_",
+      "title": "Move Key Packages section down",
+      "url": "https://github.com/mlswg/mls-protocol/pull/569",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Depends on #568 \r\n\r\nThis swaps the \"Key Packages\" and \"Key Schedule\" sections, so that the former is just before \"Group Creation\".\r\n\r\n<img width=\"472\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151881864-641618af-7c5a-493e-b174-1fe8d1185848.png\">\r\n",
+      "createdAt": "2022-01-31T22:14:07Z",
+      "updatedAt": "2022-01-31T22:16:07Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "reorg-move-kp-down",
+      "headRefOid": "97414ef4916ec27012ad35ba6fa782e046c0e1d8",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Best reviewed with `git diff  reorg-ratchet-tree-together --diff-algorithm=minimal`, which will show the diff against #568 ",
+          "createdAt": "2022-01-31T22:14:27Z",
+          "updatedAt": "2022-01-31T22:16:07Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 570,
+      "id": "PR_kwDOBoyH6c4x3fTi",
+      "title": "Split out Secret Tree",
+      "url": "https://github.com/mlswg/mls-protocol/pull/570",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Depends on #569 \r\n\r\nAs described in the protocol overview, the Secret Tree can be understood apart from the key schedule; the key schedule just provides the `encryption_secret` to become the root of the tree.  This PR pulls out the secret-tree-related subsections of the key schedule section into their own top-level section.\r\n\r\nBest reviewed with `git diff reorg-move-kp-down --diff-algorithm=minimal` to show the diff against #569 \r\n\r\n<img width=\"472\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151882712-66b6ba56-7688-4b47-9516-a19affe15336.png\">\r\n",
+      "createdAt": "2022-01-31T22:20:55Z",
+      "updatedAt": "2022-01-31T22:20:55Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "reorg-split-out-secret-tree",
+      "headRefOid": "72168c22ad84ab1985d5178382bc4ab9fb9c4bec",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 571,
+      "id": "PR_kwDOBoyH6c4x3gXe",
+      "title": "Move up group state",
+      "url": "https://github.com/mlswg/mls-protocol/pull/571",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Depends on #570 \r\n\r\nThis PR moves the \"Group State\" subsection up into the \"Key Schedule\" section, where it fits more naturally.\r\n\r\n<img width=\"482\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151883518-7f8b52c1-51d8-4b67-9252-c85ef92c09cc.png\">\r\n",
+      "createdAt": "2022-01-31T22:27:21Z",
+      "updatedAt": "2022-01-31T22:27:56Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "reorg-move-up-group-state",
+      "headRefOid": "06e1de2d001bc23836af256be041e6077ec623e6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "`git diff reorg-split-out-secret-tree --diff-algorithm=minimal`",
+          "createdAt": "2022-01-31T22:27:56Z",
+          "updatedAt": "2022-01-31T22:27:56Z"
+        }
+      ],
       "reviews": []
     }
   ]

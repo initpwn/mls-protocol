@@ -105,11 +105,12 @@ Table of Contents
        8.5.2.  Verifying Parent Hashes
      8.6.  Update Paths
    9.  Key Schedule
-     9.1.  External Initialization
-     9.2.  Pre-Shared Keys
-     9.3.  Exporters
-     9.4.  Resumption Secret
-     9.5.  State Authentication Keys
+     9.1.  Group Context
+     9.2.  External Initialization
+     9.3.  Pre-Shared Keys
+     9.4.  Exporters
+     9.5.  Resumption Secret
+     9.6.  State Authentication Keys
    10. Secret Tree
      10.1.  Encryption Keys
      10.2.  Deletion Schedule
@@ -118,7 +119,6 @@ Table of Contents
      11.2.  Client Capabilities
      11.3.  Lifetime
      11.4.  KeyPackage Identifiers
-     11.5.  Group State
    12. Group Creation
      12.1.  Required Capabilities
      12.2.  Reinitialization
@@ -2145,7 +2145,100 @@ Table of Contents
    struct in order to allow non-members to join the group using an
    external commit.
 
-9.1.  External Initialization
+9.1.  Group Context
+
+   Each member of the group maintains a GroupContext object that
+   summarizes the state of the group:
+
+   struct {
+       opaque group_id<0..255>;
+       uint64 epoch;
+       opaque tree_hash<0..255>;
+       opaque confirmed_transcript_hash<0..255>;
+       Extension extensions<0..2^32-1>;
+   } GroupContext;
+
+   The fields in this state have the following semantics:
+
+   *  The group_id field is an application-defined identifier for the
+      group.
+
+   *  The epoch field represents the current version of the group key.
+
+   *  The tree_hash field contains a commitment to the contents of the
+      group's ratchet tree and the credentials for the members of the
+      group, as described in Section 8.4.
+
+   *  The confirmed_transcript_hash field contains a running hash over
+      the messages that led to this state.
+
+   *  The extensions field contains the details of any protocol
+      extensions that apply to the group.
+
+   When a new member is added to the group, an existing member of the
+   group provides the new member with a Welcome message.  The Welcome
+   message provides the information the new member needs to initialize
+   its GroupContext.
+
+   Different changes to the group will have different effects on the
+   group state.  These effects are described in their respective
+   subsections of Section 13.1.  The following general rules apply:
+
+   *  The group_id field is constant.
+
+   *  The epoch field increments by one for each Commit message that is
+      processed.
+
+   *  The tree_hash is updated to represent the current tree and
+      credentials.
+
+   *  The confirmed_transcript_hash field is updated with the data for
+      an MLSPlaintext message encoding a Commit message as described
+      below.
+
+   *  The extensions field changes when a GroupContextExtensions
+      proposal is committed.
+
+   The confirmed_transcript_hash is updated with an MLSPlaintext in two
+   steps:
+
+   struct {
+       WireFormat wire_format;
+       opaque group_id<0..255>;
+       uint64 epoch;
+       Sender sender;
+       opaque authenticated_data<0..2^32-1>;
+       ContentType content_type = commit;
+       Commit commit;
+       opaque signature<0..2^16-1>;
+   } MLSPlaintextCommitContent;
+
+   struct {
+       optional<MAC> confirmation_tag;
+   } MLSPlaintextCommitAuthData;
+
+   interim_transcript_hash_[0] = ""; // zero-length octet string
+
+   confirmed_transcript_hash_[n] =
+       Hash(interim_transcript_hash_[n] ||
+           MLSPlaintextCommitContent_[n]);
+
+   interim_transcript_hash_[n+1] =
+       Hash(confirmed_transcript_hash_[n] ||
+           MLSPlaintextCommitAuthData_[n]);
+
+   Thus the confirmed_transcript_hash field in a GroupContext object
+   represents a transcript over the whole history of MLSPlaintext Commit
+   messages, up to the confirmation_tag field of the most recent Commit.
+   The confirmation tag is then included in the transcript for the next
+   epoch.  The interim transcript hash is computed by new members using
+   the confirmation_tag of the GroupInfo struct, while existing members
+   can compute it directly.
+
+   As shown above, when a new group is created, the
+   interim_transcript_hash field is set to the zero-length octet string.
+
+9.2.  External Initialization
 
    In addition to initializing a new epoch via KDF invocations as
    described above, an MLS group can also initialize a new epoch via an
@@ -2172,7 +2265,7 @@ Table of Contents
    In both cases, the info input to HPKE is set to the PublicGroupState
    for the previous epoch, encoded using the TLS serialization.
 
-9.2.  Pre-Shared Keys
+9.3.  Pre-Shared Keys
 
    Groups which already have an out-of-band mechanism to generate shared
    group secrets can inject those into the MLS key schedule to seed the
@@ -2288,7 +2381,7 @@ Table of Contents
    Commit, then the resulting psk_secret is psk_secret_[0], the all-zero
    vector.
 
-9.3.  Exporters
+9.4.  Exporters
 
    The main MLS key schedule provides an exporter_secret which can be
    used by an application as the basis to derive new secrets called
@@ -2310,7 +2403,7 @@ Table of Contents
    It is RECOMMENDED for the application generating exported values to
    refresh those values after a Commit is processed.
 
-9.4.  Resumption Secret
+9.5.  Resumption Secret
 
    The main MLS key schedule provides a resumption_secret that is used
    as a PSK to inject entropy from one epoch into another.  This
@@ -2323,7 +2416,7 @@ Table of Contents
    the number of past epochs for which the resumption_secret may be
    stored.
 
-9.5.  State Authentication Keys
+9.6.  State Authentication Keys
 
    The main MLS key schedule provides a per-epoch authentication_secret.
    If one of the parties is being actively impersonated by an attacker,
@@ -2644,99 +2737,6 @@ Table of Contents
 
    opaque external_key_id<0..2^16-1>;
 
-11.5.  Group State
-
-   Each member of the group maintains a GroupContext object that
-   summarizes the state of the group:
-
-   struct {
-       opaque group_id<0..255>;
-       uint64 epoch;
-       opaque tree_hash<0..255>;
-       opaque confirmed_transcript_hash<0..255>;
-       Extension extensions<0..2^32-1>;
-   } GroupContext;
-
-   The fields in this state have the following semantics:
-
-   *  The group_id field is an application-defined identifier for the
-      group.
-
-   *  The epoch field represents the current version of the group key.
-
-   *  The tree_hash field contains a commitment to the contents of the
-      group's ratchet tree and the credentials for the members of the
-      group, as described in Section 8.4.
-
-   *  The confirmed_transcript_hash field contains a running hash over
-      the messages that led to this state.
-
-   *  The extensions field contains the details of any protocol
-      extensions that apply to the group.
-
-   When a new member is added to the group, an existing member of the
-   group provides the new member with a Welcome message.  The Welcome
-   message provides the information the new member needs to initialize
-   its GroupContext.
-
-   Different changes to the group will have different effects on the
-   group state.  These effects are described in their respective
-   subsections of Section 13.1.  The following general rules apply:
-
-   *  The group_id field is constant.
-
-   *  The epoch field increments by one for each Commit message that is
-      processed.
-
-   *  The tree_hash is updated to represent the current tree and
-      credentials.
-
-   *  The confirmed_transcript_hash field is updated with the data for
-      an MLSPlaintext message encoding a Commit message as described
-      below.
-
-   *  The extensions field changes when a GroupContextExtensions
-      proposal is committed.
-
-   The confirmed_transcript_hash is updated with an MLSPlaintext in two
-   steps:
-
-   struct {
-       WireFormat wire_format;
-       opaque group_id<0..255>;
-       uint64 epoch;
-       Sender sender;
-       opaque authenticated_data<0..2^32-1>;
-       ContentType content_type = commit;
-       Commit commit;
-       opaque signature<0..2^16-1>;
-   } MLSPlaintextCommitContent;
-
-   struct {
-       optional<MAC> confirmation_tag;
-   } MLSPlaintextCommitAuthData;
-
-   interim_transcript_hash_[0] = ""; // zero-length octet string
-
-   confirmed_transcript_hash_[n] =
-       Hash(interim_transcript_hash_[n] ||
-           MLSPlaintextCommitContent_[n]);
-
-   interim_transcript_hash_[n+1] =
-       Hash(confirmed_transcript_hash_[n] ||
-           MLSPlaintextCommitAuthData_[n]);
-
-   Thus the confirmed_transcript_hash field in a GroupContext object
-   represents a transcript over the whole history of MLSPlaintext Commit
-   messages, up to the confirmation_tag field of the most recent Commit.
-   The confirmation tag is then included in the transcript for the next
-   epoch.  The interim transcript hash is computed by new members using
-   the confirmation_tag of the GroupInfo struct, while existing members
-   can compute it directly.
-
-   As shown above, when a new group is created, the
-   interim_transcript_hash field is set to the zero-length octet string.
-
 12.  Group Creation
 
    A group is always created with a single member, the "creator".  The
@@ -3054,7 +3054,7 @@ Table of Contents
    The psktype of the pre-shared key MUST be external and the psk_nonce
    MUST be a randomly sampled nonce of length KDF.Nh.  When processing a
    Commit message that includes one or more PreSharedKey proposals,
-   group members derive psk_secret as described in Section 9.2, where
+   group members derive psk_secret as described in Section 9.3, where
    the order of the PSKs corresponds to the order of the PreSharedKey
    proposals in the Commit.
 
@@ -3095,7 +3095,7 @@ Table of Contents
 
    A member of the group applies an ExternalInit message by initializing
    the next epoch using an init secret computed as described in
-   Section 9.1.  The kem_output field contains the required KEM output.
+   Section 9.2.  The kem_output field contains the required KEM output.
 
 13.1.7.  AppAck
 
@@ -3412,7 +3412,7 @@ Table of Contents
       be).  In this case, the new ratchet tree is the same as the
       provisional ratchet tree.
 
-   *  Derive the psk_secret as specified in Section 9.2, where the order
+   *  Derive the psk_secret as specified in Section 9.3, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3538,7 +3538,7 @@ Table of Contents
    *  Update the confirmed and interim transcript hashes using the new
       Commit, and generate the new GroupContext.
 
-   *  Derive the psk_secret as specified in Section 9.2, where the order
+   *  Derive the psk_secret as specified in Section 9.3, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3700,7 +3700,7 @@ Table of Contents
       field.
 
    *  When processing a Commit, both existing and new members MUST use
-      the external init secret as described in Section 9.1.
+      the external init secret as described in Section 9.2.
 
    *  The sender type for the MLSPlaintext encapsulating the External
       Commit MUST be new_member

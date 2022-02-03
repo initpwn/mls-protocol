@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 5 August 2022                                   Inria & Mozilla
+Expires: 7 August 2022                                   Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 5 August 2022                                   Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                         1 February 2022
+                                                         3 February 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 August 2022.
+   This Internet-Draft will expire on 7 August 2022.
 
 Copyright Notice
 
@@ -106,11 +106,12 @@ Table of Contents
      8.6.  Update Paths
    9.  Key Schedule
      9.1.  Group Context
-     9.2.  External Initialization
-     9.3.  Pre-Shared Keys
-     9.4.  Exporters
-     9.5.  Resumption Secret
-     9.6.  State Authentication Keys
+     9.2.  Transcript Hashes
+     9.3.  External Initialization
+     9.4.  Pre-Shared Keys
+     9.5.  Exporters
+     9.6.  Resumption Secret
+     9.7.  State Authentication Keys
    10. Secret Tree
      10.1.  Encryption Keys
      10.2.  Deletion Schedule
@@ -2199,8 +2200,17 @@ Table of Contents
    *  The extensions field changes when a GroupContextExtensions
       proposal is committed.
 
-   The confirmed_transcript_hash is updated with an MLSPlaintext in two
-   steps:
+9.2.  Transcript Hashes
+
+   The transcript hashes computed in MLS represent a running hash over
+   all Proposal and Commit messages that have ever been sent in a group.
+   Commit messages are included directly.  Proposal messages are
+   indirectly included via the Commit that applied them.  Both types of
+   message are included by hashing the MLSPlaintext in which they were
+   sent.
+
+   The confirmed_transcript_hash is updated with an MLSPlaintext
+   containing a Commit in two steps:
 
    struct {
        WireFormat wire_format;
@@ -2238,7 +2248,7 @@ Table of Contents
    As shown above, when a new group is created, the
    interim_transcript_hash field is set to the zero-length octet string.
 
-9.2.  External Initialization
+9.3.  External Initialization
 
    In addition to initializing a new epoch via KDF invocations as
    described above, an MLS group can also initialize a new epoch via an
@@ -2265,7 +2275,7 @@ Table of Contents
    In both cases, the info input to HPKE is set to the PublicGroupState
    for the previous epoch, encoded using the TLS serialization.
 
-9.3.  Pre-Shared Keys
+9.4.  Pre-Shared Keys
 
    Groups which already have an out-of-band mechanism to generate shared
    group secrets can inject those into the MLS key schedule to seed the
@@ -2381,7 +2391,7 @@ Table of Contents
    Commit, then the resulting psk_secret is psk_secret_[0], the all-zero
    vector.
 
-9.4.  Exporters
+9.5.  Exporters
 
    The main MLS key schedule provides an exporter_secret which can be
    used by an application as the basis to derive new secrets called
@@ -2403,7 +2413,7 @@ Table of Contents
    It is RECOMMENDED for the application generating exported values to
    refresh those values after a Commit is processed.
 
-9.5.  Resumption Secret
+9.6.  Resumption Secret
 
    The main MLS key schedule provides a resumption_secret that is used
    as a PSK to inject entropy from one epoch into another.  This
@@ -2416,7 +2426,7 @@ Table of Contents
    the number of past epochs for which the resumption_secret may be
    stored.
 
-9.6.  State Authentication Keys
+9.7.  State Authentication Keys
 
    The main MLS key schedule provides a per-epoch authentication_secret.
    If one of the parties is being actively impersonated by an attacker,
@@ -3054,7 +3064,7 @@ Table of Contents
    The psktype of the pre-shared key MUST be external and the psk_nonce
    MUST be a randomly sampled nonce of length KDF.Nh.  When processing a
    Commit message that includes one or more PreSharedKey proposals,
-   group members derive psk_secret as described in Section 9.3, where
+   group members derive psk_secret as described in Section 9.4, where
    the order of the PSKs corresponds to the order of the PreSharedKey
    proposals in the Commit.
 
@@ -3095,7 +3105,7 @@ Table of Contents
 
    A member of the group applies an ExternalInit message by initializing
    the next epoch using an init secret computed as described in
-   Section 9.2.  The kem_output field contains the required KEM output.
+   Section 9.3.  The kem_output field contains the required KEM output.
 
 13.1.7.  AppAck
 
@@ -3412,7 +3422,7 @@ Table of Contents
       be).  In this case, the new ratchet tree is the same as the
       provisional ratchet tree.
 
-   *  Derive the psk_secret as specified in Section 9.3, where the order
+   *  Derive the psk_secret as specified in Section 9.4, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3538,7 +3548,7 @@ Table of Contents
    *  Update the confirmed and interim transcript hashes using the new
       Commit, and generate the new GroupContext.
 
-   *  Derive the psk_secret as specified in Section 9.3, where the order
+   *  Derive the psk_secret as specified in Section 9.4, where the order
       of PSKs in the derivation corresponds to the order of PreSharedKey
       proposals in the proposals vector.
 
@@ -3700,7 +3710,7 @@ Table of Contents
       field.
 
    *  When processing a Commit, both existing and new members MUST use
-      the external init secret as described in Section 9.2.
+      the external init secret as described in Section 9.3.
 
    *  The sender type for the MLSPlaintext encapsulating the External
       Commit MUST be new_member

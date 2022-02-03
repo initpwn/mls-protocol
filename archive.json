@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-01T01:07:47.179435+00:00",
+  "timestamp": "2022-02-03T01:02:51.668872+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4146,7 +4146,7 @@
       "id": "MDU6SXNzdWU3MTQ3MjAxMTY=",
       "title": "Draft structure/Editorial Changes",
       "url": "https://github.com/mlswg/mls-protocol/issues/409",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "franziskuskiefer",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -4155,8 +4155,8 @@
       ],
       "body": "This issue accompanies the e-mail [1] pointing out editorial issues with the draft and suggesting improvements.\r\n\r\nTL;DR: I don't think the draft currently is what is needed to implement MLS. It needs an editorial overhaul with a better structure.\r\n\r\n[1] https://mailarchive.ietf.org/arch/msg/mls/ZOy80Yp5bRhoM8fsQMGVwmFFEzY/",
       "createdAt": "2020-10-05T10:31:58Z",
-      "updatedAt": "2022-01-27T18:45:49Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-01T15:14:03Z",
+      "closedAt": "2022-02-01T15:14:03Z",
       "comments": [
         {
           "author": "beurdouche",
@@ -4199,6 +4199,13 @@
           "body": "I have an alternative organization of the first sections:\r\n* Add the one sentence definition of `node` before the last paragraph of `##Tree Computation Terminology`\r\n* Swap `##Ratchet Tree Nodes` and `##Views of a Ratchet Tree`\r\n\r\nThis seems to all flow nicely with very few forward references.\r\n\r\nA more radical rewrite might \r\n* Move `#Group Evolution` forward before `#Cryptographic Objects`\r\nbut I don't think that is necessary.\r\n\r\nI do like Richard's proposal to split `## Group State`\r\n\r\n",
           "createdAt": "2022-01-27T18:45:49Z",
           "updatedAt": "2022-01-27T18:45:49Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm considering this fixed after the series of reorg PRs that @rohan-wire @Bren2010 and I just finished.  \r\n\r\n#565 #566 #567 #568 #569 #570 #571 \r\n",
+          "createdAt": "2022-02-01T15:14:03Z",
+          "updatedAt": "2022-02-01T15:14:03Z"
         }
       ]
     },
@@ -5745,6 +5752,30 @@
           "body": "I think the definition of redundant is slightly different than what you propose. Redundant nodes are nodes with a resolution of only one leaf node, where all parent nodes are filtered out of the resolution. I think in the very early days we called that a \"shadow\".\r\n\r\nWith the definition you propose, I think it would become impossible to do the first-ever full commit in an otherwise empty tree.",
           "createdAt": "2022-01-31T12:25:22Z",
           "updatedAt": "2022-01-31T12:25:22Z"
+        }
+      ]
+    },
+    {
+      "number": 574,
+      "id": "I_kwDOBoyH6c5C5CEX",
+      "title": "Consistency between \"optional that MUST contain a value when \u2026\" and selects",
+      "url": "https://github.com/mlswg/mls-protocol/issues/574",
+      "state": "OPEN",
+      "author": "TWal",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In the draft, we often need some value to be present in a structure under certain conditions.\r\n\r\nSometimes, it is done using an `optional<\u2026>`, and the prose says that it MUST contain a value under these conditions, e.g. for:\r\n- `confirmation_tag`\r\n- `membership_tag`\r\n\r\nSometimes, it is done using a `select`, e.g. for:\r\n- `GroupContext` in `MLSPlaintextTBS`\r\n\r\nIt looks like we need to make a choice here.",
+      "createdAt": "2022-02-02T18:17:33Z",
+      "updatedAt": "2022-02-02T23:20:44Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It seems like the `select` pattern only works when you have an indicator to use as selector, as opposed to some broader context.  For `confirmation_tag` and `membership_tag`, you might be able to use `sender.type`, but it seems a bit messy. ",
+          "createdAt": "2022-02-02T23:20:44Z",
+          "updatedAt": "2022-02-02T23:20:44Z"
         }
       ]
     }
@@ -39578,13 +39609,13 @@
       ],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2022-01-28T18:39:08Z",
+      "updatedAt": "2022-02-02T18:20:22Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
+      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_wire_format",
-      "headRefOid": "839aa87dab229251cb9dd94bfcd5dd6c555d7c40",
+      "headRefOid": "66a1775bf51535f8b899db0f939fbcbefa78fb18",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -39666,6 +39697,13 @@
           "body": "Discussion on working call:\r\n\r\n* General agreement that this approach is good\r\n* Holding this PR until after section rearrangement\r\n* @rohan-wire suggests extending the `wire_format` idea to other types\r\n    * e.g., Welcome, PublicGroupState\r\n    * @kkohbrok notes that this could help with unambiguous signatures as well\r\n    * Let's handle as a follow-on once this merges",
           "createdAt": "2022-01-27T15:40:07Z",
           "updatedAt": "2022-01-27T15:40:07Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I just made the merge post-section rearranging (it was an ugly one, it was easier to re-do it from scratch).\r\n\r\n@rohan-wire I opened the issue #574 to talk about it, since I feel it belong to a separate discussion.\r\n\r\nAbout adding `Welcome` and `PublicGroupState` in `wire_format`, that means we should add them in the `select` for `MLSMessage`?",
+          "createdAt": "2022-02-02T18:20:22Z",
+          "updatedAt": "2022-02-02T18:20:22Z"
         }
       ],
       "reviews": []
@@ -41898,24 +41936,26 @@
       "id": "PR_kwDOBoyH6c4xwUxd",
       "title": "Consolidate ratchet-tree-related sections",
       "url": "https://github.com/mlswg/mls-protocol/pull/568",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Depends on #567 \r\n\r\nSome subsections of `Key Packages` are more natural within the ratchet tree operations section.  This PR pulls them up into the `Ratchet Tree Operations` section.\r\n\r\n<img width=\"495\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151607463-8ffdd738-1034-4c80-b137-c64492e6e001.png\">\r\n",
       "createdAt": "2022-01-28T19:27:56Z",
-      "updatedAt": "2022-01-31T22:08:47Z",
+      "updatedAt": "2022-02-01T02:16:55Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-ratchet-tree-together",
       "headRefOid": "b07503101c5bafd51652adb1b79d7d197ab2fd10",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-01T02:16:55Z",
+      "mergedAt": "2022-02-01T02:16:55Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "1616f4172550aaaf8a65a6aaad059c269462b7ac"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -41925,31 +41965,47 @@
           "updatedAt": "2022-01-31T22:08:47Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zxe7-",
+          "commit": {
+            "abbreviatedOid": "b075031"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-01T01:49:56Z",
+          "updatedAt": "2022-02-01T01:49:56Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 569,
       "id": "PR_kwDOBoyH6c4x3eB_",
       "title": "Move Key Packages section down",
       "url": "https://github.com/mlswg/mls-protocol/pull/569",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Depends on #568 \r\n\r\nThis swaps the \"Key Packages\" and \"Key Schedule\" sections, so that the former is just before \"Group Creation\".\r\n\r\n<img width=\"472\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151881864-641618af-7c5a-493e-b174-1fe8d1185848.png\">\r\n",
       "createdAt": "2022-01-31T22:14:07Z",
-      "updatedAt": "2022-01-31T22:16:07Z",
+      "updatedAt": "2022-02-01T02:20:58Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "baseRefOid": "1616f4172550aaaf8a65a6aaad059c269462b7ac",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-move-kp-down",
-      "headRefOid": "97414ef4916ec27012ad35ba6fa782e046c0e1d8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "5aa26e4b0876ade14cd11c6f1ac3f119582219d5",
+      "closedAt": "2022-02-01T02:20:58Z",
+      "mergedAt": "2022-02-01T02:20:58Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "34a6ac78b764208f994c20f4d9a709a9692e3c5e"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -41959,57 +42015,89 @@
           "updatedAt": "2022-01-31T22:16:07Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zxfJ_",
+          "commit": {
+            "abbreviatedOid": "97414ef"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-01T01:52:19Z",
+          "updatedAt": "2022-02-01T01:52:19Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 570,
       "id": "PR_kwDOBoyH6c4x3fTi",
       "title": "Split out Secret Tree",
       "url": "https://github.com/mlswg/mls-protocol/pull/570",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Depends on #569 \r\n\r\nAs described in the protocol overview, the Secret Tree can be understood apart from the key schedule; the key schedule just provides the `encryption_secret` to become the root of the tree.  This PR pulls out the secret-tree-related subsections of the key schedule section into their own top-level section.\r\n\r\nBest reviewed with `git diff reorg-move-kp-down --diff-algorithm=minimal` to show the diff against #569 \r\n\r\n<img width=\"472\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151882712-66b6ba56-7688-4b47-9516-a19affe15336.png\">\r\n",
       "createdAt": "2022-01-31T22:20:55Z",
-      "updatedAt": "2022-01-31T22:20:55Z",
+      "updatedAt": "2022-02-01T02:23:18Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "baseRefOid": "34a6ac78b764208f994c20f4d9a709a9692e3c5e",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-split-out-secret-tree",
-      "headRefOid": "72168c22ad84ab1985d5178382bc4ab9fb9c4bec",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f7c12f74d6a376ff28ae465768f0b8e218ab8388",
+      "closedAt": "2022-02-01T02:23:18Z",
+      "mergedAt": "2022-02-01T02:23:18Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "dab97f24b30cf395919e64d8c86beda1756f5b48"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zxfRK",
+          "commit": {
+            "abbreviatedOid": "72168c2"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-01T01:53:26Z",
+          "updatedAt": "2022-02-01T01:53:26Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 571,
       "id": "PR_kwDOBoyH6c4x3gXe",
       "title": "Move up group state",
       "url": "https://github.com/mlswg/mls-protocol/pull/571",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Depends on #570 \r\n\r\nThis PR moves the \"Group State\" subsection up into the \"Key Schedule\" section, where it fits more naturally.\r\n\r\n<img width=\"482\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151883518-7f8b52c1-51d8-4b67-9252-c85ef92c09cc.png\">\r\n",
       "createdAt": "2022-01-31T22:27:21Z",
-      "updatedAt": "2022-01-31T22:27:56Z",
+      "updatedAt": "2022-02-01T02:26:07Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "8efbc7f8af47028978829b29132755b7e144484c",
+      "baseRefOid": "dab97f24b30cf395919e64d8c86beda1756f5b48",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-move-up-group-state",
-      "headRefOid": "06e1de2d001bc23836af256be041e6077ec623e6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "eb45ddc1d5bc5cbfc1e63e7789c52a02dc94da23",
+      "closedAt": "2022-02-01T02:26:07Z",
+      "mergedAt": "2022-02-01T02:26:07Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "e7e132080d81149639cc64642f4e16beef58786a"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -42019,6 +42107,112 @@
           "updatedAt": "2022-01-31T22:27:56Z"
         }
       ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4zxfet",
+          "commit": {
+            "abbreviatedOid": "06e1de2"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-01T01:55:38Z",
+          "updatedAt": "2022-02-01T01:55:38Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 572,
+      "id": "PR_kwDOBoyH6c4x4Do9",
+      "title": "Split the Group State section into Group Context and Transcript Hashes",
+      "url": "https://github.com/mlswg/mls-protocol/pull/572",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is the last of the reorg PRs.  Does what it says in the title.\r\n\r\n<img width=\"482\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151904958-f1b7530e-2ef0-4ed0-93dd-b9e9db6bfcfc.png\">\r\n",
+      "createdAt": "2022-02-01T02:32:32Z",
+      "updatedAt": "2022-02-01T02:32:32Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "reorg-split-group-state",
+      "headRefOid": "91c2d322322c19289991f9dafb43e9966cf56532",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 573,
+      "id": "PR_kwDOBoyH6c4x6YFP",
+      "title": "Remove endpoint_id",
+      "url": "https://github.com/mlswg/mls-protocol/pull/573",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #558\r\n\r\nThis involved a couple of changes other than just removing the field and references to it:\r\n\r\n* Detecting duplicative Adds is now a little more ambiguous, since you can't just match on `endpoint_id`.  However (a) this doesn't degrade the security of the protocol, just makes it a little less efficient (b) as discussed in #558, if applications want to sharpen it, they can add an `endpoint_id`-like identifier in an extension.\r\n* The External Commit language around resync got generalized to say that the KeyPackage needs to meet the requirements of an Update for the removed node, which captures the successor notions we've discussed.\r\n\r\nI also noticed that when we forbade proposals by reference in #562, we didn't totally remove them.  So I went ahead and fixed that here.",
+      "createdAt": "2022-02-01T15:46:15Z",
+      "updatedAt": "2022-02-01T15:55:46Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "remove-endpoint-id",
+      "headRefOid": "eb8396a5b47c72260c024750da6d50dd1c926f04",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4z0QlS",
+          "commit": {
+            "abbreviatedOid": "eb8396a"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks for taking care of the cleanup here after the discussion on #509.\r\n\r\nIf the application has to provide a function that determines if a given KeyPackage represents a valid update, we could use the same function to determine if an Add is a duplicate. Although admittedly, in that case one would have to compare with all other KeyPackages in the group and the function might not be very efficient.\r\n\r\nGenerally, I'm ok with this solution, though \ud83d\udc4d\ud83c\udffb.",
+          "createdAt": "2022-02-01T15:55:46Z",
+          "updatedAt": "2022-02-01T15:55:46Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 575,
+      "id": "PR_kwDOBoyH6c4x_q2y",
+      "title": "Split LeafNode from KeyPackage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/575",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Depends on  #573 \r\n\r\nFixes #539 \r\n\r\nThis PR implements the suggestion from @TWal in #539, taking into account the discussion on the issue and on the call last week.  There are a bunch of small changes (e.g., changing a lot of `KeyPackageRef` to `LeafNodeRef`), but the critical change is the following split of KeyPackage into LeafNode and KeyPackage:\r\n\r\n```\r\nstruct {\r\n    opaque group_id<0..255>;\r\n    opaque parent_hash<0..255>;\r\n} MembershipInfo;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n    optional<MembershipInfo> membership;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n    LeafNode leaf_node;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n```\r\n\r\nThis does a few things we had discussed:\r\n\r\n* KeyPackage is the thing you pre-publish; LeafNode is what goes in the tree\r\n* Sign the LeafNode and the KeyPackage separately, nesting the LeafNode inside the signed KeyPackage information\r\n* Sign the `group_id` when possible.  (This PR takes the chattiest approach, replicating the `group_id` in each leaf.)\r\n* Promote mandatory extensions to fields\r\n\r\nAdd continues to refer to KeyPackage.  Update and Commit use LeafNode directly.\r\n\r\nI did a walk through the document grepping for KeyPackage, and I think I found all the instances that needed to be changed.  But some review to make sure I didn't miss anything would be appreciated.",
+      "createdAt": "2022-02-02T22:59:46Z",
+      "updatedAt": "2022-02-02T23:00:01Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "split-leaf-kp",
+      "headRefOid": "bf03ed5b492a8c9e7c5f0af6bc08709d378c914f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]

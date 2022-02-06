@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-03T01:02:51.668872+00:00",
+  "timestamp": "2022-02-06T01:13:32.984756+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5698,15 +5698,15 @@
       "id": "I_kwDOBoyH6c5CipEB",
       "title": "Remove `endpoint_id`",
       "url": "https://github.com/mlswg/mls-protocol/issues/558",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "We added `endpoint_id` to have a way to reference a member that is stable over the member's lifetime in the group.  However, `endpoint_id` is never used in the protocol; the main need for such references is to give applications a way to tell an MLS stack what to do, e.g., which member to remove.\r\n\r\n`endpoint_id` isn't really required for this purpose, either:\r\n\r\n* Leaf indices have the same stability as `endpoint_id` (since members don't change leaves), and no need for explicit checks on uniqueness.\r\n* Applications can add their own unique identifiers in KeyPackage extensions\r\n* Applications often want to refer to _non-unique_ identifiers, e.g., asking to remove all devices belonging to an email address\r\n\r\nSo it seems like at this point, `endpoint_id` can safely be removed.",
       "createdAt": "2022-01-27T15:24:10Z",
-      "updatedAt": "2022-01-28T09:45:55Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-03T15:23:37Z",
+      "closedAt": "2022-02-03T15:23:37Z",
       "comments": [
         {
           "author": "bifurcation",
@@ -5767,7 +5767,7 @@
       "labels": [],
       "body": "In the draft, we often need some value to be present in a structure under certain conditions.\r\n\r\nSometimes, it is done using an `optional<\u2026>`, and the prose says that it MUST contain a value under these conditions, e.g. for:\r\n- `confirmation_tag`\r\n- `membership_tag`\r\n\r\nSometimes, it is done using a `select`, e.g. for:\r\n- `GroupContext` in `MLSPlaintextTBS`\r\n\r\nIt looks like we need to make a choice here.",
       "createdAt": "2022-02-02T18:17:33Z",
-      "updatedAt": "2022-02-02T23:20:44Z",
+      "updatedAt": "2022-02-03T15:56:58Z",
       "closedAt": null,
       "comments": [
         {
@@ -5776,8 +5776,93 @@
           "body": "It seems like the `select` pattern only works when you have an indicator to use as selector, as opposed to some broader context.  For `confirmation_tag` and `membership_tag`, you might be able to use `sender.type`, but it seems a bit messy. ",
           "createdAt": "2022-02-02T23:20:44Z",
           "updatedAt": "2022-02-02T23:20:44Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* @TWal  elaborates:\r\n    * For `confirmation_tag` could select on `content_type`\r\n    * For `membership_tag` could select on `sender.type`\r\n* @bifurcation agrees that failing on parsing is a pretty compelling rationale for these cases ",
+          "createdAt": "2022-02-03T15:56:58Z",
+          "updatedAt": "2022-02-03T15:56:58Z"
         }
       ]
+    },
+    {
+      "number": 576,
+      "id": "I_kwDOBoyH6c5C81BF",
+      "title": "Make credential succession checking the AS' job",
+      "url": "https://github.com/mlswg/mls-protocol/issues/576",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Right now it says in the Update proposal section: \"Verify that the set of identities attested by the credential is acceptable to the application for the participant being updated.\"\r\n\r\nFirstly, I think this is a matter of authentication and thus the AS' job and secondly, it's a validation step that should probably go into the `KeyPackage Validation` section.",
+      "createdAt": "2022-02-03T15:42:57Z",
+      "updatedAt": "2022-02-03T16:10:51Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* Depends on what the boundary of the AS is:\r\n    * Checking credential is valid\r\n    * Also checking (credential -> credential) transitions\r\n* Moving this check to KP validation section would make it clearer\r\n* @kkohbrok to make a PR ",
+          "createdAt": "2022-02-03T16:10:51Z",
+          "updatedAt": "2022-02-03T16:10:51Z"
+        }
+      ]
+    },
+    {
+      "number": 577,
+      "id": "I_kwDOBoyH6c5C82g0",
+      "title": "Add message/mls MIME Type",
+      "url": "https://github.com/mlswg/mls-protocol/issues/577",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "When MLS messages are transmitted over a protocol which supports Content-Type / MIME Type negotiation, signal that the message is an MLS message.\r\n\r\nBecause MLS messages are really a bag of formats today we should have a MIME type parameter which specifies the specific format included.\r\n\r\nmessage/mls;format={application|handshake|welcome|keypackage|groupcontext}",
+      "createdAt": "2022-02-03T15:48:23Z",
+      "updatedAt": "2022-02-03T23:46:55Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This seems like a fine idea to me.  Could go as a section in the protocol spec, or as a separate (small) spec.",
+          "createdAt": "2022-02-03T16:02:23Z",
+          "updatedAt": "2022-02-03T16:02:23Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* Section or separate doc?\r\n* How do we handle versioning?\r\n    * Internal to the protocol (field in MLSMessage?)\r\n    * Field in the MIME type\r\n    * Different MIME type per version",
+          "createdAt": "2022-02-03T16:05:15Z",
+          "updatedAt": "2022-02-03T16:05:15Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "- I would prefer a short section in the protocol document.\r\n- I think Internal to the protocol is cleanest. \r\n- Likewise the format parameter becomes unnecessary if we add Welcome, PublicGroupState, and KeyPackage to wire_format (see issue #574 )",
+          "createdAt": "2022-02-03T23:46:55Z",
+          "updatedAt": "2022-02-03T23:46:55Z"
+        }
+      ]
+    },
+    {
+      "number": 578,
+      "id": "I_kwDOBoyH6c5DBcq6",
+      "title": "Uniqueness of PSK proposals within a commit",
+      "url": "https://github.com/mlswg/mls-protocol/issues/578",
+      "state": "OPEN",
+      "author": "tomleavy",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Should multiple PSK proposals within a commit be able to reference the same `PreSharedKeyID `? I feel like this should be covered in the same way we state multiple removals for the same `KeyPackageRef` should result in the committer choosing one. Wasn't sure if this was an oversight or on purpose. \r\n\r\nI can submit a PR to clarify if this is something that should be addressed",
+      "createdAt": "2022-02-04T17:40:35Z",
+      "updatedAt": "2022-02-04T17:40:47Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -39609,7 +39694,7 @@
       ],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2022-02-02T18:20:22Z",
+      "updatedAt": "2022-02-03T23:32:53Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
@@ -39704,9 +39789,37 @@
           "body": "I just made the merge post-section rearranging (it was an ugly one, it was easier to re-do it from scratch).\r\n\r\n@rohan-wire I opened the issue #574 to talk about it, since I feel it belong to a separate discussion.\r\n\r\nAbout adding `Welcome` and `PublicGroupState` in `wire_format`, that means we should add them in the `select` for `MLSMessage`?",
           "createdAt": "2022-02-02T18:20:22Z",
           "updatedAt": "2022-02-02T18:20:22Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* Re: @TWal's question - Yes, let's cover all the types\r\n    * @rohan-wire notes that we should also cover KeyPackage",
+          "createdAt": "2022-02-03T16:01:03Z",
+          "updatedAt": "2022-02-03T16:01:03Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> @rohan-wire I opened the issue #574 to talk about it, since I feel it belong to a separate discussion.\r\nThanks. Good call.\r\n \r\n> About adding `Welcome` and `PublicGroupState` in `wire_format`, that means we should add them in the `select` for `MLSMessage`?\r\nYes. And also KeyPackage.\r\n",
+          "createdAt": "2022-02-03T23:32:19Z",
+          "updatedAt": "2022-02-03T23:32:53Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4z_9HG",
+          "commit": {
+            "abbreviatedOid": "66a1775"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Looks good to me, once the additional MLSMessageType values are in.",
+          "createdAt": "2022-02-03T20:57:35Z",
+          "updatedAt": "2022-02-03T20:57:35Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 524,
@@ -42128,50 +42241,108 @@
       "id": "PR_kwDOBoyH6c4x4Do9",
       "title": "Split the Group State section into Group Context and Transcript Hashes",
       "url": "https://github.com/mlswg/mls-protocol/pull/572",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This is the last of the reorg PRs.  Does what it says in the title.\r\n\r\n<img width=\"482\" alt=\"image\" src=\"https://user-images.githubusercontent.com/75597/151904958-f1b7530e-2ef0-4ed0-93dd-b9e9db6bfcfc.png\">\r\n",
       "createdAt": "2022-02-01T02:32:32Z",
-      "updatedAt": "2022-02-01T02:32:32Z",
+      "updatedAt": "2022-02-03T15:08:05Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "reorg-split-group-state",
       "headRefOid": "91c2d322322c19289991f9dafb43e9966cf56532",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-03T15:08:05Z",
+      "mergedAt": "2022-02-03T15:08:05Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "9ec5be0cda8a6eb6d387f564fee984ddb699d9b1"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4z-OMp",
+          "commit": {
+            "abbreviatedOid": "91c2d32"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-03T14:48:56Z",
+          "updatedAt": "2022-02-03T14:48:57Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\r\n* The `confirmed_transcript_hash` is updated according to the rules in the following section.\r\n\r\n## Transcript Hashes\r\n```",
+              "createdAt": "2022-02-03T14:48:56Z",
+              "updatedAt": "2022-02-03T14:48:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4z-O_r",
+          "commit": {
+            "abbreviatedOid": "91c2d32"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-03T14:51:08Z",
+          "updatedAt": "2022-02-03T14:51:09Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "This is already covered above:\r\n\r\n> * The `confirmed_transcript_hash` field is updated with the data for an\r\n>   MLSPlaintext message encoding a Commit message as described below.",
+              "createdAt": "2022-02-03T14:51:08Z",
+              "updatedAt": "2022-02-03T14:51:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4z-Q7x",
+          "commit": {
+            "abbreviatedOid": "91c2d32"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-03T14:56:18Z",
+          "updatedAt": "2022-02-03T14:56:18Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 573,
       "id": "PR_kwDOBoyH6c4x6YFP",
       "title": "Remove endpoint_id",
       "url": "https://github.com/mlswg/mls-protocol/pull/573",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #558\r\n\r\nThis involved a couple of changes other than just removing the field and references to it:\r\n\r\n* Detecting duplicative Adds is now a little more ambiguous, since you can't just match on `endpoint_id`.  However (a) this doesn't degrade the security of the protocol, just makes it a little less efficient (b) as discussed in #558, if applications want to sharpen it, they can add an `endpoint_id`-like identifier in an extension.\r\n* The External Commit language around resync got generalized to say that the KeyPackage needs to meet the requirements of an Update for the removed node, which captures the successor notions we've discussed.\r\n\r\nI also noticed that when we forbade proposals by reference in #562, we didn't totally remove them.  So I went ahead and fixed that here.",
       "createdAt": "2022-02-01T15:46:15Z",
-      "updatedAt": "2022-02-01T15:55:46Z",
+      "updatedAt": "2022-02-03T15:23:38Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "remove-endpoint-id",
       "headRefOid": "eb8396a5b47c72260c024750da6d50dd1c926f04",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-03T15:23:37Z",
+      "mergedAt": "2022-02-03T15:23:37Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7"
+      },
       "comments": [],
       "reviews": [
         {
@@ -42185,6 +42356,19 @@
           "body": "Thanks for taking care of the cleanup here after the discussion on #509.\r\n\r\nIf the application has to provide a function that determines if a given KeyPackage represents a valid update, we could use the same function to determine if an Add is a duplicate. Although admittedly, in that case one would have to compare with all other KeyPackages in the group and the function might not be very efficient.\r\n\r\nGenerally, I'm ok with this solution, though \ud83d\udc4d\ud83c\udffb.",
           "createdAt": "2022-02-01T15:55:46Z",
           "updatedAt": "2022-02-01T15:55:46Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4z-PTD",
+          "commit": {
+            "abbreviatedOid": "eb8396a"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-03T14:51:57Z",
+          "updatedAt": "2022-02-03T14:51:57Z",
           "comments": []
         }
       ]
@@ -42201,7 +42385,7 @@
       "labels": [],
       "body": "Depends on  #573 \r\n\r\nFixes #539 \r\n\r\nThis PR implements the suggestion from @TWal in #539, taking into account the discussion on the issue and on the call last week.  There are a bunch of small changes (e.g., changing a lot of `KeyPackageRef` to `LeafNodeRef`), but the critical change is the following split of KeyPackage into LeafNode and KeyPackage:\r\n\r\n```\r\nstruct {\r\n    opaque group_id<0..255>;\r\n    opaque parent_hash<0..255>;\r\n} MembershipInfo;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n    optional<MembershipInfo> membership;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n    LeafNode leaf_node;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n```\r\n\r\nThis does a few things we had discussed:\r\n\r\n* KeyPackage is the thing you pre-publish; LeafNode is what goes in the tree\r\n* Sign the LeafNode and the KeyPackage separately, nesting the LeafNode inside the signed KeyPackage information\r\n* Sign the `group_id` when possible.  (This PR takes the chattiest approach, replicating the `group_id` in each leaf.)\r\n* Promote mandatory extensions to fields\r\n\r\nAdd continues to refer to KeyPackage.  Update and Commit use LeafNode directly.\r\n\r\nI did a walk through the document grepping for KeyPackage, and I think I found all the instances that needed to be changed.  But some review to make sure I didn't miss anything would be appreciated.",
       "createdAt": "2022-02-02T22:59:46Z",
-      "updatedAt": "2022-02-02T23:00:01Z",
+      "updatedAt": "2022-02-03T20:47:57Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
@@ -42212,7 +42396,29 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I haven't done a full review yet, but one thing to note is that if a member commits an Update proposal by another member, there should be a `group_id`, but there can't be a `parent_hash`. One way to tackle that issue would be to remove the notion of an update proposal entirely such that key material can only be updated via commit. I have no data to back it up, of course, but I doubt that there are going to be many cases where clients will issue update proposals without actually committing them themselves.",
+          "createdAt": "2022-02-03T08:02:05Z",
+          "updatedAt": "2022-02-03T08:04:10Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@kkohbrok I think this is already taken into account:\r\n\r\n> * A LeafNode sent in an Update proposal MUST have this field set.  The\r\n>  `group_id` MUST match the value set for the overall group, and the\r\n>  `parent_hash` field MUST be empty.\r\n\r\nMaybe it would be clearer to say `parent_hash` MUST be the zero-length octet string.  Or make `group_id` and `parent_hash` two independent optionals (this is a bit messy with the TLS syntax, but doable).  I kind of liked the MembershipInfo approach because it gave you a clean signal of whether the LeafNode was a prepublished one or not.",
+          "createdAt": "2022-02-03T13:49:55Z",
+          "updatedAt": "2022-02-03T13:49:55Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "After the virtual interim today, I did a little thinking on how to structure these objects to take into account @TWal's point about having the signature be lifetime-constrained in the prepublished case.  I think we all agree on which fields should appear in which cases:\r\n\r\n| Item                            | KeyPackage    | Pre-pub LeafNode | Update LeafNode  | Commit LeafNode |\r\n|:--------------------------------|:-------------:|:----------------:|:----------------:|:---------------:|\r\n| `version`                       | X             |                  |                  |                 | \r\n| `cipher_suite`                  | X             |                  |                  |                 | \r\n| `init_key` (for Welcome)        | X             |                  |                  |                 | \r\n| `lifetime`                      | X             | X                |                  |                 | \r\n| `public_key` (for TreeKEM)      |               | X                | X                | X               | \r\n| `credential`                    | X             | X                | X                | X               | \r\n| `capabilities`                  | X             | X                | X                | X               | \r\n| `group_id`                      |               |                  | X                | X               | \r\n| `parent_hash`                   |               |                  |                  | X               | \r\n| `extensions`                    | X             | X                | X                | X               |\r\n\r\n(Where the Credential/Capabilities in KeyPackage might be indirect, via containing a pre-pub LeafNode.) So it's mainly a question of how we lay this out syntactically.  A couple of options follow. I have not split the Update and Commit cases; they would differ only in whether the `parent_hash` field has a value.\r\n\r\n## Option 1: Variant field within leaf node\r\n\r\n```\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    LeafNodeSource leaf_node_source;\r\n    select (leaf_node_source) {\r\n        case pre_published: \r\n            Lifetime lifetime;\r\n        \r\n        case member:\r\n            opaque parent_hash<0..255>;   // zero-length octet string if update\r\n    }\r\n    \r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\n// LeafNodeTBS adds group_id in the `leaf_node_source = member` case\r\n// KeyPackage wraps LeafNode as in current PR\r\n```\r\n\r\n## Option 2: Two types of leaf node\r\n\r\n```\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    opaque parent_hash<0..255>;\r\n    \r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeContentTBS\", LeafNodeContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNodeContent;\r\n\r\n// KeyPackageTBS just has fields above signature\r\n// LeafNodeContentTBS adds group_id\r\n\r\nstruct {\r\n    LeafNodeSource leaf_node_source;\r\n    select (leaf_node_type) {\r\n        case pre_published:\r\n            KeyPackage key_package;\r\n\r\n        case member:\r\n            LeafNodeContent leaf_node_content;\r\n    }\r\n} LeafNode;\r\n```\r\n\r\n## Opinion below this line\r\n\r\nPersonally, I feel pretty strongly that Option 1 will be easier to work with.  Option 2 basically means that there are three types of tree node, and two different algorithms for verifying leaf signatures. (!)  That seems like a bigger distinction than is merited here, given that the two types of leaf have mostly the same content.\r\n\r\nHaving selects here is helpful, though.  (Once again `select > optional`!)  In addition to avoiding the chattiness of replicating the `group_id` everywhere (since now there's a clear signal of when to inject the `group_id` as context), it provides a simple way to check that a LeafNode has the right contents for a given context in the protocol.\r\n\r\nIn either case, we will need to be clear about how the `lifetime` field should be interpreted in a pre-published LeafNode.  I got the impression from the call today that there was agreement that the limitation here was purely advisory, i.e., that we would **not** require that a client reject as invalid a leaf with an expired `lifetime`.  I'm OK with that, but it does seem like it reduces the utility of including the lifetime in the leaf node.\r\n\r\n",
+          "createdAt": "2022-02-03T20:47:57Z",
+          "updatedAt": "2022-02-03T20:47:57Z"
+        }
+      ],
       "reviews": []
     }
   ]

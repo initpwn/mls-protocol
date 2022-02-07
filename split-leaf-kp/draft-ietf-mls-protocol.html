@@ -3087,6 +3087,14 @@ unmerged, according to their indices among all the leaves in the tree.<a href="#
 appearance in the group, signed by that client:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.1-5">
 <pre>
+enum {
+    reserved(0),
+    add(1),
+    update(2),
+    commit(3),
+    (255)
+} LeafNodeSource;
+
 struct {
     ProtocolVersion versions&lt;0..255&gt;;
     CipherSuite ciphersuites&lt;0..255&gt;;
@@ -3095,15 +3103,27 @@ struct {
 } Capabilities;
 
 struct {
-    opaque group_id&lt;0..255&gt;;
-    opaque parent_hash&lt;0..255&gt;;
-} MembershipInfo;
+    uint64 not_before;
+    uint64 not_after;
+} Lifetime;
 
 struct {
     HPKEPublicKey public_key;
     Credential credential;
     Capabilities capabilities;
-    optional&lt;MembershipInfo&gt; membership;
+
+    LeafNodeSource leaf_node_source;
+    select (leaf_node_source) {
+        case add:
+            Lifetime lifetime;
+
+        case update:
+            struct {}
+
+        case commit:
+            opaque parent_hash&lt;0..255&gt;;
+    }
+
     Extension extensions&lt;8..2^32-1&gt;;
     // SignWithLabel(., "LeafNodeTBS", LeafNodeTBS)
     opaque signature&lt;0..2^16-1&gt;;
@@ -3113,8 +3133,31 @@ struct {
     HPKEPublicKey public_key;
     Credential credential;
     Capabilities capabilities;
-    optional&lt;MembershipInfo&gt; membership;
+
+    LeafNodeSource leaf_node_source;
+    select (leaf_node_source) {
+        case add:
+            Lifetime lifetime;
+
+        case update:
+            struct{};
+
+        case commit:
+            opaque parent_hash&lt;0..255&gt;;
+    }
+
     Extension extensions&lt;8..2^32-1&gt;;
+
+    select (leaf_node_source) {
+        case add:
+            struct{};
+
+        case update:
+            opaque group_id&lt;0..255&gt;;
+
+        case commit:
+            opaque group_id&lt;0..255&gt;;
+    }
 } LeafNodeTBS;
 </pre><a href="#section-8.1-5" class="pilcrow">¶</a>
 </div>
@@ -3126,26 +3169,31 @@ protocol extensions, and non-default proposal types are supported by a client.
 Proposal types defined in this document are considered "default" and thus need
 not be listed.  Extensions that appear in the <code>extensions</code> field of a LeafNode
 MUST be included in the <code>extensions</code> field of the <code>capabilities</code> field.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
-<p id="section-8.1-8">The <code>membership</code> field connects the member's info to the group.  Its contents
-vary depending on the context in which the LeafNode appears in the protocol:<a href="#section-8.1-8" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.1-9.1">A LeafNode pre-published in a KeyPackage MUST have this field set to the null
-optional value.<a href="#section-8.1-9.1" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-8.1-9.2">A LeafNode sent in an Update proposal MUST have this field set.  The
-<code>group_id</code> MUST match the value set for the overall group, and the
-<code>parent_hash</code> field MUST be empty.<a href="#section-8.1-9.2" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-8.1-9.3">A LeafNode sent in an UpdatePath MUST have this field set. The <code>group_id</code> MUST
-be correct, and the <code>parent_hash</code> field MUST contain the parent hash of the
-first node in the UpdatePath.<a href="#section-8.1-9.3" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-8.1-10">Since the LeafNode is a structure which is stored in the group's ratchet tree
+<p id="section-8.1-8">The <code>leaf_node_source</code> field indicates how this LeafNode came to be added to the
+tree.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
+<p id="section-8.1-9">In the case where the leaf was added to the tree based on a pre-published
+KeyPackage, the <code>lifetime</code> field represents the times between which clients will
+consider a LeafNode valid.  These times are represented as absolute times,
+measured in seconds since the Unix epoch (1970-01-01T00:00:00Z).  An expired
+LeafNode MUST NOT be sent in an Add proposal.  If an Add proposal contains an
+expired LeafNode, it MUST be rejected as invalid.  When a client first downloads
+the tree for a group on joining, the client SHOULD NOT reject the tree because
+there are expired leaf nodes in the tree, since these nodes may have been valid
+when they were added.  Applications MUST define a maximum total lifetime that is
+acceptable for a LeafNode, and reject any LeafNode where the total lifetime
+is longer than this duration.<a href="#section-8.1-9" class="pilcrow">¶</a></p>
+<p id="section-8.1-10">In the case where the leaf node was inserted into the tree via a Commit message,
+the <code>parent_hash</code> field contains the parent hash for this leaf node (see
+<a href="#parent-hash" class="xref">Section 8.6</a>).<a href="#section-8.1-10" class="pilcrow">¶</a></p>
+<p id="section-8.1-11">The LeafNodeTBS structure covers the fields above the signature in the LeafNode.
+In addition, when the leaf node was created in the context of a group (the
+update and commit cases), the group ID of the group is added as context to the
+signature.<a href="#section-8.1-11" class="pilcrow">¶</a></p>
+<p id="section-8.1-12">Since the LeafNode is a structure which is stored in the group's ratchet tree
 and updated depending on the evolution of the tree, each modification of its
 content MUST be reflected by a change in its signature. This allows other
 members to verify the validity of the LeafNode at any time, particularly in the
-case of a newcomer joining the group.<a href="#section-8.1-10" class="pilcrow">¶</a></p>
+case of a newcomer joining the group.<a href="#section-8.1-12" class="pilcrow">¶</a></p>
 <div id="leaf-node-validation">
 <section id="section-8.1.1">
           <h4 id="name-leaf-node-validation">
@@ -4332,11 +4380,6 @@ enum {
     (255)
 } ProtocolVersion;
 
-struct {
-    uint64 not_before;
-    uint64 not_after;
-} Lifetime;
-
 // See IANA registry for registered values
 uint16 ExtensionType;
 
@@ -4349,7 +4392,6 @@ struct {
     ProtocolVersion version;
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
-    Lifetime lifetime;
     LeafNode leaf_node;
     Extension extensions&lt;8..2^32-1&gt;;
     // SignWithLabel(., "KeyPackageTBS", KeyPackageTBS)
@@ -4360,23 +4402,15 @@ struct {
     ProtocolVersion version;
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
-    Lifetime lifetime;
     LeafNode leaf_node;
     Extension extensions&lt;8..2^32-1&gt;;
 } KeyPackageTBS;
 </pre><a href="#section-11-6" class="pilcrow">¶</a>
 </div>
-<p id="section-11-7">The <code>lifetime</code> field represents the times between which clients will consider a
-KeyPackage valid.  These times are represented as absolute times, measured in
-seconds since the Unix epoch (1970-01-01T00:00:00Z). A client MUST NOT use the
-data in a KeyPackage for any processing before the <code>not_before</code> date, or after
-the <code>not_after</code> date. Applications MUST define a maximum total lifetime that is
-acceptable for a KeyPackage, and reject any KeyPackage where the total lifetime
-is longer than this duration.<a href="#section-11-7" class="pilcrow">¶</a></p>
-<p id="section-11-8">Note that the <code>capabilties</code> field in the <code>leaf_node</code> allows MLS session
+<p id="section-11-7">Note that the <code>capabilties</code> field in the <code>leaf_node</code> allows MLS session
 establishment to be safe from downgrade attacks on the parameters described (as
 discussed in <a href="#group-creation" class="xref">Section 12</a>), while still only advertising one version /
-ciphersuite per KeyPackage.<a href="#section-11-8" class="pilcrow">¶</a></p>
+ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
 <div id="keypackage-validation">
 <section id="section-11.1">
         <h3 id="name-keypackage-validation">

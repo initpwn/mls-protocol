@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-06T01:13:32.984756+00:00",
+  "timestamp": "2022-02-08T01:07:39.799936+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5767,7 +5767,7 @@
       "labels": [],
       "body": "In the draft, we often need some value to be present in a structure under certain conditions.\r\n\r\nSometimes, it is done using an `optional<\u2026>`, and the prose says that it MUST contain a value under these conditions, e.g. for:\r\n- `confirmation_tag`\r\n- `membership_tag`\r\n\r\nSometimes, it is done using a `select`, e.g. for:\r\n- `GroupContext` in `MLSPlaintextTBS`\r\n\r\nIt looks like we need to make a choice here.",
       "createdAt": "2022-02-02T18:17:33Z",
-      "updatedAt": "2022-02-03T15:56:58Z",
+      "updatedAt": "2022-02-07T22:34:45Z",
       "closedAt": null,
       "comments": [
         {
@@ -5783,13 +5783,34 @@
           "body": "Discussion on virtual interim:\r\n\r\n* @TWal  elaborates:\r\n    * For `confirmation_tag` could select on `content_type`\r\n    * For `membership_tag` could select on `sender.type`\r\n* @bifurcation agrees that failing on parsing is a pretty compelling rationale for these cases ",
           "createdAt": "2022-02-03T15:56:58Z",
           "updatedAt": "2022-02-03T15:56:58Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I just looked at implementing this on top of #523, and it actually looked a little non-trivial.  If we use `select` in MLSMessageAuth, then we'll need to know the `content_type` from elsewhere when parsing the MLSMessageAuth.  \r\n\r\n```\r\nstruct {\r\n    // SignWithLabel(., \"MLSMessageContentTBS\", MLSMessageContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n\r\n    select (content_type) { // <---- where does this come from?\r\n        case application: struct{};\r\n        case proposal: struct{};\r\n\r\n        // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)\r\n        case commit: MAC confirmation_tag;\r\n    }\r\n} MLSMessageAuth;\r\n```\r\n\r\nThat might not be terrible to implement, but it does mean that MLSMessageAuth is no longer independently parseable.\r\n\r\nNo similar concerns about `membership_tag` -- that's within MLSPlaintext, so you can refer to `content.sender.sender_type`.\r\n\r\n```\r\nstruct {\r\n    MLSMessageContent content;\r\n    MLSMessageAuth auth;\r\n\r\n    select (content.sender.sender_type) {\r\n        case preconfigured: struct{};\r\n        case new_member: struct{};\r\n\r\n        // MAC(membership_key, MLSMessageContentTBM)\r\n        case member: MAC membership_tag;\r\n    }\r\n} MLSPlaintext;\r\n```",
+          "createdAt": "2022-02-07T21:17:52Z",
+          "updatedAt": "2022-02-07T21:17:52Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "You are right\u2026 We maybe we could template `MLSMessageAuth` on the ContentType?\r\n\r\nSomething like\r\n```\r\ntemplate <ContentType content_type>\r\nstruct {\r\n    // SignWithLabel(., \"MLSMessageContentTBS\", MLSMessageContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n\r\n    select (content_type) {\r\n        case application: struct{};\r\n        case proposal: struct{};\r\n\r\n        // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)\r\n        case commit: MAC confirmation_tag;\r\n    }\r\n} MLSMessageAuth;\r\n```\r\n\r\nand\r\n\r\n```\r\nstruct {\r\n    MLSMessageContent content;\r\n    MLSMessageAuth<content.content_type> auth;\r\n\r\n    select (content.sender.sender_type) {\r\n        case preconfigured: struct{};\r\n        case new_member: struct{};\r\n\r\n        // MAC(membership_key, MLSMessageContentTBM)\r\n        case member: MAC membership_tag;\r\n    }\r\n} MLSPlaintext;\r\n```\r\n\r\nBut that might look a bit convoluted\u2026",
+          "createdAt": "2022-02-07T22:26:53Z",
+          "updatedAt": "2022-02-07T22:26:53Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Note that a structure with a similar problem already exists: `MLSCiphertextContent`.\r\n\r\nWith the same style, we could have:\r\n```\r\nstruct {\r\n    // SignWithLabel(., \"MLSMessageContentTBS\", MLSMessageContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n\r\n    select (MLSMessageContent.content_type) {\r\n        case application: struct{};\r\n        case proposal: struct{};\r\n\r\n        // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)\r\n        case commit: MAC confirmation_tag;\r\n    }\r\n} MLSMessageAuth;\r\n```",
+          "createdAt": "2022-02-07T22:34:45Z",
+          "updatedAt": "2022-02-07T22:34:45Z"
         }
       ]
     },
     {
       "number": 576,
       "id": "I_kwDOBoyH6c5C81BF",
-      "title": "Make credential succession checking the AS' job",
+      "title": "Make credential succession checking the AS's job",
       "url": "https://github.com/mlswg/mls-protocol/issues/576",
       "state": "OPEN",
       "author": "kkohbrok",
@@ -5798,7 +5819,7 @@
       "labels": [],
       "body": "Right now it says in the Update proposal section: \"Verify that the set of identities attested by the credential is acceptable to the application for the participant being updated.\"\r\n\r\nFirstly, I think this is a matter of authentication and thus the AS' job and secondly, it's a validation step that should probably go into the `KeyPackage Validation` section.",
       "createdAt": "2022-02-03T15:42:57Z",
-      "updatedAt": "2022-02-03T16:10:51Z",
+      "updatedAt": "2022-02-07T20:28:45Z",
       "closedAt": null,
       "comments": [
         {
@@ -5822,7 +5843,7 @@
       "labels": [],
       "body": "When MLS messages are transmitted over a protocol which supports Content-Type / MIME Type negotiation, signal that the message is an MLS message.\r\n\r\nBecause MLS messages are really a bag of formats today we should have a MIME type parameter which specifies the specific format included.\r\n\r\nmessage/mls;format={application|handshake|welcome|keypackage|groupcontext}",
       "createdAt": "2022-02-03T15:48:23Z",
-      "updatedAt": "2022-02-03T23:46:55Z",
+      "updatedAt": "2022-02-07T20:49:08Z",
       "closedAt": null,
       "comments": [
         {
@@ -5845,6 +5866,20 @@
           "body": "- I would prefer a short section in the protocol document.\r\n- I think Internal to the protocol is cleanest. \r\n- Likewise the format parameter becomes unnecessary if we add Welcome, PublicGroupState, and KeyPackage to wire_format (see issue #574 )",
           "createdAt": "2022-02-03T23:46:55Z",
           "updatedAt": "2022-02-03T23:46:55Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@rohan-wire send a PR?",
+          "createdAt": "2022-02-07T20:33:51Z",
+          "updatedAt": "2022-02-07T20:33:51Z"
+        },
+        {
+          "author": "seanturner",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Asking for friend: would we want to define (or use) a structured syntax suffix ala [RFC 6839](https://datatracker.ietf.org/doc/html/rfc6839)?",
+          "createdAt": "2022-02-07T20:49:07Z",
+          "updatedAt": "2022-02-07T20:49:07Z"
         }
       ]
     },
@@ -5860,9 +5895,17 @@
       "labels": [],
       "body": "Should multiple PSK proposals within a commit be able to reference the same `PreSharedKeyID `? I feel like this should be covered in the same way we state multiple removals for the same `KeyPackageRef` should result in the committer choosing one. Wasn't sure if this was an oversight or on purpose. \r\n\r\nI can submit a PR to clarify if this is something that should be addressed",
       "createdAt": "2022-02-04T17:40:35Z",
-      "updatedAt": "2022-02-04T17:40:47Z",
+      "updatedAt": "2022-02-07T20:39:17Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I agree, duplicates are an error.  Committer MUST NOT include duplicates; receiver MUST reject Commit with duplicates.\r\n\r\n@tomleavy  - Please send a PR!",
+          "createdAt": "2022-02-07T20:39:17Z",
+          "updatedAt": "2022-02-07T20:39:17Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -39689,12 +39732,10 @@
       "author": "TWal",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [
-        "work in progress"
-      ],
+      "labels": [],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2022-02-03T23:32:53Z",
+      "updatedAt": "2022-02-07T22:16:33Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
@@ -39803,6 +39844,20 @@
           "body": "> @rohan-wire I opened the issue #574 to talk about it, since I feel it belong to a separate discussion.\r\nThanks. Good call.\r\n \r\n> About adding `Welcome` and `PublicGroupState` in `wire_format`, that means we should add them in the `select` for `MLSMessage`?\r\nYes. And also KeyPackage.\r\n",
           "createdAt": "2022-02-03T23:32:19Z",
           "updatedAt": "2022-02-03T23:32:53Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@TWal - Also happy to merge this and do the extra content types in a follow-up.  Up to you.",
+          "createdAt": "2022-02-07T21:19:37Z",
+          "updatedAt": "2022-02-07T21:19:37Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "We still need to change the references to `MLSPlaintext` everywhere. I'll handle this tomorrow, and handle the extra content types at the same time",
+          "createdAt": "2022-02-07T22:16:32Z",
+          "updatedAt": "2022-02-07T22:16:32Z"
         }
       ],
       "reviews": [
@@ -40246,7 +40301,7 @@
       ],
       "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
       "createdAt": "2021-12-16T12:54:02Z",
-      "updatedAt": "2022-01-31T08:13:27Z",
+      "updatedAt": "2022-02-07T16:32:05Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
@@ -40383,6 +40438,13 @@
           "body": "@psyoptix good points. If there is indeed an easier-to-create ratchet tree that would be equally plausible (as is the case here), then I agree that the guarantees are not worth much. In principle, however, I still think that guarantees might be worth having even if the user isn't aware of it. One example could be that the application could consider the effective guarantees that we get from a ratchet tree and then, for example, hide the group from the user until enough members have updated, such that group membership was sufficiently attested to (for some degree of \"sufficiently\"). Although for usability purposes that might not be an option, so in this particular point, it probably means that it's not worth having if we can't communicate it to the user.\r\n\r\nRegarding the interface: I don't believe MLS as specified right now has any sort of interface. It's really only specified how clients communicate with one-another. They way I understand it, an MLS implementation can then decide what information about their state they make available to the application or what actions the application can take.\r\n\r\nRegarding language: I'm not sure I understand what you have in mind, but let's give it a try. (Of course this is all going to be a bit vague, but maybe it's a starting point for further discussions.)\r\n\r\n# Security Model\r\n\r\nLet T be a ratchet tree freshly received by user U. Then let M_T be an array in the state of user U indexed by the members of the tree T, where for each member m, M_T[m] contains the set of identities attested to by m. We can now create an oracle that allows the adversary to query this store. \r\n\r\nIn the real world, the store is filled by checking which leaves are covered by the individual parent hashes present in the member's key packages. In the ideal world, each sender maintains a log (per tree) containing the members to which they attest and the receiver just copies the information from there upon receiving a ratchet tree. (Similar to log-decryption in real-vs.-ideal AE models.)\r\n\r\n# Resolution Based Parent Hash\r\n\r\nI would now claim that with resolution based parent hashes, there is an attack that goes as follows:\r\n\r\nThe adversary takes a valid tree, where a user A has already made a commit. The adversary generates a credential and replaces the credential of one of the users attested to by A (let's call the user B), before re-signing the corresponding key package. The adversary then sends it to their victim V as part of a Welcome message. V validates the parent hashes, which should be fine, since we didn't touch any hpke keys. The adversary then queries the oracle defined above using the gid of the new group, as well as the cids of V and A. If the user B shows up in M_T[A] then the adversary knows it's the ideal world, otherwise it's the real world.\r\n\r\n# Tree-Hash Based Parent Hash \r\n\r\nIf we have tree-hash based parent hash, the attack described above will not work. This is because upon receiving the Welcome message, V will fail to verify the parent hashes since the tree hash covers the credential as well.\r\n\r\n# Caveat: AS\r\n\r\nThe above attack will _not_ work in the first scenario if the AS (which V will consult upon receiving the Welcome) rejects the tampered-with key package (or the credential within) created by the adversary. I still think there is some relevance to the attack, since for many messengers in use today, the AS essentially requires users to verify identities OOB (\"safety numbers\", etc.), which I would claim is not done in most cases.",
           "createdAt": "2022-01-31T08:12:33Z",
           "updatedAt": "2022-01-31T08:13:27Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "When working through the proof, I came up with another interesting pathological case, which has nothing to do with unmerged leaves:\r\n```\r\n_____________\r\n             \\\r\n              X\r\n        ______|______\r\n       /             \\\r\n      V               _\r\n    __|__           __|__\r\n   /     \\         /     \\\r\n  U       _       _       _\r\n / \\     / \\     / \\     / \\\r\nA   B   C   _   _   _   _   H\r\n```\r\nIf A did the last commit in this subtree, and someone in the left part of the tree (hidden) removes H, the tree will be truncated up to C so the sibling tree hash will change for V.\r\n\r\nHopefully the fixes I proposed earlier work against this pathological case.",
+          "createdAt": "2022-02-07T16:32:05Z",
+          "updatedAt": "2022-02-07T16:32:05Z"
         }
       ],
       "reviews": []
@@ -42385,13 +42447,13 @@
       "labels": [],
       "body": "Depends on  #573 \r\n\r\nFixes #539 \r\n\r\nThis PR implements the suggestion from @TWal in #539, taking into account the discussion on the issue and on the call last week.  There are a bunch of small changes (e.g., changing a lot of `KeyPackageRef` to `LeafNodeRef`), but the critical change is the following split of KeyPackage into LeafNode and KeyPackage:\r\n\r\n```\r\nstruct {\r\n    opaque group_id<0..255>;\r\n    opaque parent_hash<0..255>;\r\n} MembershipInfo;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n    optional<MembershipInfo> membership;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n    LeafNode leaf_node;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n```\r\n\r\nThis does a few things we had discussed:\r\n\r\n* KeyPackage is the thing you pre-publish; LeafNode is what goes in the tree\r\n* Sign the LeafNode and the KeyPackage separately, nesting the LeafNode inside the signed KeyPackage information\r\n* Sign the `group_id` when possible.  (This PR takes the chattiest approach, replicating the `group_id` in each leaf.)\r\n* Promote mandatory extensions to fields\r\n\r\nAdd continues to refer to KeyPackage.  Update and Commit use LeafNode directly.\r\n\r\nI did a walk through the document grepping for KeyPackage, and I think I found all the instances that needed to be changed.  But some review to make sure I didn't miss anything would be appreciated.",
       "createdAt": "2022-02-02T22:59:46Z",
-      "updatedAt": "2022-02-03T20:47:57Z",
+      "updatedAt": "2022-02-07T21:44:58Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "split-leaf-kp",
-      "headRefOid": "bf03ed5b492a8c9e7c5f0af6bc08709d378c914f",
+      "headRefOid": "a79b8d9bf0a0630fdf8bd733481fffd3c023c661",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -42417,8 +42479,159 @@
           "body": "After the virtual interim today, I did a little thinking on how to structure these objects to take into account @TWal's point about having the signature be lifetime-constrained in the prepublished case.  I think we all agree on which fields should appear in which cases:\r\n\r\n| Item                            | KeyPackage    | Pre-pub LeafNode | Update LeafNode  | Commit LeafNode |\r\n|:--------------------------------|:-------------:|:----------------:|:----------------:|:---------------:|\r\n| `version`                       | X             |                  |                  |                 | \r\n| `cipher_suite`                  | X             |                  |                  |                 | \r\n| `init_key` (for Welcome)        | X             |                  |                  |                 | \r\n| `lifetime`                      | X             | X                |                  |                 | \r\n| `public_key` (for TreeKEM)      |               | X                | X                | X               | \r\n| `credential`                    | X             | X                | X                | X               | \r\n| `capabilities`                  | X             | X                | X                | X               | \r\n| `group_id`                      |               |                  | X                | X               | \r\n| `parent_hash`                   |               |                  |                  | X               | \r\n| `extensions`                    | X             | X                | X                | X               |\r\n\r\n(Where the Credential/Capabilities in KeyPackage might be indirect, via containing a pre-pub LeafNode.) So it's mainly a question of how we lay this out syntactically.  A couple of options follow. I have not split the Update and Commit cases; they would differ only in whether the `parent_hash` field has a value.\r\n\r\n## Option 1: Variant field within leaf node\r\n\r\n```\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    LeafNodeSource leaf_node_source;\r\n    select (leaf_node_source) {\r\n        case pre_published: \r\n            Lifetime lifetime;\r\n        \r\n        case member:\r\n            opaque parent_hash<0..255>;   // zero-length octet string if update\r\n    }\r\n    \r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\n// LeafNodeTBS adds group_id in the `leaf_node_source = member` case\r\n// KeyPackage wraps LeafNode as in current PR\r\n```\r\n\r\n## Option 2: Two types of leaf node\r\n\r\n```\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n\r\n    opaque parent_hash<0..255>;\r\n    \r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeContentTBS\", LeafNodeContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNodeContent;\r\n\r\n// KeyPackageTBS just has fields above signature\r\n// LeafNodeContentTBS adds group_id\r\n\r\nstruct {\r\n    LeafNodeSource leaf_node_source;\r\n    select (leaf_node_type) {\r\n        case pre_published:\r\n            KeyPackage key_package;\r\n\r\n        case member:\r\n            LeafNodeContent leaf_node_content;\r\n    }\r\n} LeafNode;\r\n```\r\n\r\n## Opinion below this line\r\n\r\nPersonally, I feel pretty strongly that Option 1 will be easier to work with.  Option 2 basically means that there are three types of tree node, and two different algorithms for verifying leaf signatures. (!)  That seems like a bigger distinction than is merited here, given that the two types of leaf have mostly the same content.\r\n\r\nHaving selects here is helpful, though.  (Once again `select > optional`!)  In addition to avoiding the chattiness of replicating the `group_id` everywhere (since now there's a clear signal of when to inject the `group_id` as context), it provides a simple way to check that a LeafNode has the right contents for a given context in the protocol.\r\n\r\nIn either case, we will need to be clear about how the `lifetime` field should be interpreted in a pre-published LeafNode.  I got the impression from the call today that there was agreement that the limitation here was purely advisory, i.e., that we would **not** require that a client reject as invalid a leaf with an expired `lifetime`.  I'm OK with that, but it does seem like it reduces the utility of including the lifetime in the leaf node.\r\n\r\n",
           "createdAt": "2022-02-03T20:47:57Z",
           "updatedAt": "2022-02-03T20:47:57Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think I also prefer the first option!\r\nThis refactor looks great, it makes things about leaf content a lot more clear. I also like the new consistency between the names `LeafNode` and `ParentNode`.\r\n\r\nI think we should advise to reject expired LeafNode when adding them to the tree (and also check that they have the same lifetime as the corresponding KeyPackage?)\r\nHowever when joining a group, we should not reject a tree containing expired leaf nodes (as they might have been added when they were not expired)",
+          "createdAt": "2022-02-07T21:16:01Z",
+          "updatedAt": "2022-02-07T21:16:01Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@TWal  - Thanks for the feedback.\r\n\r\nWith regard to when expired LeafNodes should be rejected -- With the scheme you propose, why does the Lifetime need to be in the LeafNode instead of the KeyPackage?  Since the KeyPackage is in the Add, having the lifetime there would still allow it to be validated at add time.  And if you're not going to do anything with the lifetime after add time, why do you need it to still be in the tree?",
+          "createdAt": "2022-02-07T21:32:56Z",
+          "updatedAt": "2022-02-07T21:32:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The latest commit updates the PR to match Option 1.  It still seems awkward to have the Lifetime in the LeafNode.",
+          "createdAt": "2022-02-07T21:44:58Z",
+          "updatedAt": "2022-02-07T21:44:58Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 579,
+      "id": "PR_kwDOBoyH6c4yMy2t",
+      "title": "Enforce uniqueness of PreSharedKeyIDs in PreSharedKey proposals",
+      "url": "https://github.com/mlswg/mls-protocol/pull/579",
+      "state": "OPEN",
+      "author": "tomleavy",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As discussed in #578 , PreSharedKeyIDs shouldn't be repeated in the same commit",
+      "createdAt": "2022-02-07T22:12:30Z",
+      "updatedAt": "2022-02-07T22:12:30Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "tomleavy/mls-protocol",
+      "headRefName": "unique-psk",
+      "headRefOid": "e6dd45e80c68538888ab070bf7cdbb4fec425cb7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 580,
+      "id": "PR_kwDOBoyH6c4yM0w-",
+      "title": "Move definition of blank node earlier into ## Ratchet Tree Terminology",
+      "url": "https://github.com/mlswg/mls-protocol/pull/580",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The definition of blank node needs to move ahead into ## Ratchet Tree Terminology as it is used in the section immediately following (## Views of a Ratchet Tree).",
+      "createdAt": "2022-02-07T22:22:45Z",
+      "updatedAt": "2022-02-07T22:22:45Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/blank-nodes",
+      "headRefOid": "0a1e30656a2efe8fa08eef4c9f3d1b755350b724",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 581,
+      "id": "PR_kwDOBoyH6c4yM4xm",
+      "title": "Add message/mls MIME type registration",
+      "url": "https://github.com/mlswg/mls-protocol/pull/581",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a minimal section for MIME type registration of message/mls. \r\n\r\nIt assumes that PR #523 include wire_format in all MLS messages (making a format parameter unnecessary),\r\nand that all messages have the MLS version number encoded (making a version parameter unnecessary).\r\n\r\nThese parameters can be added if needed.",
+      "createdAt": "2022-02-07T22:47:35Z",
+      "updatedAt": "2022-02-08T01:03:20Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/mime-type",
+      "headRefOid": "d15cbbcd7638bef5a5b96aa8a350672f75beda73",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 582,
+      "id": "PR_kwDOBoyH6c4yM6v0",
+      "title": "Figure 1 is more accurate showing init_secret as start and end secrets.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/582",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "change Figure 1 to be more accurate:\r\n\r\nbefore: epoch_secret -> epoch_secret -> epoch_secret\r\n\r\nafter: init_secret -> epoch_secret -> init_secret",
+      "createdAt": "2022-02-07T23:02:42Z",
+      "updatedAt": "2022-02-07T23:02:42Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/init_secret_drawing",
+      "headRefOid": "29874110e593ac0ded53209944b466c15751cb13",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 583,
+      "id": "PR_kwDOBoyH6c4yNIxk",
+      "title": "Fix tables in IANA section",
+      "url": "https://github.com/mlswg/mls-protocol/pull/583",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fix ciphersuite table so the .txt version can fit in 73 chars.\r\n\r\nUse the correct separator (-) between table header and the table body for some tables. Some where using the footer separator (=).",
+      "createdAt": "2022-02-08T00:45:20Z",
+      "updatedAt": "2022-02-08T00:45:20Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/fix-long-tables",
+      "headRefOid": "2040bcc6706dbe6f0f28846b159599ec2fd67b03",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]

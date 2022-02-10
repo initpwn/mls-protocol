@@ -2350,7 +2350,10 @@ A   B   C   D   E   F   G
 leaves (A, B, C, D, E, F, G) and 13 nodes.<a href="#section-5.1-10" class="pilcrow">¶</a></p>
 <p id="section-5.1-11">Each leaf is given an <em>index</em> (or <em>leaf index</em>), starting at <code>0</code> from the left to
 <code>n-1</code> at the right.<a href="#section-5.1-11" class="pilcrow">¶</a></p>
-<p id="section-5.1-12">There are multiple ways that an implementation might represent a ratchet tree in
+<p id="section-5.1-12">Finally, a node in the tree may also be <em>blank</em>, indicating that no value
+is present at that node (i.e. no keying material). This is often the case
+when a leaf was recently removed from the tree.<a href="#section-5.1-12" class="pilcrow">¶</a></p>
+<p id="section-5.1-13">There are multiple ways that an implementation might represent a ratchet tree in
 memory.  For example, left-balanced binary trees can be represented as an array
 of nodes, with node relationships computed based on nodes' indices in the array.
 Or a more traditional representation of linked node objects may be used.
@@ -2358,7 +2361,7 @@ Or a more traditional representation of linked node objects may be used.
 implement the tree operations required for MLS in these representations.
 MLS places no requirements on implementations' internal representations
 of ratchet trees.  An implementation MAY use any tree representation and
-associated algorithms, as long as they produce correct protocol messages.<a href="#section-5.1-12" class="pilcrow">¶</a></p>
+associated algorithms, as long as they produce correct protocol messages.<a href="#section-5.1-13" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="views">
@@ -2456,8 +2459,7 @@ node was changed (see <a href="#parent-hash" class="xref">Section 8.5</a>).<a hr
         </ul>
 <p id="section-5.3-5">The conditions under which each of these values must or must not be
 present are laid out in <a href="#views" class="xref">Section 5.2</a>.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
-that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
+<p id="section-5.3-6">The <em>resolution</em> of a node is an ordered list of non-blank nodes
 that collectively cover all non-blank descendants of the node.  The resolution
 of a non-blank node with no unmerged leaves is just the node itself. More generally, the resolution
 of a node is effectively a depth-first, left-first enumeration of the nearest

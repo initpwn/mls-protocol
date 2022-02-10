@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-08T01:07:39.799936+00:00",
+  "timestamp": "2022-02-10T01:07:50.326995+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5767,7 +5767,7 @@
       "labels": [],
       "body": "In the draft, we often need some value to be present in a structure under certain conditions.\r\n\r\nSometimes, it is done using an `optional<\u2026>`, and the prose says that it MUST contain a value under these conditions, e.g. for:\r\n- `confirmation_tag`\r\n- `membership_tag`\r\n\r\nSometimes, it is done using a `select`, e.g. for:\r\n- `GroupContext` in `MLSPlaintextTBS`\r\n\r\nIt looks like we need to make a choice here.",
       "createdAt": "2022-02-02T18:17:33Z",
-      "updatedAt": "2022-02-07T22:34:45Z",
+      "updatedAt": "2022-02-08T15:18:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -5804,6 +5804,13 @@
           "body": "Note that a structure with a similar problem already exists: `MLSCiphertextContent`.\r\n\r\nWith the same style, we could have:\r\n```\r\nstruct {\r\n    // SignWithLabel(., \"MLSMessageContentTBS\", MLSMessageContentTBS)\r\n    opaque signature<0..2^16-1>;\r\n\r\n    select (MLSMessageContent.content_type) {\r\n        case application: struct{};\r\n        case proposal: struct{};\r\n\r\n        // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)\r\n        case commit: MAC confirmation_tag;\r\n    }\r\n} MLSMessageAuth;\r\n```",
           "createdAt": "2022-02-07T22:34:45Z",
           "updatedAt": "2022-02-07T22:34:45Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Note that independently of #523 we also have a similar problem for `MLSPlaintextCommitAuthData`.",
+          "createdAt": "2022-02-08T15:18:54Z",
+          "updatedAt": "2022-02-08T15:18:54Z"
         }
       ]
     },
@@ -39735,13 +39742,13 @@
       "labels": [],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2022-02-07T22:16:33Z",
+      "updatedAt": "2022-02-08T20:32:08Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "e7e132080d81149639cc64642f4e16beef58786a",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_wire_format",
-      "headRefOid": "66a1775bf51535f8b899db0f939fbcbefa78fb18",
+      "headRefOid": "95fbce0fe5e4ff9bd3c403e2313c473708b601dd",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -39858,6 +39865,20 @@
           "body": "We still need to change the references to `MLSPlaintext` everywhere. I'll handle this tomorrow, and handle the extra content types at the same time",
           "createdAt": "2022-02-07T22:16:32Z",
           "updatedAt": "2022-02-07T22:16:32Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I just updated it, however I noticed something a bit weird when removing the mentions to `MLSPlaintext`:\r\n```\r\nProposalRef, the `value` input is the MLSPlaintext carrying the proposal, and\r\nthe KDF is determined by the group's ciphersuite.\r\n```\r\nWhy do we make a hashref of the `MLSPlaintext` and not the `Proposal`?\r\nIn any case it looks like we need to do a non-editorial change here.",
+          "createdAt": "2022-02-08T15:09:47Z",
+          "updatedAt": "2022-02-08T15:09:47Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I think this goes in the right direction, but I'm wondering about the authentication of the `wire_format` field in `MLSMessage`:\r\n - It is authenticated as part of `MLSMessageContentTBS` for `MLSPlaintext`/MLSCiphertext`\r\n - It is not authenticated for all other message types\r\n\r\nI'd like to propose the following changes:\r\n - the `wire_format` filed should also be authenticated for other messages, it can simply be part of `KeyPackageTBS` etc.\r\n - we have a `protocol_version` field in all messages except `MLSPlaintext`/`MLSCiphertext`: we should extract it and add it right after the `wire_format` field for all messages. This would increase the size by two bytes in some cases, but I think that's tolerable. Obviously we can also authenticate that field.\r\n - with the above, there is no need for the optional version number proposed in #581. I think having it in the message would be much more robust and future-proof.",
+          "createdAt": "2022-02-08T20:32:08Z",
+          "updatedAt": "2022-02-08T20:32:08Z"
         }
       ],
       "reviews": [
@@ -42447,7 +42468,7 @@
       "labels": [],
       "body": "Depends on  #573 \r\n\r\nFixes #539 \r\n\r\nThis PR implements the suggestion from @TWal in #539, taking into account the discussion on the issue and on the call last week.  There are a bunch of small changes (e.g., changing a lot of `KeyPackageRef` to `LeafNodeRef`), but the critical change is the following split of KeyPackage into LeafNode and KeyPackage:\r\n\r\n```\r\nstruct {\r\n    opaque group_id<0..255>;\r\n    opaque parent_hash<0..255>;\r\n} MembershipInfo;\r\n\r\nstruct {\r\n    HPKEPublicKey public_key;\r\n    Credential credential;\r\n    Capabilities capabilities;\r\n    optional<MembershipInfo> membership;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"LeafNodeTBS\", LeafNodeTBS)\r\n    opaque signature<0..2^16-1>;\r\n} LeafNode;\r\n\r\nstruct {\r\n    ProtocolVersion version;\r\n    CipherSuite cipher_suite;\r\n    HPKEPublicKey init_key;\r\n    Lifetime lifetime;\r\n    LeafNode leaf_node;\r\n    Extension extensions<8..2^32-1>;\r\n    // SignWithLabel(., \"KeyPackageTBS\", KeyPackageTBS)\r\n    opaque signature<0..2^16-1>;\r\n} KeyPackage;\r\n```\r\n\r\nThis does a few things we had discussed:\r\n\r\n* KeyPackage is the thing you pre-publish; LeafNode is what goes in the tree\r\n* Sign the LeafNode and the KeyPackage separately, nesting the LeafNode inside the signed KeyPackage information\r\n* Sign the `group_id` when possible.  (This PR takes the chattiest approach, replicating the `group_id` in each leaf.)\r\n* Promote mandatory extensions to fields\r\n\r\nAdd continues to refer to KeyPackage.  Update and Commit use LeafNode directly.\r\n\r\nI did a walk through the document grepping for KeyPackage, and I think I found all the instances that needed to be changed.  But some review to make sure I didn't miss anything would be appreciated.",
       "createdAt": "2022-02-02T22:59:46Z",
-      "updatedAt": "2022-02-07T21:44:58Z",
+      "updatedAt": "2022-02-09T08:04:50Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
@@ -42500,6 +42521,41 @@
           "body": "The latest commit updates the PR to match Option 1.  It still seems awkward to have the Lifetime in the LeafNode.",
           "createdAt": "2022-02-07T21:44:58Z",
           "updatedAt": "2022-02-07T21:44:58Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think I also prefer the first option.\r\n\r\nOn lifetimes: Lifetimes are the only thing that allow us to get some degree of PCS for pre-published key material. If Alice is compromised and Bob won't check lifetimes if he is invited into a group that includes Alice, then the adversary can impersonate Alice towards Bob indefinitely after compromise: He creates a group using Alice's KeyPackage and invites Bob.\r\n\r\nOf course there are a few caveats to this attack:\r\n- the credential could have its own lifetime\r\n- a higher-level signature key could have been rotated in the meantime, leading to Bob's check with the AS to fail\r\n- the credential could be revoked (with a mandatory stapling scheme that implements a lifetime)\r\n- depending on how the application handles \"duplicated\" groups, this might or might not work if Bob already has a 1-to-1 group with Alice\r\n  - although the adversary could just include another party in the group, weakening the attack slightly",
+          "createdAt": "2022-02-08T08:01:34Z",
+          "updatedAt": "2022-02-08T08:01:34Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "Given the two options, I also prefer option 1. That being said, it still bothers me that we now have two signatures instead of one, which doubles the creation time for large groups.",
+          "createdAt": "2022-02-08T20:15:58Z",
+          "updatedAt": "2022-02-08T20:15:58Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@raphaelrobert note that Option 2 does avoid double signature.  But in my experience, the slow thing about MLS in large groups is not so much the cryptography (signature or otherwise), but the moving around of the large tree.",
+          "createdAt": "2022-02-08T20:17:56Z",
+          "updatedAt": "2022-02-08T20:17:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@kkohbrok  - To refine your analysis a bit -- the interesting case here is when the Alice's *HPKE* private key is compromised, but not her signature key.  If her signature key is compromised, then all bets are off; the attacker can impersonate Alice in any way, until the AS invalidates the signature key (e.g., via credential expiry/revocation).\r\n\r\nIf we take on that constraint, then your attack actually doesn't work.  The attacker can't create sign a GroupInfo message that Bob will accept.\r\n\r\nThe best the attacker could do is create a group with the attacker, Alice, and Bob, such that if Bob removes the attacker, the attacker still has access to the group via knowledge of Alice's HPKE private key (since Bob's UpdatePath will TreeKEM-encrypt to Alice's compromised HPKE key).  And here the attacker is pretty limited, since they can't send any MLSPlaintext/MLSCiphertext signatures.\r\n\r\nBut at that point, it seems like you're in the same posture for pre-published keys as for keys in the group.  Any leaf signed by Alice can be used in that attack in the same way.\r\n\r\nSo it seems like the answer for PCS in any case is \"Update/Commit\"?",
+          "createdAt": "2022-02-08T20:35:33Z",
+          "updatedAt": "2022-02-08T20:36:02Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@bifurcation you're right, the attack doesn't quite work the way I thought it would. \r\n\r\nIt all depends a bit on what the AS does.\r\n- If the app naively checks the signature based on the key package (credential) provided in the Welcome, the attack has a chance. Although I admit that's quite an oversight on part of the AS/app, the lifetime would be useful here and add some robustness.\r\n- Similarly, if the app uses per-group credentials that don't expire, the attack still works. If we had lifetimes, the client could recover by updating all groups and cycling the key packages that were uploaded to the server. This is again assuming the AS doesn't invalidate credentials after a while.\r\n\r\nGood point also about the adversary being able to just pluck key packages from any given group at the time of compromise. Those would have to be fitted with lifetimes as well to make this work.\r\n\r\nI still like lifetimes as a conservative, defense-in-depth approach in case the AS is very minimal or just not very good. I think as a general rule, it's good to attach an expiration date to key material that is not single-use.\r\n\r\nThat being said, I understand that due to the asynchronicity in many use-cases it's going to be hard to enforce in a meaningful way that doesn't impede usability too much.",
+          "createdAt": "2022-02-09T08:04:50Z",
+          "updatedAt": "2022-02-09T08:04:50Z"
         }
       ],
       "reviews": []
@@ -42633,6 +42689,157 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 584,
+      "id": "PR_kwDOBoyH6c4yNsTH",
+      "title": "Move validation of identity change to the AS",
+      "url": "https://github.com/mlswg/mls-protocol/pull/584",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR moves the remark that there has to be validation of the attested identities upon a credential update to the KeyPackage validation subsection. It also changes the responsibility for the check to be that of the AS rather than that of the application. Note, that the boundaries are somewhat arbitrary at this point, since the application running on the local device may well implement parts of the AS. The reason for this change is to ensure any validation checks that pertain to authentication are part of the AS.",
+      "createdAt": "2022-02-08T06:11:49Z",
+      "updatedAt": "2022-02-08T06:11:49Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "kkohbrok/mls-protocol",
+      "headRefName": "as_credential_succession_validation",
+      "headRefOid": "36b52bc44c66ce73d1f52f7594b9d37bd010c0cf",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 585,
+      "id": "PR_kwDOBoyH6c4yPi-W",
+      "title": "Fix typo",
+      "url": "https://github.com/mlswg/mls-protocol/pull/585",
+      "state": "OPEN",
+      "author": "stefunctional",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-02-08T15:23:39Z",
+      "updatedAt": "2022-02-08T15:23:39Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "stefunctional/mls-protocol",
+      "headRefName": "fix-typo",
+      "headRefOid": "46d8ec1fc4ab289ff3f6f7e6c2b3a7423d75bf24",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 586,
+      "id": "PR_kwDOBoyH6c4yPpVJ",
+      "title": "Fix indexes in `psk_secret` diagram",
+      "url": "https://github.com/mlswg/mls-protocol/pull/586",
+      "state": "OPEN",
+      "author": "stefunctional",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-02-08T15:46:13Z",
+      "updatedAt": "2022-02-08T15:46:13Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "stefunctional/mls-protocol",
+      "headRefName": "fix-psk-indexes",
+      "headRefOid": "6c525f3b2a97f73662ba15662696c789922d6227",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 587,
+      "id": "PR_kwDOBoyH6c4yQFBk",
+      "title": "Stop generating redundant PKE key pairs.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/587",
+      "state": "OPEN",
+      "author": "MartaMularczyk",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR is motivated by an observation made independently by me and @bifurcation that MLS currently generates many \"redundant\" PKE keypairs which never have to be used. The proposal is to stop generating such key pairs, which greatly improves efficiency. In particular, in some scenarios the solution from this PR results in ~3 times smaller ratchet trees compared to the current MLS (we found such a scenario and @bifurcation illustrated it here [careful-truncate.pdf](https://github.com/mlswg/mls-protocol/files/8026064/careful-truncate.pdf)). This PR addresses the issue #559.\r\n\r\n### Problem\r\n\r\nTo give a better intuition, we explain the problem on an example. Take the following ratchet tree [trees.txt](https://github.com/mlswg/mls-protocol/files/8026207/trees.txt).\r\n\r\nCurrently, when E rekeys her path in a commit, she generates new PKE key pairs for all nodes on her direct path, i.e., Z, W, U and T. We notice that the key pairs for nodes Z and W are redundant -- since the subtrees of their children on the copath are all blank, E's leaf key pair can be used equivalently. Moreover, we notice that generating redundant key pairs is inefficient for 2 reasons:\r\n1. The redundant public keys have to be sent as part of E's commit and potentially welcome messages.\r\n2. The redundant public keys together with the parent hash mechanism prevent \"aggressive truncation\". Aggressive truncation was introduced in #461 in order to \"heal\" the ratchet tree (which decreases complexity). However, it broke the protocol due to incompatibility with the parent hash mechanism. For this reason, it was replaced in #524 by a far less efficient \"careful truncation\" mechanism. \r\n\r\n### Solution\r\n\r\nThis PR proposes to stop generating redundant key pairs, getting rid of both of the above inefficiencies. More precisely, we say that a node on E's path is _redundant_ if its copath child (or in general any child) has an empty resolution (which implies that its subtree is empty). Further, we say that E's _filtered direct path_ is her direct path with all redundant nodes removed. When E commits, she rekeys only her filtered direct path. The redundant nodes are blanked. In the example above, E's filtered direct path consists of Y and Z. After her, commit we get the following tree [trees_no_redundant.txt](https://github.com/mlswg/mls-protocol/files/8026218/trees_no_redundant.txt).\r\n\r\nThis way, E doesn't send redundant public keys for Z and W. Moreover, we can restore aggressive truncation -- the blank nodes above E can be truncated without destroying the parent hash. The following picture by @bifurcation shows how the above solution can result in ~3 times smaller trees than currently generated by MLS [careful-truncate.pdf](https://github.com/mlswg/mls-protocol/files/8026064/careful-truncate.pdf).\r\n\r\n### Parent Hash\r\n\r\nThe above solution requires modifying how the parent hash is verified by new members joining the group. Roughly, before the proposed change, the new member for each node U with children V and W performed the following check: either A) `V.parent_hash` is equal to the parent hash of U with copath child W or B) `W.parent_hash` is equal to the parent hash of U with copath child V. In the running example, B) would be true.\r\n\r\nAfter the proposed change, W is blank and the parent hash of U with copath child V is stored in the node E instead. Accordingly, the new member performs the following modified check: either A) there exists a node X in the resolution of V s.t. `X.parent_hash` is equal to the parent hash of U with copath child W or B) [modified analogous to A)].\r\n\r\nFrom the security perspective, the new check fulfils the same purpose as we meant for the original check: for every node U, the member who last rekeyed U attests to the publickey U.pk they generated and the public keys they told U.sk to.",
+      "createdAt": "2022-02-08T17:40:32Z",
+      "updatedAt": "2022-02-09T16:22:27Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "headRepository": "MartaMularczyk/mls-protocol",
+      "headRefName": "aggressive-truncate",
+      "headRefOid": "e2533ff1c9602d0e32d835c76b5b811e48e2b322",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I feel a bit uncomfortable with the part \"there exists a node X in the resolution of V such that \u2026\". I think we can replace \"resolution\" with \"original resolution\" and furthermore enforce the original resolution to only contain one node?",
+          "createdAt": "2022-02-09T16:22:26Z",
+          "updatedAt": "2022-02-09T16:22:26Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c40Tm8u",
+          "commit": {
+            "abbreviatedOid": "e2533ff"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Neat solution! Just a few editorial comments.\r\n\r\nLooking forward to implementing and testing it.",
+          "createdAt": "2022-02-09T14:36:46Z",
+          "updatedAt": "2022-02-09T14:48:50Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "This is already mentioned in the paragraph above.",
+              "createdAt": "2022-02-09T14:36:46Z",
+              "updatedAt": "2022-02-09T14:48:50Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "I'm not sure if that is what you meant here, but I believe the HPKE key pair is generated from a given (symmetric) secret rather than the public key being generated using the private key.",
+              "createdAt": "2022-02-09T14:39:01Z",
+              "updatedAt": "2022-02-09T14:48:50Z"
+            },
+            {
+              "originalPosition": 133,
+              "body": "A pretty similar sentence is already in the paragraph above.",
+              "createdAt": "2022-02-09T14:42:33Z",
+              "updatedAt": "2022-02-09T14:48:50Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "I'm aware that this is not the style this section was written in previously, but when trying to implement an algorithm like this, I found it very helpful in the past if the description is a bit more structured. An example of this is the parent hash verification algorithm that (in the shape of bullet points) has pretty clear instructions on what should happen when.",
+              "createdAt": "2022-02-09T14:47:19Z",
+              "updatedAt": "2022-02-09T14:48:50Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -864,7 +864,7 @@ Each leaf is given an _index_ (or _leaf index_), starting at `0` from the left t
 
 Finally, a node in the tree may also be _blank_, indicating that no value
 is present at that node (i.e. no keying material). This is often the case
-when a leaf was recently removed from the tree.  
+when a leaf was recently removed from the tree.
 
 There are multiple ways that an implementation might represent a ratchet tree in
 memory.  For example, left-balanced binary trees can be represented as an array
@@ -1119,6 +1119,7 @@ uint16 CredentialType;
 
 struct {
     opaque identity<0..2^16-1>;
+    opaque extra_data<0..2^16-1>;
     SignatureScheme signature_scheme;
     opaque signature_key<0..2^16-1>;
 } BasicCredential;
@@ -1128,6 +1129,12 @@ struct {
 } Certificate;
 
 struct {
+  opaque authority_id<0..255>;
+  BasicCredential credential;
+  opaque proof<0..2^16-1>;
+} ProofCredential;
+
+struct {
     CredentialType credential_type;
     select (Credential.credential_type) {
         case basic:
@@ -1135,6 +1142,9 @@ struct {
 
         case x509:
             Certificate chain<1..2^32-1>;
+
+        case proof:
+            ProofCredential;
     };
 } Credential;
 ~~~~~
@@ -1146,7 +1156,9 @@ the KeyPackage ciphersuite for a credential in a KeyPackage object.
 For ciphersuites using Ed25519 or Ed448 signature schemes, the public key is in
 the format specified {{?RFC8032}}.  For ciphersuites using ECDSA with the NIST
 curves P-256 or P-521, the public key is the output of the uncompressed
-Elliptic-Curve-Point-to-Octet-String conversion according to {{SECG}}.
+Elliptic-Curve-Point-to-Octet-String conversion according to {{SECG}}. The
+`extra_data` field may contain any additional application-specific data about
+the identity.
 
 For an X.509 credential, each entry in the chain represents a single DER-encoded
 X.509 certificate. The chain is ordered such that the first entry (chain[0])
@@ -1154,6 +1166,15 @@ is the end-entity certificate and each subsequent certificate in the chain
 MUST be the issuer of the previous certificate. The algorithm for the
 `public_key` in the end-entity certificate MUST match the relevant
 ciphersuite.
+
+A ProofCredential wraps a BasicCredential with some `proof` that the
+BasicCredential is valid from an authority specified by `authority_id`. Clients
+are pre-configured to recognize different authorities and the method of
+verifying the attached proof varies. In the simplest case, `proof` would contain
+a signature over the BasicCredential from a public key identified
+by `authority_id`. However, `proof` could also contain more sophisticated and
+structured data like an attestation from secure hardware, or an entry from a Key
+Transparency tree.
 
 The signatures used in this document are encoded as specified in {{!RFC8446}}.
 In particular, ECDSA signatures are DER-encoded and EdDSA signatures are defined
@@ -4320,6 +4341,7 @@ Initial contents:
 | 0x0000           | RESERVED                 | N/A         | RFC XXXX  |
 | 0x0001           | basic                    | Y           | RFC XXXX  |
 | 0x0002           | x509                     | Y           | RFC XXXX  |
+| 0x0003           | proof                    | Y           | RFC XXXX  |
 | 0xff00  - 0xffff | Reserved for Private Use | N/A         | RFC XXXX  |
 
 ## MLS Designated Expert Pool {#de}

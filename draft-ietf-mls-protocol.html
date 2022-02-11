@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 August 2022</td>
+<td class="center">Expires 15 August 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-02-10" class="published">10 February 2022</time>
+<time datetime="2022-02-11" class="published">11 February 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-08-14">14 August 2022</time></dd>
+<dd class="expires"><time datetime="2022-08-15">15 August 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 15 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1215,10 +1215,18 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                 <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-content-authentication" class="xref">Content Authentication</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
-                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-content-encryption" class="xref">Content Encryption</a></p>
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-encoding-and-decoding-a-pla" class="xref">Encoding and Decoding a Plaintext</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>.  <a href="#name-sender-data-encryption" class="xref">Sender Data Encryption</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>.  <a href="#name-encoding-and-decoding-a-cip" class="xref">Encoding and Decoding a Ciphertext</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3.2.1">
+                    <p id="section-toc.1-1.7.2.3.2.1.1"><a href="#section-7.3.1" class="xref">7.3.1</a>.  <a href="#name-content-encryption" class="xref">Content Encryption</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3.2.2">
+                    <p id="section-toc.1-1.7.2.3.2.2.1"><a href="#section-7.3.2" class="xref">7.3.2</a>.  <a href="#name-sender-data-encryption" class="xref">Sender Data Encryption</a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
@@ -2553,7 +2561,7 @@ opaque HPKEPublicKey&lt;1..2^16-1&gt;;
 </pre><a href="#section-6.1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
-to be used for signatures in MLSPlaintext and the tree signatures.  It MUST be
+to be used for signatures in MLSMessageAuth and the tree signatures.  It MUST be
 the same as the signature algorithm specified in the credential field of the
 KeyPackage objects in the leaves of the tree (including those used to add new
 members).<a href="#section-6.1-6" class="pilcrow">¶</a></p>
@@ -2604,8 +2612,8 @@ HashReference ProposalRef;
 </div>
 <p id="section-6.2-3">For a KeyPackageRef, the <code>value</code> input is the encoded KeyPackage, and the
 ciphersuite specified in the KeyPackage determines the KDF used.  For a
-ProposalRef, the <code>value</code> input is the MLSPlaintext carrying the proposal, and
-the KDF is determined by the group's ciphersuite.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+ProposalRef, the <code>value</code> input is the MLSMessageContentAuth carrying the
+proposal, and the KDF is determined by the group's ciphersuite.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="credentials">
@@ -2735,16 +2743,21 @@ proposal from the member is committed.<a href="#section-6.3.1-3" class="pilcrow"
 <p id="section-7-1">Handshake and application messages use a common framing structure.
 This framing provides encryption to ensure confidentiality within the
 group, as well as signing to authenticate the sender within the group.<a href="#section-7-1" class="pilcrow">¶</a></p>
-<p id="section-7-2">The two main structures involved are MLSPlaintext and MLSCiphertext.
-MLSCiphertext represents a signed and encrypted message, with
+<p id="section-7-2">The main structure is MLSMessageContent, which contains the content of
+the message.  This structure is authenticated using MLSMessageAuth
+(see <a href="#content-authentication" class="xref">Section 7.1</a>).
+The two structures are combined in MLSMessageContentAuth, which can then be
+encoded/decoded from/to MLSPlaintext or MLSCiphertext, which are then included
+in the MLSMessage structure.<a href="#section-7-2" class="pilcrow">¶</a></p>
+<p id="section-7-3">MLSCiphertext represents a signed and encrypted message, with
 protections for both the content of the message and related
 metadata.  MLSPlaintext represents a message that is only signed,
 and not encrypted.  Applications MUST use MLSCiphertext to encrypt
 application messages and SHOULD use MLSCiphertext to encode
 handshake messages, but MAY transmit handshake messages encoded
 as MLSPlaintext objects in cases where it is necessary for the
-Delivery Service to examine such messages.<a href="#section-7-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7-3">
+Delivery Service to examine such messages.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7-4">
 <pre>
 enum {
     reserved(0),
@@ -2771,26 +2784,24 @@ struct {
     }
 } Sender;
 
-struct {
-    opaque mac_value&lt;0..255&gt;;
-} MAC;
-
 enum {
   reserved(0),
   mls_plaintext(1),
   mls_ciphertext(2),
+  mls_welcome(3),
+  mls_public_group_state(4),
+  mls_key_package(5),
   (255)
 } WireFormat;
 
 struct {
-    WireFormat wire_format;
     opaque group_id&lt;0..255&gt;;
     uint64 epoch;
     Sender sender;
     opaque authenticated_data&lt;0..2^32-1&gt;;
 
     ContentType content_type;
-    select (MLSPlaintext.content_type) {
+    select (MLSMessageContent.content_type) {
         case application:
           opaque application_data&lt;0..2^32-1&gt;;
 
@@ -2800,86 +2811,78 @@ struct {
         case commit:
           Commit commit;
     }
-
-    // SignWithLabel(., "MLSPlaintextTBS", MLSPlaintextTBS)
-    opaque signature&lt;0..2^16-1&gt;;
-    // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
-    optional&lt;MAC&gt; confirmation_tag;
-    // MAC(membership_key, MLSPlaintextTBM);
-    optional&lt;MAC&gt; membership_tag;
-} MLSPlaintext;
+} MLSMessageContent;
 
 struct {
-    WireFormat wire_format = mls_ciphertext;
-    opaque group_id&lt;0..255&gt;;
-    uint64 epoch;
-    ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
-    opaque encrypted_sender_data&lt;0..255&gt;;
-    opaque ciphertext&lt;0..2^32-1&gt;;
-} MLSCiphertext;
-</pre><a href="#section-7-3" class="pilcrow">¶</a>
+    WireFormat wire_format;
+    select (MLSMessage.wire_format) {
+        case mls_plaintext:
+            MLSPlaintext plaintext;
+        case mls_ciphertext:
+            MLSCiphertext ciphertext;
+        case mls_welcome:
+            Welcome welcome;
+        case mls_public_group_state:
+            PublicGroupState public_group_state;
+        case mls_key_package:
+            KeyPackage key_package;
+    }
+} MLSMessage;
+</pre><a href="#section-7-4" class="pilcrow">¶</a>
 </div>
-<p id="section-7-4">The field <code>confirmation_tag</code> MUST be present if <code>content_type</code> equals commit.
-Otherwise, it MUST NOT be present.<a href="#section-7-4" class="pilcrow">¶</a></p>
 <p id="section-7-5">External sender types are sent as MLSPlaintext, see <a href="#external-proposals" class="xref">Section 13.1.9</a>
 for their use.<a href="#section-7-5" class="pilcrow">¶</a></p>
-<p id="section-7-6">The remainder of this section describes how to compute the signature of an
-MLSPlaintext object and how to convert it to an MLSCiphertext object for
-<code>member</code> sender types.  The steps are:<a href="#section-7-6" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7-7.1">Set <code>group_id</code>, <code>epoch</code>, <code>content_type</code> and <code>authenticated_data</code> fields from the
-MLSPlaintext object directly<a href="#section-7-7.1" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-7-7.2">Identify the key and key generation depending on the content type<a href="#section-7-7.2" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-7-7.3">Encrypt an MLSCiphertextContent for the ciphertext field using the key
-identified and MLSPlaintext object<a href="#section-7-7.3" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-7-7.4">Encrypt the sender data using a key and nonce derived from the
-<code>sender_data_secret</code> for the epoch and a sample of the encrypted
-MLSCiphertextContent.<a href="#section-7-7.4" class="pilcrow">¶</a>
-</li>
-      </ul>
-<p id="section-7-8">Decryption is done by decrypting the sender data, then the message, and then
-verifying the content signature.<a href="#section-7-8" class="pilcrow">¶</a></p>
-<p id="section-7-9">The following sections describe the encryption and signing processes in detail.<a href="#section-7-9" class="pilcrow">¶</a></p>
+<p id="section-7-6">The following structure is used to fully describe the data transmitted in
+plaintexts or ciphertexts.<a href="#section-7-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7-7">
+<pre>
+struct MLSMessageContentAuth {
+    WireFormat wire_format;
+    MLSMessageContent content;
+    MLSMessageAuth auth;
+}
+</pre><a href="#section-7-7" class="pilcrow">¶</a>
+</div>
 <div id="content-authentication">
 <section id="section-7.1">
         <h3 id="name-content-authentication">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-content-authentication" class="section-name selfRef">Content Authentication</a>
         </h3>
-<p id="section-7.1-1">The <code>signature</code> field in an MLSPlaintext object is computed using the signing
-private key corresponding to the public key, which was authenticated by the
-credential at the leaf of the tree indicated by the sender field. The signature
-is computed using <code>SignWithLabel</code> with label <code>"MLSPlaintextTBS"</code> and with a content
-that covers the plaintext metadata and message content, which is all of MLSPlaintext
-except for the <code>signature</code>, the <code>confirmation_tag</code> and <code>membership_tag</code> fields.
-If the sender is a member of the group, the content also covers the
-GroupContext for the current epoch, so that signatures are specific to a given
-group and epoch.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">MLSMessageContent is authenticated using the MLSMessageAuth structure.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.1-2">
 <pre>
 struct {
-    WireFormat wire_format;
-    opaque group_id&lt;0..255&gt;;
-    uint64 epoch;
-    Sender sender;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque mac_value&lt;0..255&gt;;
+} MAC;
 
-    ContentType content_type;
-    select (MLSPlaintextTBS.content_type) {
-        case application:
-          opaque application_data&lt;0..2^32-1&gt;;
-
-        case proposal:
-          Proposal proposal;
-
+struct {
+    // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
+    opaque signature&lt;0..2^16-1&gt;;
+    select (MLSMessageContent.content_type) {
         case commit:
-          Commit commit;
+            // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
+            MAC confirmation_tag;
+        case application:
+        case proposal:
+            struct{};
     }
-
-    select (MLSPlaintextTBS.sender.sender_type) {
+} MLSMessageAuth;
+</pre><a href="#section-7.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7.1-3">The <code>signature</code> field in an MLSMessageAuth object is computed using the signing
+private key corresponding to the public key, which was authenticated by the
+credential at the leaf of the tree indicated by the sender field. The signature
+is computed using <code>SignWithLabel</code> with label <code>"MLSMessageContentTBS"</code> and with a content
+that covers the message content and the wire format that will be used for this message.
+If the sender is a member of the group, the content also covers the
+GroupContext for the current epoch, so that signatures are specific to a given
+group and epoch.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.1-4">
+<pre>
+struct {
+    WireFormat wire_format;
+    MLSMessageContent content;
+    select (MLSMessageContentTBS.content.sender.sender_type) {
         case member:
         case new_member:
             GroupContext context;
@@ -2887,40 +2890,82 @@ struct {
         case preconfigured:
             struct{};
     }
-} MLSPlaintextTBS;
-</pre><a href="#section-7.1-2" class="pilcrow">¶</a>
-</div>
-<p id="section-7.1-3">The <code>membership_tag</code> field in the MLSPlaintext object authenticates the sender's
-membership in the group. For an MLSPlaintext with a sender type other than
-<code>member</code>, this field MUST be omitted. For messages sent by members, it MUST be
-present and set to the following value:<a href="#section-7.1-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.1-4">
-<pre>
-struct {
-  MLSPlaintextTBS tbs;
-  opaque signature&lt;0..2^16-1&gt;;
-  optional&lt;MAC&gt; confirmation_tag;
-} MLSPlaintextTBM;
-
-membership_tag = MAC(membership_key, MLSPlaintextTBM);
+} MLSMessageContentTBS;
 </pre><a href="#section-7.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-7.1-5">Note that the <code>membership_tag</code> only needs to be computed for MLSPlaintext
-messages that will be sent over the wire (<code>wire_format == mls_plaintext</code>).  It
-isn't needed for messages that will be encrypted and transmitted as
-MLSCiphertext messages (<code>wire_format == mls_ciphertext</code>).<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1-5">The confirmation tag value confirms that the members of the group have arrived
+at the same state of the group.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1-6">A MLSMessageAuth is said to be valid when both the <code>signature</code> and
+<code>confirmation_tag</code> fields are valid.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="content-encryption">
+<div id="encoding-and-decoding-a-plaintext">
 <section id="section-7.2">
-        <h3 id="name-content-encryption">
-<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-content-encryption" class="section-name selfRef">Content Encryption</a>
+        <h3 id="name-encoding-and-decoding-a-pla">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-encoding-and-decoding-a-pla" class="section-name selfRef">Encoding and Decoding a Plaintext</a>
         </h3>
-<p id="section-7.2-1">The <code>ciphertext</code> field of the MLSCiphertext object is produced by supplying the
-inputs described below to the AEAD function specified by the ciphersuite in use.
-The plaintext input contains the content and signature of the MLSPlaintext, plus
-optional padding. These values are encoded in the following form:<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-1">Plaintexts are encoded using the MLSPlaintext structure.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.2-2">
+<pre>
+struct {
+    MLSMessageContent content;
+    MLSMessageAuth auth;
+    select(MLSPlaintext.content.sender.sender_type) {
+        case member:
+            MAC membership_tag;
+        case preconfigured:
+        case new_member:
+            struct{};
+    }
+} MLSPlaintext;
+</pre><a href="#section-7.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7.2-3">The <code>membership_tag</code> field in the MLSPlaintext object authenticates the sender's
+membership in the group. For messages sent by members, it MUST be set to the
+following value:<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.2-4">
+<pre>
+struct {
+  MLSMessageContentTBS content_tbs;
+  MLSMessageAuth auth;
+} MLSMessageContentTBM;
+
+membership_tag = MAC(membership_key, MLSMessageContentTBM);
+</pre><a href="#section-7.2-4" class="pilcrow">¶</a>
+</div>
+<p id="section-7.2-5">When decoding a MLSPlaintext into a MLSMessageContentAuth,
+the application MUST check <code>membership_tag</code>, and MUST check that the
+MLSMessageAuth is valid.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="encoding-and-decoding-a-ciphertext">
+<section id="section-7.3">
+        <h3 id="name-encoding-and-decoding-a-cip">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-encoding-and-decoding-a-cip" class="section-name selfRef">Encoding and Decoding a Ciphertext</a>
+        </h3>
+<p id="section-7.3-1">Ciphertexts are encoded using the MLSCiphertext structure.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3-2">
+<pre>
+struct {
+    opaque group_id&lt;0..255&gt;;
+    uint64 epoch;
+    ContentType content_type;
+    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque encrypted_sender_data&lt;0..255&gt;;
+    opaque ciphertext&lt;0..2^32-1&gt;;
+} MLSCiphertext;
+</pre><a href="#section-7.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3-3"><code>encrypted_sender_data</code> and <code>ciphertext</code> are encrypted using the AEAD function
+specified by the ciphersuite in use, using as input the structures MLSSenderData
+and MLSCiphertextContent.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+<div id="content-encryption">
+<section id="section-7.3.1">
+          <h4 id="name-content-encryption">
+<a href="#section-7.3.1" class="section-number selfRef">7.3.1. </a><a href="#name-content-encryption" class="section-name selfRef">Content Encryption</a>
+          </h4>
+<p id="section-7.3.1-1">The ciphertext content is encoded using the MLSCiphertextContent structure.<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-2">
 <pre>
 struct {
     select (MLSCiphertext.content_type) {
@@ -2934,32 +2979,29 @@ struct {
           Commit commit;
     }
 
-    // SignWithLabel(., "MLSPlaintextTBS", MLSPlaintextTBS)
-    opaque signature&lt;0..2^16-1&gt;;
-    // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
-    optional&lt;MAC&gt; confirmation_tag;
+    MLSMessageAuth auth;
     opaque padding&lt;0..2^16-1&gt;;
 } MLSCiphertextContent;
-</pre><a href="#section-7.2-2" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-7.2-3">In the MLS key schedule, the sender creates two distinct key ratchets for
+<p id="section-7.3.1-3">In the MLS key schedule, the sender creates two distinct key ratchets for
 handshake and application messages for each member of the group. When encrypting
 a message, the sender looks at the ratchets it derived for its own member and
 chooses an unused generation from either the handshake or application ratchet
 depending on the content type of the message. This generation of the ratchet is
-used to derive a provisional nonce and key.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2-4">Before use in the encryption operation, the nonce is XORed with a fresh random
+used to derive a provisional nonce and key.<a href="#section-7.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-4">Before use in the encryption operation, the nonce is XORed with a fresh random
 value to guard against reuse.  Because the key schedule generates nonces
 deterministically, a client must keep persistent state as to where in the key
 schedule it is; if this persistent state is lost or corrupted, a client might
-reuse a generation that has already been used, causing reuse of a key/nonce pair.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
-<p id="section-7.2-5">To avoid this situation, the sender of a message MUST generate a fresh random
+reuse a generation that has already been used, causing reuse of a key/nonce pair.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-5">To avoid this situation, the sender of a message MUST generate a fresh random
 4-byte "reuse guard" value and XOR it with the first four bytes of the nonce
 from the key schedule before using the nonce for encryption.  The sender MUST
 include the reuse guard in the <code>reuse_guard</code> field of the sender data object, so
 that the recipient of the message can use it to compute the nonce to be used for
-decryption.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.2-6">
+decryption.<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-6">
 <pre>
 +-+-+-+-+---------...---+
 |   Key Schedule Nonce  |
@@ -2972,12 +3014,12 @@ decryption.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
 +-+-+-+-+---------...---+
 | Encrypt/Decrypt Nonce |
 +-+-+-+-+---------...---+
-</pre><a href="#section-7.2-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.2-7">The Additional Authenticated Data (AAD) input to the encryption
+<p id="section-7.3.1-7">The Additional Authenticated Data (AAD) input to the encryption
 contains an object of the following form, with the values used to
-identify the key and nonce:<a href="#section-7.2-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.2-8">
+identify the key and nonce:<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-8">
 <pre>
 struct {
     opaque group_id&lt;0..255&gt;;
@@ -2985,38 +3027,40 @@ struct {
     ContentType content_type;
     opaque authenticated_data&lt;0..2^32-1&gt;;
 } MLSCiphertextContentAAD;
-</pre><a href="#section-7.2-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-8" class="pilcrow">¶</a>
 </div>
+<p id="section-7.3.1-9">When decoding a MLSCiphertextContent, the application MUST check that the
+MLSMessageAuth is valid.<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sender-data-encryption">
-<section id="section-7.3">
-        <h3 id="name-sender-data-encryption">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-sender-data-encryption" class="section-name selfRef">Sender Data Encryption</a>
-        </h3>
-<p id="section-7.3-1">The "sender data" used to look up the key for the content encryption is
+<section id="section-7.3.2">
+          <h4 id="name-sender-data-encryption">
+<a href="#section-7.3.2" class="section-number selfRef">7.3.2. </a><a href="#name-sender-data-encryption" class="section-name selfRef">Sender Data Encryption</a>
+          </h4>
+<p id="section-7.3.2-1">The "sender data" used to look up the key for the content encryption is
 encrypted with the ciphersuite's AEAD with a key and nonce derived from both the
 <code>sender_data_secret</code> and a sample of the encrypted content. Before being
-encrypted, the sender data is encoded as an object of the following form:<a href="#section-7.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3-2">
+encrypted, the sender data is encoded as an object of the following form:<a href="#section-7.3.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.2-2">
 <pre>
 struct {
     KeyPackageRef sender;
     uint32 generation;
     opaque reuse_guard[4];
 } MLSSenderData;
-</pre><a href="#section-7.3-2" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3-3">MLSSenderData.sender is assumed to be a <code>member</code> sender type.  When constructing
+<p id="section-7.3.2-3">MLSSenderData.sender is assumed to be a <code>member</code> sender type.  When constructing
 an MLSSenderData from a Sender object, the sender MUST verify Sender.sender_type
-is <code>member</code> and use Sender.sender for MLSSenderData.sender.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
-<p id="section-7.3-4">The <code>reuse_guard</code> field contains a fresh random value used to avoid nonce reuse
-in the case of state loss or corruption, as described in <a href="#content-encryption" class="xref">Section 7.2</a>.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
-<p id="section-7.3-5">The key and nonce provided to the AEAD are computed as the KDF of the first
+is <code>member</code> and use Sender.sender for MLSSenderData.sender.<a href="#section-7.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.3.2-4">The <code>reuse_guard</code> field contains a fresh random value used to avoid nonce reuse
+in the case of state loss or corruption, as described in <a href="#content-encryption" class="xref">Section 7.3.1</a>.<a href="#section-7.3.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.2-5">The key and nonce provided to the AEAD are computed as the KDF of the first
 <code>KDF.Nh</code> bytes of the ciphertext generated in the previous section. If the
 length of the ciphertext is less than <code>KDF.Nh</code>, the whole ciphertext is used
-without padding. In pseudocode, the key and nonce are derived as:<a href="#section-7.3-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3-6">
+without padding. In pseudocode, the key and nonce are derived as:<a href="#section-7.3.2-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.2-6">
 <pre>
 ciphertext_sample = ciphertext[0..KDF.Nh-1]
 
@@ -3024,22 +3068,24 @@ sender_data_key = ExpandWithLabel(sender_data_secret, "key",
                       ciphertext_sample, AEAD.Nk)
 sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce",
                       ciphertext_sample, AEAD.Nn)
-</pre><a href="#section-7.3-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.2-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is all the
-fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#section-7.3-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3-8">
+<p id="section-7.3.2-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is all the
+fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.2-8">
 <pre>
 struct {
     opaque group_id&lt;0..255&gt;;
     uint64 epoch;
     ContentType content_type;
 } MLSSenderDataAAD;
-</pre><a href="#section-7.3-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3-9">When parsing a SenderData struct as part of message decryption, the recipient
+<p id="section-7.3.2-9">When parsing a SenderData struct as part of message decryption, the recipient
 MUST verify that the KeyPackageRef indicated in the <code>sender</code> field identifies a
-member of the group.<a href="#section-7.3-9" class="pilcrow">¶</a></p>
+member of the group.<a href="#section-7.3.2-9" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 </section>
@@ -3744,38 +3790,33 @@ and Commit messages that have ever been sent in a group.  Commit messages are
 included directly. Proposal messages are indirectly included via the Commit that
 applied them. Both types of message are included by hashing the MLSPlaintext
 in which they were sent.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
-<p id="section-9.2-2">The <code>confirmed_transcript_hash</code> is updated with an MLSPlaintext containing a
-Commit in two steps:<a href="#section-9.2-2" class="pilcrow">¶</a></p>
+<p id="section-9.2-2">The <code>confirmed_transcript_hash</code> is updated with an MLSMessageContent and
+MLSMessageAuth containing a Commit in two steps:<a href="#section-9.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.2-3">
 <pre>
 struct {
     WireFormat wire_format;
-    opaque group_id&lt;0..255&gt;;
-    uint64 epoch;
-    Sender sender;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
-    ContentType content_type = commit;
-    Commit commit;
+    MLSMessageContent content; //with content.content_type == commit
     opaque signature&lt;0..2^16-1&gt;;
-} MLSPlaintextCommitContent;
+} MLSMessageCommitContent;
 
 struct {
-    optional&lt;MAC&gt; confirmation_tag;
-} MLSPlaintextCommitAuthData;
+    MAC confirmation_tag;
+} MLSMessageCommitAuthData;
 
 interim_transcript_hash_[0] = ""; // zero-length octet string
 
 confirmed_transcript_hash_[n] =
     Hash(interim_transcript_hash_[n] ||
-        MLSPlaintextCommitContent_[n]);
+        MLSMessageCommitContent_[n]);
 
 interim_transcript_hash_[n+1] =
     Hash(confirmed_transcript_hash_[n] ||
-        MLSPlaintextCommitAuthData_[n]);
+        MLSMessageCommitAuthData_[n]);
 </pre><a href="#section-9.2-3" class="pilcrow">¶</a>
 </div>
 <p id="section-9.2-4">Thus the <code>confirmed_transcript_hash</code> field in a GroupContext object represents a
-transcript over the whole history of MLSPlaintext Commit messages, up to the
+transcript over the whole history of MLSMessage Commit messages, up to the
 confirmation_tag field of the most recent Commit.  The confirmation
 tag is then included in the transcript for the next epoch.  The interim
 transcript hash is computed by new members using the confirmation_tag of the
@@ -4529,8 +4570,8 @@ a state transition occurs, the epoch number is incremented by one.<a href="#sect
         <h3 id="name-proposals">
 <a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-proposals" class="section-name selfRef">Proposals</a>
         </h3>
-<p id="section-13.1-1">Proposals are included in an MLSPlaintext by way of a Proposal structure that
-indicates their type:<a href="#section-13.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.1-1">Proposals are included in an MLSMessageContent by way of a Proposal structure
+that indicates their type:<a href="#section-13.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-13.1-2">
 <pre>
 // See IANA registry for registered values
@@ -4551,8 +4592,8 @@ struct {
 } Proposal;
 </pre><a href="#section-13.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-13.1-3">On receiving an MLSPlaintext containing a Proposal, a client MUST verify the
-signature on the enclosing MLSPlaintext.  If the signature verifies
+<p id="section-13.1-3">On receiving an MLSMessageContent containing a Proposal, a client MUST verify the
+signature inside MLSMessageAuth.  If the signature verifies
 successfully, then the Proposal should be cached in such a way that it can be
 retrieved by hash (as a ProposalOrRef object) in a later Commit message.<a href="#section-13.1-3" class="pilcrow">¶</a></p>
 <div id="add">
@@ -5065,10 +5106,10 @@ of PSKs in the derivation corresponds to the order of PreSharedKey proposals
 in the <code>proposals</code> vector.<a href="#section-13.2.1-4.6" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.2.1-4.7">
-              <p id="section-13.2.1-4.7.1">Construct an MLSPlaintext object containing the Commit object. Sign the
-MLSPlaintext using the old GroupContext as context.<a href="#section-13.2.1-4.7.1" class="pilcrow">¶</a></p>
+              <p id="section-13.2.1-4.7.1">Construct an MLSMessageContent object containing the Commit object. Sign the
+MLSMessageContent using the old GroupContext as context.<a href="#section-13.2.1-4.7.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.2.1-4.7.2.1">Use the MLSPlaintext to update the confirmed transcript hash and generate
+<li class="normal" id="section-13.2.1-4.7.2.1">Use the MLSMessageContent to update the confirmed transcript hash and generate
 the new GroupContext.<a href="#section-13.2.1-4.7.2.1" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-13.2.1-4.7.2.2">Use the <code>init_secret</code> from the previous epoch, the <code>commit_secret</code> and the
@@ -5081,7 +5122,7 @@ derived secrets for the new epoch.<a href="#section-13.2.1-4.7.2.2" class="pilcr
 compute the <code>membership_tag</code> value in the MLSPlaintext.<a href="#section-13.2.1-4.7.2.3" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-13.2.1-4.7.2.4">Calculate the interim transcript hash using the new confirmed transcript
-hash and the <code>confirmation_tag</code> from the MLSPlaintext.<a href="#section-13.2.1-4.7.2.4" class="pilcrow">¶</a>
+hash and the <code>confirmation_tag</code> from the MLSMessageAuth.<a href="#section-13.2.1-4.7.2.4" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
@@ -5091,7 +5132,7 @@ hash and the <code>confirmation_tag</code> from the MLSPlaintext.<a href="#secti
 <li class="normal" id="section-13.2.1-4.8.2.1">Group ID, epoch, tree, confirmed transcript hash, interim transcript
 hash, and group context extensions from the new state<a href="#section-13.2.1-4.8.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.1-4.8.2.2">The confirmation_tag from the MLSPlaintext object<a href="#section-13.2.1-4.8.2.2" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.1-4.8.2.2">The confirmation_tag from the MLSMessageAuth object<a href="#section-13.2.1-4.8.2.2" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-13.2.1-4.8.2.3">Other extensions as defined by the application<a href="#section-13.2.1-4.8.2.3" class="pilcrow">¶</a>
 </li>
@@ -5155,10 +5196,10 @@ parameters:<a href="#section-13.2.1-4.11.1" class="pilcrow">¶</a></p>
           </h4>
 <p id="section-13.2.2-1">A member of the group applies a Commit message by taking the following steps:<a href="#section-13.2.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.2.2-2.1">Verify that the <code>epoch</code> field of the enclosing MLSPlaintext message is equal
+<li class="normal" id="section-13.2.2-2.1">Verify that the <code>epoch</code> field of the enclosing MLSMessageContent is equal
 to the <code>epoch</code> field of the current GroupContext object<a href="#section-13.2.2-2.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.2.2-2.2">Verify that the signature on the MLSPlaintext message verifies using the
+            <li class="normal" id="section-13.2.2-2.2">Verify that the signature on the MLSMessageContent message verifies using the
 public key from the credential stored at the leaf in the tree indicated by
 the <code>sender</code> field.<a href="#section-13.2.2-2.2" class="pilcrow">¶</a>
 </li>
@@ -5220,7 +5261,7 @@ derived secrets for the new epoch.<a href="#section-13.2.2-2.10" class="pilcrow"
 </li>
             <li class="normal" id="section-13.2.2-2.11">Use the <code>confirmation_key</code> for the new epoch to compute the confirmation tag
 for this message, as described below, and verify that it is the same as the
-<code>confirmation_tag</code> field in the MLSPlaintext object.<a href="#section-13.2.2-2.11" class="pilcrow">¶</a>
+<code>confirmation_tag</code> field in the MLSMessageAuth object.<a href="#section-13.2.2-2.11" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.2.2-2.12">If the above checks are successful, consider the new GroupContext object
 as the current state of the group.<a href="#section-13.2.2-2.12" class="pilcrow">¶</a>
@@ -5230,14 +5271,6 @@ send messages anymore. Instead, it MUST wait for a Welcome message from the comm
 meeting the requirements of <a href="#reinitialization" class="xref">Section 12.2</a>.<a href="#section-13.2.2-2.13" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-13.2.2-3">The confirmation tag value confirms that the members of the group have arrived
-at the same state of the group:<a href="#section-13.2.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-13.2.2-4">
-<pre>
-MLSPlaintext.confirmation_tag =
-    MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
-</pre><a href="#section-13.2.2-4" class="pilcrow">¶</a>
-</div>
 </section>
 </div>
 <div id="adding-members-to-the-group">
@@ -5778,8 +5811,8 @@ once it has been created; such a behavior could be implemented as an extension.<
 <a href="#section-15" class="section-number selfRef">15. </a><a href="#name-sequencing-of-state-changes" class="section-name selfRef">Sequencing of State Changes</a>
       </h2>
 <p id="section-15-1">Each Commit message is premised on a given starting state,
-indicated by the <code>epoch</code> field of the enclosing MLSPlaintext
-message. If the changes implied by a Commit messages are made
+indicated by the <code>epoch</code> field of the enclosing MLSMessageContent.
+If the changes implied by a Commit messages are made
 starting from a different state, the results will be incorrect.<a href="#section-15-1" class="pilcrow">¶</a></p>
 <p id="section-15-2">This need for sequencing is not a problem as long as each time a
 group member sends a Commit message, it is based on the most

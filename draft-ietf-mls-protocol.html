@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 15 August 2022</td>
+<td class="center">Expires 17 August 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-02-11" class="published">11 February 2022</time>
+<time datetime="2022-02-13" class="published">13 February 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-08-15">15 August 2022</time></dd>
+<dd class="expires"><time datetime="2022-08-17">17 August 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 15 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1459,6 +1459,9 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18.2.5">
                 <p id="section-toc.1-1.18.2.5.1"><a href="#section-18.5" class="xref">18.5</a>.  <a href="#name-mls-designated-expert-pool" class="xref">MLS Designated Expert Pool</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18.2.6">
+                <p id="section-toc.1-1.18.2.6.1"><a href="#section-18.6" class="xref">18.6</a>.  <a href="#name-the-message-mls-mime-type" class="xref">The "message/mls" MIME Type</a></p>
 </li>
             </ul>
 </li>
@@ -6682,6 +6685,37 @@ be perceived as creating a conflict of interest for a particular
 MLS DE, that MLS DE SHOULD defer to the judgment of the other MLS DEs.<a href="#section-18.5-6" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="the-messagemls-mime-type">
+<section id="section-18.6">
+        <h3 id="name-the-message-mls-mime-type">
+<a href="#section-18.6" class="section-number selfRef">18.6. </a><a href="#name-the-message-mls-mime-type" class="section-name selfRef">The "message/mls" MIME Type</a>
+        </h3>
+<p id="section-18.6-1">This document registers the "message/mls" MIME media type in order to allow other
+protocols (ex: HTTP <span>[<a href="#RFC7540" class="xref">RFC7540</a>]</span>) to convey MLS messages.<a href="#section-18.6-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-18.6-2">
+<pre>
+  Media type name: message
+  Media subtype name: mls
+  Required parameters: none
+  Optional parameters: version
+     version: The MLS protocol version expressed as a string
+     &lt;major&gt;.&lt;minor&gt;.  If omitted the version is "1.0", which
+     corresponds to MLS ProtocolVersion mls10. If for some reason
+     the version number in the MIME type parameter differs from the
+     ProtocolVersion embedded in the protocol, the protocol takes
+     precedence.
+
+  Encoding scheme: MLS messages are represented using the TLS
+     presentation language [RFC8446]. Therefore MLS messages need to be
+     treated as binary data.
+
+  Security considerations: MLS is an encrypted messaging layer designed to
+     be transmitted over arbitrary lower layer protocols. The security
+     considerations in this document (the MLS protocol) also apply.
+</pre><a href="#section-18.6-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="contributors">
@@ -6762,6 +6796,10 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC7540">[RFC7540]</dt>
+        <dd>
+<span class="refAuthor">Belshe, M.</span>, <span class="refAuthor">Peon, R.</span>, and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol Version 2 (HTTP/2)"</span>, <span class="seriesInfo">RFC 7540</span>, <span class="seriesInfo">DOI 10.17487/RFC7540</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7540">https://www.rfc-editor.org/rfc/rfc7540</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8126">[RFC8126]</dt>
         <dd>
 <span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06" class="refDate">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8126">https://www.rfc-editor.org/rfc/rfc8126</a>&gt;</span>. </dd>
@@ -6812,10 +6850,6 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 <dt id="RFC6125">[RFC6125]</dt>
         <dd>
 <span class="refAuthor">Saint-Andre, P.</span> and <span class="refAuthor">J. Hodges</span>, <span class="refTitle">"Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)"</span>, <span class="seriesInfo">RFC 6125</span>, <span class="seriesInfo">DOI 10.17487/RFC6125</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6125">https://www.rfc-editor.org/rfc/rfc6125</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC7540">[RFC7540]</dt>
-        <dd>
-<span class="refAuthor">Belshe, M.</span>, <span class="refAuthor">Peon, R.</span>, and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol Version 2 (HTTP/2)"</span>, <span class="seriesInfo">RFC 7540</span>, <span class="seriesInfo">DOI 10.17487/RFC7540</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7540">https://www.rfc-editor.org/rfc/rfc7540</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7696">[RFC7696]</dt>
         <dd>

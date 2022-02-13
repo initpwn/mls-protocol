@@ -2679,7 +2679,7 @@ protocol (see the Cryptographic Dependencies section of the HPKE specification f
 information).<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.1-5">
 <pre>
-opaque HPKEPublicKey&lt;1..2^16-1&gt;;
+opaque HPKEPublicKey&lt;V&gt;;
 </pre><a href="#section-6.1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
@@ -2700,8 +2700,8 @@ VerifyWithLabel(VerificationKey, Label, Content) =
 Where SignContent is specified as:
 
 struct {
-    opaque label&lt;9..255&gt; = "MLS 1.0 " + Label;
-    opaque content&lt;0..2^32-1&gt; = Content;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque content&lt;V&gt; = Content;
 } SignContent;
 </pre><a href="#section-6.1-8" class="pilcrow">¶</a>
 </div>
@@ -2778,13 +2778,13 @@ uint16 SignatureScheme;
 uint16 CredentialType;
 
 struct {
-    opaque identity&lt;0..2^16-1&gt;;
+    opaque identity&lt;V&gt;;
     SignatureScheme signature_scheme;
-    opaque signature_key&lt;0..2^16-1&gt;;
+    opaque signature_key&lt;V&gt;;
 } BasicCredential;
 
 struct {
-    opaque cert_data&lt;0..2^16-1&gt;;
+    opaque cert_data&lt;V&gt;;
 } Certificate;
 
 struct {
@@ -2794,7 +2794,7 @@ struct {
             BasicCredential;
 
         case x509:
-            Certificate chain&lt;1..2^32-1&gt;;
+            Certificate chain&lt;V&gt;;
     };
 } Credential;
 </pre><a href="#section-6.3-6" class="pilcrow">¶</a>
@@ -2898,10 +2898,10 @@ enum {
 } SenderType;
 
 struct {
-    SenderType sender_type;
+    SenderType sendertype;
     switch (sender_type) {
         case member:        KeyPackageRef member;
-        case preconfigured: opaque external_key_id&lt;0..255&gt;;
+        case preconfigured: opaque external_key_id&lt;V&gt;;
         case new_member:    struct{};
     }
 } Sender;
@@ -2917,15 +2917,15 @@ enum {
 } WireFormat;
 
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     Sender sender;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 
     ContentType content_type;
     select (MLSMessageContent.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -2974,12 +2974,12 @@ struct MLSMessageContentAuth {
 <div class="alignLeft art-text artwork" id="section-7.1-2">
 <pre>
 struct {
-    opaque mac_value&lt;0..255&gt;;
+    opaque mac_value&lt;V&gt;;
 } MAC;
 
 struct {
     // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
     select (MLSMessageContent.content_type) {
         case commit:
             // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
@@ -3069,12 +3069,12 @@ MLSMessageAuth is valid.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
-    opaque encrypted_sender_data&lt;0..255&gt;;
-    opaque ciphertext&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
+    opaque encrypted_sender_data&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } MLSCiphertext;
 </pre><a href="#section-7.3-2" class="pilcrow">¶</a>
 </div>
@@ -3092,7 +3092,7 @@ and MLSCiphertextContent.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
 struct {
     select (MLSCiphertext.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -3102,7 +3102,7 @@ struct {
     }
 
     MLSMessageAuth auth;
-    opaque padding&lt;0..2^16-1&gt;;
+    opaque padding&lt;V&gt;;
 } MLSCiphertextContent;
 </pre><a href="#section-7.3.1-2" class="pilcrow">¶</a>
 </div>
@@ -3144,10 +3144,10 @@ identify the key and nonce:<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 } MLSCiphertextContentAAD;
 </pre><a href="#section-7.3.1-8" class="pilcrow">¶</a>
 </div>
@@ -3197,7 +3197,7 @@ fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#s
 <div class="alignLeft art-text artwork" id="section-7.3.2-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
 } MLSSenderDataAAD;
@@ -3511,14 +3511,14 @@ object depending on whether the node is blank or not.<a href="#section-8.4-4" cl
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    uint32 unmerged_leaves&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    uint32 unmerged_leaves&lt;V&gt;;
 } ParentNode;
 
 struct {
     optional&lt;ParentNode&gt; parent_node;
-    opaque left_hash&lt;0..255&gt;;
-    opaque right_hash&lt;0..255&gt;;
+    opaque left_hash&lt;V&gt;;
+    opaque right_hash&lt;V&gt;;
 } ParentNodeHashInput;
 </pre><a href="#section-8.4-5" class="pilcrow">¶</a>
 </div>
@@ -3535,7 +3535,7 @@ left and right children, respectively.<a href="#section-8.4-6" class="pilcrow">�
 the tree, as described below.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.5-2">
 <pre>
-opaque parent_hash&lt;0..255&gt;;
+opaque parent_hash&lt;V&gt;;
 </pre><a href="#section-8.5-2" class="pilcrow">¶</a>
 </div>
 <p id="section-8.5-3">Consider a ratchet tree with a parent node P and children V and S. The parent hash
@@ -3551,8 +3551,8 @@ to which PK's secret key was encrypted in the Commit that contained the
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    HPKEPublicKey original_child_resolution&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    HPKEPublicKey original_child_resolution&lt;V&gt;;
 } ParentHashInput;
 </pre><a href="#section-8.5-4" class="pilcrow">¶</a>
 </div>
@@ -3634,18 +3634,18 @@ parent of its predecessor.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.6-2">
 <pre>
 struct {
-    opaque kem_output&lt;0..2^16-1&gt;;
-    opaque ciphertext&lt;0..2^16-1&gt;;
+    opaque kem_output&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } HPKECiphertext;
 
 struct {
     HPKEPublicKey public_key;
-    HPKECiphertext encrypted_path_secret&lt;0..2^32-1&gt;;
+    HPKECiphertext encrypted_path_secret&lt;V&gt;;
 } UpdatePathNode;
 
 struct {
     KeyPackage leaf_key_package;
-    UpdatePathNode nodes&lt;0..2^32-1&gt;;
+    UpdatePathNode nodes&lt;V&gt;;
 } UpdatePath;
 </pre><a href="#section-8.6-2" class="pilcrow">¶</a>
 </div>
@@ -3687,8 +3687,8 @@ Where KDFLabel is specified as:
 
 struct {
     uint16 length = Length;
-    opaque label&lt;7..255&gt; = "MLS 1.0 " + Label;
-    opaque context&lt;0..2^32-1&gt; = Context;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque context&lt;V&gt; = Context;
 } KDFLabel;
 
 DeriveSecret(Secret, Label) =
@@ -3838,11 +3838,11 @@ summarizes the state of the group:<a href="#section-9.1-1" class="pilcrow">¶</a
 <div class="alignLeft art-text artwork" id="section-9.1-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension extensions&lt;V&gt;;
 } GroupContext;
 </pre><a href="#section-9.1-2" class="pilcrow">¶</a>
 </div>
@@ -3906,7 +3906,7 @@ MLSMessageAuth containing a Commit in two steps:<a href="#section-9.2-2" class="
 struct {
     WireFormat wire_format;
     MLSMessageContent content; //with content.content_type == commit
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } MLSMessageCommitContent;
 
 struct {
@@ -4016,18 +4016,18 @@ struct {
   PSKType psktype;
   select (PreSharedKeyID.psktype) {
     case external:
-      opaque psk_id&lt;0..255&gt;;
+      opaque psk_id&lt;V&gt;;
 
     case resumption:
       ResumptionPSKUsage usage;
-      opaque psk_group_id&lt;0..255&gt;;
+      opaque psk_group_id&lt;V&gt;;
       uint64 psk_epoch;
   }
-  opaque psk_nonce&lt;0..255&gt;;
+  opaque psk_nonce&lt;V&gt;;
 } PreSharedKeyID;
 
 struct {
-    PreSharedKeyID psks&lt;0..2^16-1&gt;;
+    PreSharedKeyID psks&lt;V&gt;;
 } PreSharedKeys;
 </pre><a href="#section-9.4-6" class="pilcrow">¶</a>
 </div>
@@ -4344,7 +4344,7 @@ uint16 ExtensionType;
 
 struct {
     ExtensionType extension_type;
-    opaque extension_data&lt;0..2^32-1&gt;;
+    opaque extension_data&lt;V&gt;;
 } Extension;
 
 struct {
@@ -4352,9 +4352,9 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey hpke_init_key;
     Credential credential;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
     // SignWithLabel(., "KeyPackageTBS", KeyPackageTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } KeyPackage;
 
 struct {
@@ -4362,7 +4362,7 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey hpke_init_key;
     Credential credential;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } KeyPackageTBS;
 </pre><a href="#section-11-6" class="pilcrow">¶</a>
 </div>
@@ -4441,10 +4441,10 @@ not be listed.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2-2">
 <pre>
 struct {
-    ProtocolVersion versions&lt;0..255&gt;;
-    CipherSuite ciphersuites&lt;0..255&gt;;
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ProtocolVersion versions&lt;V&gt;;
+    CipherSuite ciphersuites&lt;V&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } Capabilities;
 </pre><a href="#section-11.2-2" class="pilcrow">¶</a>
 </div>
@@ -4485,7 +4485,7 @@ this duration.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
 an explicit, application-defined identifier to a KeyPackage.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.4-2">
 <pre>
-opaque external_key_id&lt;0..2^16-1&gt;;
+opaque external_key_id&lt;V&gt;;
 </pre><a href="#section-11.4-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4567,8 +4567,8 @@ including a <code>required_capabilities</code> extension in the GroupContext.<a 
 <div class="alignLeft art-text artwork" id="section-12.1-2">
 <pre>
 struct {
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } RequiredCapabilities;
 </pre><a href="#section-12.1-2" class="pilcrow">¶</a>
 </div>
@@ -4861,10 +4861,10 @@ and shutting down the old one.<a href="#section-13.1.5-1" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.1.5-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     ProtocolVersion version;
     CipherSuite cipher_suite;
-    Extension extensions&lt;0..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } ReInit;
 </pre><a href="#section-13.1.5-2" class="pilcrow">¶</a>
 </div>
@@ -4888,7 +4888,7 @@ using an external commit. This proposal can only be used in that context.<a href
 <div class="alignLeft art-text artwork" id="section-13.1.6-2">
 <pre>
 struct {
-  opaque kem_output&lt;0..2^16-1&gt;;
+  opaque kem_output&lt;V&gt;;
 } ExternalInit;
 </pre><a href="#section-13.1.6-2" class="pilcrow">¶</a>
 </div>
@@ -4915,7 +4915,7 @@ struct {
 } MessageRange;
 
 struct {
-    MessageRange received_ranges&lt;0..2^32-1&gt;;
+    MessageRange received_ranges&lt;V&gt;;
 } AppAck;
 </pre><a href="#section-13.1.7-2" class="pilcrow">¶</a>
 </div>
@@ -4965,7 +4965,7 @@ at the expected time.<a href="#section-13.1.7-7" class="pilcrow">¶</a></p>
 the GroupContext for the group.<a href="#section-13.1.8-1" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-2"><code>
 struct {
-  Extension extensions&lt;0..2^32-1&gt;;
+  Extension extensions&lt;V&gt;;
 } GroupContextExtensions;
 </code><a href="#section-13.1.8-2" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-3">A member of the group applies a GroupContextExtensions proposal with the
@@ -5053,7 +5053,7 @@ struct {
 } ProposalOrRef;
 
 struct {
-    ProposalOrRef proposals&lt;0..2^32-1&gt;;
+    ProposalOrRef proposals&lt;V&gt;;
     optional&lt;UpdatePath&gt; path;
 } Commit;
 </pre><a href="#section-13.2-3" class="pilcrow">¶</a>
@@ -5395,16 +5395,16 @@ new members need information to bootstrap their local group state.<a href="#sect
 struct {
     ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     KeyPackageRef signer;
     // SignWithLabel(., "GroupInfoTBS", GroupInfoTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } GroupInfo;
 </pre><a href="#section-13.2.3-2" class="pilcrow">¶</a>
 </div>
@@ -5416,12 +5416,12 @@ GroupInfo above <code>signature</code>:<a href="#section-13.2.3-3" class="pilcro
 <pre>
 struct {
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     KeyPackageRef signer;
 } GroupInfoTBS;
@@ -5562,11 +5562,11 @@ indicating which PSK to use.<a href="#section-13.2.3.2-3" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.2.3.2-4">
 <pre>
 struct {
-  opaque path_secret&lt;1..255&gt;;
+  opaque path_secret&lt;V&gt;;
 } PathSecret;
 
 struct {
-  opaque joiner_secret&lt;1..255&gt;;
+  opaque joiner_secret&lt;V&gt;;
   optional&lt;PathSecret&gt; path_secret;
   PreSharedKeys psks;
 } GroupSecrets;
@@ -5578,8 +5578,8 @@ struct {
 
 struct {
   CipherSuite cipher_suite;
-  EncryptedGroupSecrets secrets&lt;0..2^32-1&gt;;
-  opaque encrypted_group_info&lt;1..2^32-1&gt;;
+  EncryptedGroupSecrets secrets&lt;V&gt;;
+  opaque encrypted_group_info&lt;V&gt;;
 } Welcome;
 </pre><a href="#section-13.2.3.2-4" class="pilcrow">¶</a>
 </div>
@@ -5717,7 +5717,7 @@ struct {
     };
 } Node;
 
-optional&lt;Node&gt; ratchet_tree&lt;1..2^32-1&gt;;
+optional&lt;Node&gt; ratchet_tree&lt;V&gt;;
 </pre><a href="#section-13.3-3" class="pilcrow">¶</a>
 </div>
 <p id="section-13.3-4">The nodes are listed in the order specified by a left-to-right in-order
